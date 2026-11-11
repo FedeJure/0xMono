@@ -1,0 +1,11 @@
+[package]
+name = "settings"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Configuración del 0xMono desde el celular: lo guardado, la página, la hora por internet (SNTP) y los pedidos entre arranques (no_std)"
+
+[dependencies]
+captive = { path = "../captive" }
+companion = { path = "../companion" }
+heapless = "0.9"

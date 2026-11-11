@@ -1,0 +1,24 @@
+[package]
+name = "simulator"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Simulador de escritorio: la misma lógica y dibujo que el firmware, en una ventana"
+publish = false
+
+[dependencies]
+embedded-graphics = "0.8"
+minifb = "0.28"
+png = "0.18.1"
+engine3d = { version = "0.1.0", path = "../crates/engine" }
+companion = { path = "../crates/companion" }
+miner = { path = "../crates/miner" }
+games = { path = "../crates/games" }
+captive = { path = "../crates/captive" }
+settings = { path = "../crates/settings" }
+ui = { path = "../crates/ui" }
+heapless = "0.9"
+serialport = { version = "4", default-features = false }
+assets = { path = "../assets" }
+habitat = { path = "../crates/habitat" }
+chrono = { version = "0.4", default-features = false, features = ["clock"] }

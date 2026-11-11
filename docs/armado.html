@@ -1,0 +1,1127 @@
+<title>Armado del CustomTamagochi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Pixelify+Sans:wght@500;700&display=swap">
+<style>
+/* Misma identidad que las otras guías de docs/: guía de banco de trabajo, figura grande + instrucciones al lado. */
+:root {
+  --bg: #eaeee8;
+  --surface: #f8faf6;
+  --ink: #1a2026;
+  --muted: #56616a;
+  --line: #cfd7cd;
+  --accent: #155fb0;
+  --accent-soft: #d9e6f5;
+  --danger: #b3261e;
+  --danger-soft: #f9e1de;
+  --warn: #9a5b00;
+  --warn-soft: #f8ebcf;
+  --ok: #2c6e31;
+  --ok-soft: #dcefdc;
+  --code-bg: #eef2ec;
+  /* objetos físicos: mismos colores en los dos temas */
+  --bb: #f4f4f0;
+  --bb-edge: #c9ccc4;
+  --bb-hole: #3a3f44;
+  --bb-text: #6b737a;
+  --rail-red: #d0312d;
+  --rail-blue: #1f5fbf;
+  --pcb: #183a57;
+  --pcb-ink: #e9f1f8;
+  --pcb-dy: #1f4e9c;
+  --pcb-tft: #17191c;
+  --pin: #d4a73a;
+  --plastic: #222629;
+  --metal: #9aa4ad;
+  --solder: #c9ced3;
+  --copper: #c8793a;
+  --strap: #ffb74d;
+  /* cables (5V rojo y 3V3 naranja, como en el plan) */
+  --w-5v: #d0312d;
+  --w-3v3: #e8710a;
+  --w-gnd: #2b3238;
+  --w-scl: #d9a100;
+  --w-sda: #1f7ae0;
+  --w-dc: #2a9d5c;
+  --w-res: #c2185b;
+  --w-blk: #8d99a4;
+  --w-btn: #8a3fc0;
+  --w-uart: #0b8a7a;
+  --w-con: #8a6d1f;
+  --w-spk: #7a5a44;
+  --halo: rgba(0, 0, 0, 0.28);
+  --font-display: "Pixelify Sans", "Courier New", monospace;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --step--1: 0.875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.3rem;
+  --step-2: 1.7rem;
+  --step-3: 2.4rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1215; --surface: #161c20; --ink: #e5eaee; --muted: #9ba7b0; --line: #2a333a;
+    --accent: #6cb4ff; --accent-soft: #16304c; --danger: #ff8a80; --danger-soft: #3b1714;
+    --warn: #f3b44e; --warn-soft: #36270c; --ok: #86d18b; --ok-soft: #14301a; --code-bg: #12181c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1215; --surface: #161c20; --ink: #e5eaee; --muted: #9ba7b0; --line: #2a333a;
+  --accent: #6cb4ff; --accent-soft: #16304c; --danger: #ff8a80; --danger-soft: #3b1714;
+  --warn: #f3b44e; --warn-soft: #36270c; --ok: #86d18b; --ok-soft: #14301a; --code-bg: #12181c;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--step-0); line-height: 1.6;
+  padding-inline: 16px; padding-block: 0 64px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; }
+.prose { max-width: 68ch; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; }
+h1 { font-family: var(--font-display); font-size: var(--step-3); font-weight: 700; margin: 0; letter-spacing: 0.01em; }
+h2 { font-family: var(--font-display); font-size: var(--step-2); font-weight: 500; margin: 0 0 12px; }
+h3 { font-size: var(--step-1); margin: 0 0 8px; }
+p { margin: 0 0 12px; }
+a { color: var(--accent); }
+code, kbd { font-family: var(--font-mono); font-size: 0.88em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.eyebrow { font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; }
+.muted { color: var(--muted); }
+section { padding-block: 40px 8px; border-top: 1px solid var(--line); margin-top: 32px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+nav.toc {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; margin-inline: -16px; padding-inline: 16px;
+  scrollbar-width: thin;
+}
+nav.toc a {
+  flex: none; text-decoration: none; color: var(--ink); font-size: var(--step--1);
+  border: 1px solid var(--line); background: var(--surface); padding: 4px 10px; border-radius: 999px;
+}
+nav.toc a:hover { border-color: var(--accent); color: var(--accent); }
+
+.hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: start; padding-block: 32px 8px; }
+.hero .lede { font-size: var(--step-1); color: var(--muted); margin-top: 12px; max-width: 36ch; }
+@media (max-width: 820px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+
+.tally { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+.tally h3 { font-size: var(--step-0); margin-bottom: 10px; }
+.tally ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.tally li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: baseline; border-bottom: 1px dashed var(--line); padding-bottom: 8px; }
+.tally li:last-child { border-bottom: 0; }
+.tally .n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 600; white-space: nowrap; }
+.tally .sub { display: block; color: var(--muted); font-size: var(--step--1); }
+.tally .total { margin-top: 12px; padding-top: 10px; border-top: 2px solid var(--line); display: flex; justify-content: space-between; gap: 12px; font-weight: 700; }
+
+.callout { border-radius: 10px; padding: 14px 16px; margin-block: 16px; border: 1px solid var(--line); background: var(--surface); }
+.callout.ok { background: var(--ok-soft); border-color: transparent; }
+.callout.warn { background: var(--warn-soft); border-color: transparent; }
+.callout.danger { background: var(--danger-soft); border-color: transparent; }
+.callout.info { background: var(--accent-soft); border-color: transparent; }
+.callout strong:first-child { display: block; margin-bottom: 4px; }
+
+.tag {
+  display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  border-radius: 4px; padding: 1px 6px; margin-right: 6px; vertical-align: 2px;
+}
+.tag.danger { background: var(--danger-soft); color: var(--danger); }
+.tag.warn { background: var(--warn-soft); color: var(--warn); }
+.tag.ok { background: var(--ok-soft); color: var(--ok); }
+.tag.info { background: var(--accent-soft); color: var(--accent); }
+
+.rules { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+.rules li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.rules .why { display: block; color: var(--muted); font-size: var(--step--1); margin-top: 2px; }
+
+figure { margin: 16px 0; }
+.fig { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; overflow-x: auto; }
+.fig svg { display: block; width: 100%; height: auto; min-width: 640px; }
+.fig.narrow svg { min-width: 0; }
+figcaption { font-size: var(--step--1); color: var(--muted); margin-top: 8px; }
+.scroll-hint { display: none; font-size: var(--step--1); color: var(--muted); margin: 0 0 6px; }
+@media (max-width: 700px) { .scroll-hint { display: block; } }
+svg text { font-family: var(--font-body); }
+svg .lbl { fill: var(--ink); font-size: 13px; }
+svg .lbl-b { fill: var(--ink); font-size: 14px; font-weight: 700; }
+svg .lbl-s { fill: var(--muted); font-size: 11.5px; }
+svg .num { fill: var(--accent); font-family: var(--font-display); font-size: 18px; }
+svg .mono { font-family: var(--font-mono); }
+svg .pcb-t { fill: var(--pcb-ink); font-size: 9px; font-family: var(--font-mono); }
+svg .pcb-t.strap { fill: var(--strap); }
+svg .bb-t { fill: var(--bb-text); font-size: 8.5px; font-family: var(--font-mono); }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+.card > :last-child { margin-bottom: 0; }
+
+.solder { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 20px; }
+@media (max-width: 820px) { .solder { grid-template-columns: minmax(0, 1fr); } }
+.solder figure { margin: 0; }
+.solder h3 { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.solder h3 .count { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); font-weight: 400; }
+.solder ol { margin: 6px 0 10px; padding-left: 1.2em; }
+.solder li { margin-bottom: 6px; }
+.solder + .solder { border-top: 1px dashed var(--line); padding-top: 20px; }
+
+.joints { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.joints figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px; text-align: center; }
+.joints svg { width: 100%; height: auto; }
+.joints figcaption { margin: 4px 0 0; }
+
+.table-wrap { overflow-x: auto; margin: 12px 0; }
+table { border-collapse: collapse; width: 100%; font-size: var(--step--1); font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 700; }
+td code, td .hole { white-space: nowrap; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; box-shadow: inset 0 0 0 1px var(--halo); }
+.hole { font-family: var(--font-mono); font-weight: 600; background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-size: 0.9em; }
+
+/* Armado paso a paso */
+.steps-nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 10px; }
+.steps-nav button {
+  cursor: pointer; font: inherit; font-size: var(--step--1); color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px;
+}
+.steps-nav button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+#bb .future { opacity: 0.07; }
+#bb .past { opacity: 0.4; }
+#bb .part, #bb .wire { transition: opacity .25s; }
+#bb.focusing .wire:not(.hl) { opacity: 0.18; }
+#bb .wire .core { transition: stroke-width .15s; }
+#bb .wire.hl .core { stroke-width: 7; animation: pulse 0.9s ease-in-out infinite alternate; }
+@keyframes pulse { to { stroke-opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { #bb .wire.hl .core { animation: none; } }
+
+.panel { display: grid; gap: 10px; }
+.panel[hidden] { display: none; }
+.panel > p { margin: 0; }
+.todo { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.todo li {
+  display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 10px; align-items: start;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; cursor: default;
+}
+.todo li:hover, .todo li:focus-within { border-color: var(--accent); }
+.todo li:has(input:checked) { border-color: var(--ok); }
+.todo li:has(input:checked) .what { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--ok); }
+.todo input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--ok); }
+.todo .sw { margin-top: 6px; }
+.todo .what b { font-weight: 700; }
+.todo .hint { display: block; font-size: var(--step--1); color: var(--muted); }
+.check { background: var(--ok-soft); border-radius: 10px; padding: 10px 14px; font-size: var(--step--1); }
+.check b { color: var(--ok); }
+.progress { font-size: var(--step--1); color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: var(--step--1); margin-top: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 18px; height: 5px; border-radius: 2px; display: inline-block; box-shadow: inset 0 0 0 1px var(--halo); }
+
+.buy { padding-left: 1.1em; margin: 8px 0 0; }
+.buy li { margin-bottom: 6px; }
+footer { margin-top: 48px; color: var(--muted); font-size: var(--step--1); }
+</style>
+
+<div class="wrap">
+
+<header class="hero" id="inicio">
+  <div>
+    <div class="eyebrow">Guía de armado · pantalla ST7789 a color</div>
+    <h1>Armado del CustomTamagochi</h1>
+    <p class="lede">Todo lo que va conectado hoy: la SuperMini, la pantalla de 240×240, los tres botones y el sonido. Primero soldás cuatro cosas y después armás todo en la protoboard, cable por cable.</p>
+    <p class="muted">Sin expansor y sin batería: todo funciona enchufado al USB-C. La placa final viene <a href="#despues">más adelante</a>.</p>
+  </div>
+  <aside class="tally" aria-label="Resumen de soldaduras">
+    <h3>Lo que tenés que soldar</h3>
+    <ol>
+      <li><span>Tiras de pines de la SuperMini<span class="sub">si ya las soldaste, saltealo</span></span><span class="n">16 puntos</span></li>
+      <li><span>Tira de pines de la pantalla<span class="sub">7 u 8, según tu modelo</span></span><span class="n">7–8 puntos</span></li>
+      <li><span>Pines del DY-SV17F<span class="sub">solo si vino con los pines sueltos</span></span><span class="n">≈18 puntos</span></li>
+      <li><span>Cables del parlante<span class="sub">dos empalmes con cable dupont</span></span><span class="n">2 empalmes</span></li>
+    </ol>
+    <div class="total"><span>Total, con práctica incluida</span><span class="n">≈ 1 h 30</span></div>
+    <p class="muted" style="margin:10px 0 0;font-size:var(--step--1)">Botones, resistencia y cables: <b>nada de soldar</b>. Van enchufados en la protoboard.</p>
+  </aside>
+</header>
+
+
+<nav class="toc" aria-label="Secciones">
+  <a href="#antes">Antes de empezar</a>
+  <a href="#protoboard">La protoboard</a>
+  <a href="#soldar">Soldaduras</a>
+  <a href="#mapa">Esquema</a>
+  <a href="#armado">Armado paso a paso</a>
+  <a href="#probar">Antes de enchufar</a>
+  <a href="#despues">Más adelante</a>
+</nav>
+
+<section id="antes">
+  <div class="prose">
+    <h2>Antes de empezar</h2>
+    <p>Cinco reglas. Si respetás estas, es muy difícil quemar algo. La lista completa está en el <a href="https://github.com/FedeJure/0xMono#seguridad">README del proyecto</a>.</p>
+  </div>
+  <ul class="rules">
+    <li><span class="tag danger">Quema</span><b>Todo desenchufado mientras cableás.</b><span class="why">El USB-C se enchufa solo al final, después de revisar con el multímetro.</span></li>
+    <li><span class="tag danger">Quema</span><b>Los rieles de la protoboard llevan 3V3, nunca 5V.</b><span class="why">El 5V va por un solo cable, de <span class="hole">j4</span> al módulo de sonido. Así no llega a la pantalla ni a un pin.</span></li>
+    <li><span class="tag danger">Quema</span><b>Leé las letras impresas en cada pieza.</b><span class="why">El orden de pines puede cambiar entre fabricantes. Si tu pieza dice otra cosa que el dibujo, manda la pieza.</span></li>
+    <li><span class="tag warn">Cuidado</span><b>El parlante va solo al DY-SV17F.</b><span class="why">A SPK+ y SPK−. Nunca a un pin de la SuperMini.</span></li>
+    <li><span class="tag info">Hábito</span><b>Después de cada paso, revisá con el multímetro.</b><span class="why">Entre el riel + y el riel − no tiene que pitar. Ver <a href="#probar">Antes de enchufar</a>.</span></li>
+  </ul>
+</section>
+
+<section id="protoboard">
+  <div class="prose">
+    <h2>Cómo funciona la protoboard</h2>
+    <p>La protoboard tiene tiras de metal escondidas adentro que unen algunos agujeros entre sí. Si entendés este dibujo, entendés todo el armado.</p>
+  </div>
+  <div class="two">
+    <figure>
+      <div class="fig narrow"><svg id="bb-explain" viewBox="0 0 540 520" role="img" aria-label="Protoboard: cada columna de 5 agujeros está unida por dentro; los rieles de los bordes están unidos a lo largo"></svg></div>
+      <figcaption>Cada número tiene dos grupos de 5 agujeros (a–e y f–j) separados por el canal del medio. Los rieles + y − de los bordes van unidos a lo largo.</figcaption>
+    </figure>
+    <div class="card">
+      <h3>Las tres ideas</h3>
+      <ol style="padding-left:1.2em;margin:0 0 12px">
+        <li><b>Los 5 agujeros de un mismo número están unidos.</b> Por ejemplo a20, b20, c20, d20 y e20 son el mismo punto eléctrico. Si una pata de un botón va en c20, un cable en b20 queda conectado a esa pata.</li>
+        <li><b>El canal del medio corta.</b> e20 y f20 <i>no</i> están unidos.</li>
+        <li><b>Los rieles van a lo largo.</b> Todos los agujeros de la línea roja (+) están unidos entre sí, y lo mismo pasa con la azul (−). En este proyecto, + es 3V3 y − es GND (tierra).</li>
+      </ol>
+      <div class="callout warn" style="margin:0">
+        <strong>Ojo con los rieles cortados</strong>
+        En algunas protoboards grandes la línea roja o azul se interrumpe a la mitad. Eso significa que el riel está cortado ahí. Si la tuya es así, poné un cablecito que una las dos mitades.
+      </div>
+    </div>
+  </div>
+  <figure>
+    <div class="fig narrow"><svg id="bb-button" style="max-width:720px;margin:0 auto" viewBox="0 0 520 190" role="img" aria-label="Botón bien puesto: patas en números distintos. Mal puesto: las dos patas en el mismo número."></svg></div>
+    <figcaption>Un botón une sus dos patas cuando lo apretás. Si las dos patas están en el mismo número ya están unidas por la protoboard, y el botón queda “siempre apretado”.</figcaption>
+  </figure>
+</section>
+
+<section id="soldar">
+  <div class="prose">
+    <h2>Las soldaduras</h2>
+    <p>Antes de tocar las piezas, practicá 10 o 15 puntos en pines sueltos o en un pedazo de placa perforada. Cada punto se hace igual: la punta toca el pin y el cobre a la vez, esperás 2 segundos, acercás el estaño del otro lado, lo sacás y después sacás el soldador. Temperatura: 330–350 °C.</p>
+  </div>
+
+  <div class="joints" aria-label="Cómo se ve un buen punto de soldadura">
+    <figure>
+      <svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="62" width="100" height="10" fill="#2e6b3e"/><rect x="56" y="10" width="8" height="72" fill="var(--pin)"/><path d="M34 62 Q 50 60, 56 30 L 64 30 Q 70 60, 86 62 Z" fill="var(--solder)"/></svg>
+      <figcaption><span class="tag ok">Bien</span>Volcán brillante que cubre el cobre.</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="62" width="100" height="10" fill="#2e6b3e"/><rect x="56" y="10" width="8" height="72" fill="var(--pin)"/><circle cx="60" cy="44" r="15" fill="var(--metal)"/></svg>
+      <figcaption><span class="tag danger">Fría</span>Bola opaca: faltó calor. Recalentá.</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="62" width="100" height="10" fill="#2e6b3e"/><rect x="34" y="18" width="8" height="64" fill="var(--pin)"/><rect x="78" y="18" width="8" height="64" fill="var(--pin)"/><path d="M22 62 Q 38 40, 60 48 Q 82 40, 98 62 Z" fill="var(--solder)"/></svg>
+      <figcaption><span class="tag danger">Puente</span>Dos pines unidos: cortocircuito.</figcaption>
+    </figure>
+  </div>
+
+  <!-- 1. SuperMini -->
+  <div class="solder">
+    <figure>
+      <div class="fig narrow">
+        <svg viewBox="0 0 560 270" role="img" aria-label="Vista de costado: tiras de pines clavadas en la protoboard, la SuperMini apoyada encima y el soldador tocando un pin desde arriba">
+          <!-- protoboard en corte -->
+          <rect x="30" y="182" width="500" height="58" rx="4" fill="var(--bb)" stroke="var(--bb-edge)" stroke-width="2"/>
+          <g fill="var(--bb-hole)">
+            <rect x="136" y="182" width="8" height="30"/><rect x="176" y="182" width="8" height="30"/><rect x="216" y="182" width="8" height="30"/><rect x="256" y="182" width="8" height="30"/>
+            <rect x="296" y="182" width="8" height="30"/><rect x="336" y="182" width="8" height="30"/><rect x="376" y="182" width="8" height="30"/><rect x="416" y="182" width="8" height="30"/>
+          </g>
+          <!-- pines -->
+          <g fill="var(--pin)">
+            <rect x="138" y="104" width="4" height="104"/><rect x="178" y="104" width="4" height="104"/><rect x="218" y="104" width="4" height="104"/><rect x="258" y="104" width="4" height="104"/>
+            <rect x="298" y="104" width="4" height="104"/><rect x="338" y="104" width="4" height="104"/><rect x="378" y="104" width="4" height="104"/><rect x="418" y="104" width="4" height="104"/>
+          </g>
+          <rect x="124" y="156" width="312" height="16" rx="2" fill="var(--plastic)"/>
+          <!-- SuperMini -->
+          <rect x="112" y="128" width="336" height="12" rx="2" fill="var(--pcb)"/>
+          <rect x="250" y="112" width="70" height="16" rx="2" fill="#0b1824"/>
+          <rect x="100" y="118" width="26" height="18" rx="4" fill="var(--metal)"/>
+          <!-- soldaduras hechas -->
+          <g fill="var(--solder)">
+            <path d="M130 128 Q 137 126, 138 112 L 142 112 Q 143 126, 150 128 Z"/><path d="M170 128 Q 177 126, 178 112 L 182 112 Q 183 126, 190 128 Z"/>
+            <path d="M210 128 Q 217 126, 218 112 L 222 112 Q 223 126, 230 128 Z"/><path d="M250 128 Q 257 126, 258 112 L 262 112 Q 263 126, 270 128 Z"/>
+            <path d="M290 128 Q 297 126, 298 112 L 302 112 Q 303 126, 310 128 Z"/><path d="M330 128 Q 337 126, 338 112 L 342 112 Q 343 126, 350 128 Z"/>
+          </g>
+          <!-- soldador -->
+          <path d="M378 118 L 404 84 L 520 14 L 538 34 L 420 104 Z" fill="var(--metal)"/>
+          <path d="M378 118 L 404 84 L 420 104 Z" fill="var(--w-gnd)"/>
+          <!-- estaño -->
+          <path d="M470 150 C 440 146, 410 136, 392 124" fill="none" stroke="var(--solder)" stroke-width="5" stroke-linecap="round"/>
+          <!-- rótulos -->
+          <text class="num" x="36" y="215">1</text><text class="lbl-s" x="52" y="214">parte LARGA</text><text class="lbl-s" x="52" y="228">de los pines, abajo</text>
+          <text class="num" x="36" y="100">2</text><text class="lbl-s" x="52" y="98">la placa encima,</text><text class="lbl-s" x="52" y="112">chips arriba</text>
+          <text class="num" x="290" y="60">3</text><text class="lbl-s" x="306" y="59">soldás arriba</text>
+          <text class="lbl-s" x="478" y="166">estaño</text>
+          <text class="lbl-s" x="440" y="258" text-anchor="end">protoboard (vista de costado)</text>
+        </svg>
+      </div>
+      <figcaption>La protoboard mantiene los pines derechos mientras soldás. Es el truco que se usa siempre.</figcaption>
+    </figure>
+    <div>
+      <h3>1 · Pines de la SuperMini <span class="count">16 puntos</span></h3>
+      <ol>
+        <li>Clavá las dos tiras de 8 pines en la protoboard, con la parte larga hacia abajo, en las líneas <span class="hole">c</span> y <span class="hole">g</span>, del número 4 al 11.</li>
+        <li>Apoyá la SuperMini encima, con los chips y el conector USB-C hacia arriba.</li>
+        <li>Soldá primero <b>un pin de cada punta</b>. Mirá de costado que la placa quedó plana; si no, recalentá uno y acomodala.</li>
+        <li>Soldá los 14 restantes.</li>
+        <li>Mirá con la cámara del celular, con zoom: ningún punto tiene que tocar al de al lado.</li>
+      </ol>
+      <p class="muted">Dejala clavada ahí: ya queda en el lugar exacto del paso 1 del armado.</p>
+    </div>
+  </div>
+
+  <!-- 2. Pantalla -->
+  <div class="solder">
+    <figure>
+      <div class="fig narrow">
+        <svg viewBox="0 0 560 260" role="img" aria-label="Pantalla ST7789: la tira de pines entra por atrás, del lado sin vidrio, y se suelda adelante, en la franja de agujeros sobre el vidrio">
+          <!-- atrás -->
+          <text class="lbl-b" x="40" y="22">Atrás (sin vidrio)</text>
+          <rect x="40" y="34" width="200" height="190" rx="8" fill="var(--pcb-tft)"/>
+          <circle cx="54" cy="48" r="5" fill="var(--bg)"/><circle cx="226" cy="48" r="5" fill="var(--bg)"/><circle cx="54" cy="210" r="5" fill="var(--bg)"/><circle cx="226" cy="210" r="5" fill="var(--bg)"/>
+          <rect x="66" y="40" width="148" height="16" rx="2" fill="var(--plastic)" stroke="#555" />
+          <g fill="var(--pin)"><rect x="73" y="30" width="4" height="10"/><rect x="94" y="30" width="4" height="10"/><rect x="115" y="30" width="4" height="10"/><rect x="136" y="30" width="4" height="10"/><rect x="157" y="30" width="4" height="10"/><rect x="178" y="30" width="4" height="10"/><rect x="199" y="30" width="4" height="10"/></g>
+          <rect x="80" y="90" width="120" height="70" rx="4" fill="#2a2e33"/>
+          <text class="pcb-t" x="140" y="122" text-anchor="middle">ST7789</text><text class="pcb-t" x="140" y="136" text-anchor="middle">240×240</text>
+          <text class="lbl-s" x="140" y="244" text-anchor="middle">la tira de plástico queda de este lado</text>
+          <!-- adelante -->
+          <text class="lbl-b" x="320" y="22">Adelante (con vidrio)</text>
+          <rect x="320" y="34" width="200" height="190" rx="8" fill="var(--pcb-tft)"/>
+          <circle cx="334" cy="48" r="5" fill="var(--bg)"/><circle cx="506" cy="48" r="5" fill="var(--bg)"/><circle cx="334" cy="210" r="5" fill="var(--bg)"/><circle cx="506" cy="210" r="5" fill="var(--bg)"/>
+          <g fill="var(--solder)"><circle cx="355" cy="48" r="5.5"/><circle cx="376" cy="48" r="5.5"/><circle cx="397" cy="48" r="5.5"/><circle cx="418" cy="48" r="5.5"/><circle cx="439" cy="48" r="5.5"/><circle cx="460" cy="48" r="5.5"/><circle cx="481" cy="48" r="5.5"/></g>
+          <g class="pcb-t" text-anchor="middle" font-size="7.5"><text x="355" y="66">GND</text><text x="376" y="66">VCC</text><text x="397" y="66">SCL</text><text x="418" y="66">SDA</text><text x="439" y="66">RES</text><text x="460" y="66">DC</text><text x="481" y="66">BLK</text></g>
+          <rect x="340" y="76" width="160" height="134" rx="3" fill="#0b0f14" stroke="#3a4048"/>
+          <path d="M340 76 L 400 76 L 340 136 Z" fill="#ffffff" opacity="0.06"/>
+          <rect x="400" y="210" width="40" height="14" fill="#c98d2a" opacity="0.85"/>
+          <text class="lbl-s" x="420" y="244" text-anchor="middle">soldás acá arriba · cinta flex abajo: no tocar</text>
+          <path d="M300 48 C 312 48, 318 48, 344 48" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#arrow)"/>
+          <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker></defs>
+        </svg>
+      </div>
+      <figcaption>Dibujo genérico de un módulo de 7 pines. Si el tuyo tiene 8, el que sobra se llama CS.</figcaption>
+    </figure>
+    <div>
+      <h3>2 · Pines de la pantalla <span class="count">7–8 puntos</span></h3>
+      <ol>
+        <li>Clavá la tira en la protoboard, parte larga abajo, igual que antes.</li>
+        <li>Apoyá la pantalla con el <b>vidrio hacia arriba</b>, entrando los pines por atrás. Si no queda pareja, ponele algo de apoyo abajo, como una goma de borrar.</li>
+        <li>Soldá del lado del vidrio, en la franja de agujeros. Apoyá el soldador hacia afuera, lejos del vidrio.</li>
+        <li><b>No toques con el soldador el vidrio ni la cinta flex</b> (la tira naranja finita del borde). Se derriten.</li>
+        <li>Anotá el orden de los nombres impresos. Vas a necesitarlos en el paso 2 del armado.</li>
+      </ol>
+      <div class="callout warn" style="margin:0"><strong>Si sacaste el film protector</strong>No pasa nada. Pero no apoyes la pantalla boca abajo sobre la mesa mientras soldás: se raya.</div>
+    </div>
+  </div>
+
+  <!-- 3. DY-SV17F -->
+  <div class="solder">
+    <figure>
+      <div class="fig narrow">
+        <svg viewBox="0 0 560 210" role="img" aria-label="Módulo DY-SV17F con sus filas de agujeros y la tira de pines debajo">
+          <rect x="120" y="30" width="320" height="130" rx="8" fill="var(--pcb-dy)"/>
+          <rect x="98" y="72" width="26" height="34" rx="4" fill="var(--metal)"/>
+          <text class="lbl-s" x="92" y="125" text-anchor="end">micro-USB</text><text class="lbl-s" x="92" y="139" text-anchor="end">(para los MP3)</text>
+          <rect x="230" y="70" width="60" height="44" rx="3" fill="#0b1824"/>
+          <text class="pcb-t" x="260" y="96" text-anchor="middle">DY-SV17F</text>
+          <g fill="var(--solder)" id="dyholes"></g>
+          <rect x="146" y="176" width="268" height="12" rx="2" fill="var(--plastic)"/>
+          <g fill="var(--pin)" id="dypins"></g>
+          <text class="lbl-s" x="280" y="204" text-anchor="middle">misma técnica: pines en la protoboard, módulo encima, soldás arriba</text>
+        </svg>
+      </div>
+      <figcaption>La cantidad y el lugar de los agujeros cambian según la versión. Guiate por los nombres impresos.</figcaption>
+    </figure>
+    <div>
+      <h3>3 · Pines del DY-SV17F <span class="count">solo si vinieron sueltos</span></h3>
+      <ol>
+        <li>Si el módulo ya trae pines soldados, saltá al punto 4.</li>
+        <li>Igual que la SuperMini: tiras en la protoboard, módulo encima, componentes hacia arriba, primero un pin de cada punta.</li>
+        <li>Si te sobran agujeros en una fila, no hace falta soldar pines ahí. Los que sí o sí necesitás son <b>V5, GND, RXD, CON1, CON2, CON3, V33, SPK+ y SPK−</b>.</li>
+        <li>Revisá con zoom que no haya puentes, sobre todo entre SPK+ y SPK−.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- 4. Parlante -->
+  <div class="solder">
+    <figure>
+      <div class="fig narrow">
+        <svg viewBox="0 0 620 200" role="img" aria-label="Cuatro pasos: cortar un cable dupont, pelar 5 milímetros, retorcer con el cable del parlante y soldar, aislar con termocontraíble">
+          <g transform="translate(0,0)">
+            <text class="num" x="10" y="24">1</text><text class="lbl-s" x="28" y="23">cortá un dupont</text><text class="lbl-s" x="28" y="37">hembra por la mitad</text>
+            <rect x="14" y="88" width="22" height="14" rx="2" fill="var(--plastic)"/>
+            <path d="M36 95 H 80" stroke="var(--w-5v)" stroke-width="5" stroke-linecap="round"/>
+            <path d="M98 95 H 140" stroke="var(--w-5v)" stroke-width="5" stroke-linecap="round"/>
+            <path d="M84 76 L 94 114 M 94 76 L 84 114" stroke="var(--ink)" stroke-width="2"/>
+            <text class="lbl-s" x="89" y="132" text-anchor="middle">tijera</text>
+          </g>
+          <g transform="translate(155,0)">
+            <text class="num" x="10" y="24">2</text><text class="lbl-s" x="28" y="23">pelá 5 mm</text><text class="lbl-s" x="28" y="37">de cada punta</text>
+            <rect x="14" y="70" width="22" height="14" rx="2" fill="var(--plastic)"/>
+            <path d="M36 77 H 90" stroke="var(--w-5v)" stroke-width="5" stroke-linecap="round"/>
+            <path d="M90 77 H 112" stroke="var(--copper)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M20 118 H 90" stroke="var(--w-5v)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M90 118 H 112" stroke="var(--copper)" stroke-width="1.6" stroke-linecap="round"/>
+            <text class="lbl-s" x="20" y="140">cable del parlante</text>
+          </g>
+          <g transform="translate(310,0)">
+            <text class="num" x="10" y="24">3</text><text class="lbl-s" x="28" y="23">retorcé juntos</text><text class="lbl-s" x="28" y="37">y estañá</text>
+            <rect x="14" y="88" width="22" height="14" rx="2" fill="var(--plastic)"/>
+            <path d="M36 95 H 66" stroke="var(--w-5v)" stroke-width="5" stroke-linecap="round"/>
+            <path d="M66 95 Q 74 88, 82 95 T 98 95" fill="none" stroke="var(--copper)" stroke-width="3"/>
+            <ellipse cx="82" cy="95" rx="18" ry="6" fill="var(--solder)" opacity="0.9"/>
+            <path d="M98 95 H 140" stroke="var(--w-5v)" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <g transform="translate(465,0)">
+            <text class="num" x="10" y="24">4</text><text class="lbl-s" x="28" y="23">tapalo con</text><text class="lbl-s" x="28" y="37">termocontraíble o cinta</text>
+            <rect x="14" y="88" width="22" height="14" rx="2" fill="var(--plastic)"/>
+            <path d="M36 95 H 140" stroke="var(--w-5v)" stroke-width="4" stroke-linecap="round"/>
+            <rect x="58" y="86" width="50" height="18" rx="5" fill="var(--w-gnd)"/>
+            <text class="lbl-s" x="83" y="128" text-anchor="middle">nada de cobre</text><text class="lbl-s" x="83" y="142" text-anchor="middle">a la vista</text>
+          </g>
+          <text class="lbl-s" x="310" y="186" text-anchor="middle">Lo mismo con el negro. Rojo del parlante con un dupont rojo (+), negro con uno negro (−).</text>
+        </svg>
+      </div>
+      <figcaption>Si te pasás calentando, el plástico del cable se encoge. Es normal y no pasa nada.</figcaption>
+    </figure>
+    <div>
+      <h3>4 · Cables del parlante <span class="count">2 empalmes</span></h3>
+      <p>Los cables del parlante son muy finitos y no se quedan firmes en un pin. Por eso a cada uno le ponés en la punta un cable dupont hembra, que después se enchufa en SPK+ y SPK−.</p>
+      <ol>
+        <li>Si el parlante trae un conector blanco chiquito, cortalo.</li>
+        <li>Pelá con cuidado: el cable del parlante es frágil. Podés usar la uña o el alicate apenas apretado.</li>
+        <li>Para estañar, sostené los cables con la tercera mano o con cinta pegados a la mesa. <b>Nunca con los dedos</b>: el cobre calienta en un segundo.</li>
+        <li>Pasá el termocontraíble por el cable <b>antes</b> de retorcer, porque después ya no entra. Lo encogés acercando el costado del soldador.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="mapa">
+  <div class="prose">
+    <h2>El esquema completo</h2>
+    <p>Este es el mapa de la SuperMini: qué va en cada pin y en qué agujero de la protoboard. Está dibujada como la ves de arriba, con el USB-C hacia arriba. En la protoboard queda acostada, con el USB-C a la izquierda: lo que acá está a la derecha va en la línea <span class="hole">g</span>, y lo de la izquierda, en la <span class="hole">c</span>.</p>
+  </div>
+  <figure>
+    <p class="scroll-hint">Deslizá el dibujo hacia los costados →</p>
+    <div class="fig"><svg id="pinmap" viewBox="0 0 920 520" role="img" aria-label="Mapa de pines de la SuperMini con el destino de cada uno"></svg></div>
+    <figcaption>⚠ = pin de arranque: no se usa. GPIO4 queda libre. Los nombres también están impresos en tu placa: si alguno no coincide, manda la placa.</figcaption>
+  </figure>
+
+  <div class="two">
+    <div class="card">
+      <h3>Conexiones que no tocan la SuperMini</h3>
+      <div class="table-wrap" style="margin:0"><table>
+        <thead><tr><th>Desde</th><th>Hasta</th><th>Por qué</th></tr></thead>
+        <tbody>
+          <tr><td>DY · CON1</td><td><span class="sw" style="background:var(--w-gnd)"></span>riel −</td><td rowspan="3">CON3 en 1 y CON1, CON2 en 0 elige el modo UART: la SuperMini le dice qué sonido tocar.</td></tr>
+          <tr><td>DY · CON2</td><td><span class="sw" style="background:var(--w-gnd)"></span>riel −</td></tr>
+          <tr><td>DY · CON3</td><td><span class="sw" style="background:var(--w-con)"></span>resistencia 10&nbsp;kΩ → DY · V33</td></tr>
+          <tr><td>DY · SPK+ / SPK−</td><td><span class="sw" style="background:var(--w-spk)"></span>parlante + / −</td><td>El amplificador del módulo mueve el parlante.</td></tr>
+          <tr><td>DY · TXD</td><td>nada</td><td>No lo necesitamos.</td></tr>
+          <tr><td>Pantalla · CS</td><td><span class="sw" style="background:var(--w-gnd)"></span>riel −</td><td>Solo si tu pantalla tiene ese pin. Así queda siempre activa.</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <h3>Por qué la resistencia en CON3</h3>
+      <p>CON3 hace dos trabajos. Al encender, el módulo lo lee para saber en qué modo arrancar. Un instante después lo usa como salida para avisar “estoy sonando”. Si lo conectaras directo a 3,3&nbsp;V, en ese segundo trabajo el pin quedaría forzado y podría dañarse. La resistencia de 10&nbsp;kΩ deja pasar el “1” al arrancar y lo protege después.</p>
+      <p class="muted">Dato de la hoja de datos del DY-SV17F: modo UART = CON3 en 1, CON2 en 0 y CON1 en 0. Algunas versiones traen estas resistencias puestas de fábrica. Si ves resistencias chiquitas al lado de CON1–CON3, mandame una foto antes del paso 4.</p>
+    </div>
+  </div>
+</section>
+
+<section id="armado">
+  <div class="prose">
+    <h2>Armado paso a paso</h2>
+    <p>Elegí un paso y aparecen solo sus cables. Tocá un renglón de la lista y el cable se ilumina en el dibujo. Los agujeros se nombran con una letra y un número, por ejemplo <span class="hole">i8</span>: línea i, número 8. Los dos vienen impresos en tu protoboard, que tiene 30 números. Girala hasta que el número 1 quede a la izquierda y la línea a, cerca tuyo.</p>
+  </div>
+
+  <div class="steps-nav" role="group" aria-label="Paso del armado" id="steps">
+    <button type="button" data-step="1" aria-pressed="true">1 · Placa y rieles</button>
+    <button type="button" data-step="2" aria-pressed="false">2 · Pantalla</button>
+    <button type="button" data-step="3" aria-pressed="false">3 · Botones</button>
+    <button type="button" data-step="4" aria-pressed="false">4 · Sonido</button>
+    <button type="button" data-step="all" aria-pressed="false">Todo junto</button>
+  </div>
+
+  <figure>
+    <p class="scroll-hint">Deslizá el dibujo hacia los costados →</p>
+    <div class="fig"><svg id="bb" viewBox="0 0 860 830" role="img" aria-label="Protoboard con la SuperMini, la pantalla, los botones, el módulo de sonido y todos los cables"></svg></div>
+    <div class="legend" aria-label="Colores de los cables">
+      <span><i style="background:var(--w-5v)"></i>5V</span>
+      <span><i style="background:var(--w-3v3)"></i>3V3</span>
+      <span><i style="background:var(--w-gnd)"></i>GND</span>
+      <span><i style="background:var(--w-scl)"></i>SCL</span>
+      <span><i style="background:var(--w-sda)"></i>SDA</span>
+      <span><i style="background:var(--w-dc)"></i>DC</span>
+      <span><i style="background:var(--w-res)"></i>RES</span>
+      <span><i style="background:var(--w-blk)"></i>BLK</span>
+      <span><i style="background:var(--w-btn)"></i>Botones</span>
+      <span><i style="background:var(--w-uart)"></i>Datos al sonido</span>
+      <span><i style="background:var(--w-con)"></i>Modo del sonido</span>
+      <span><i style="background:var(--w-spk)"></i>Parlante</span>
+    </div>
+    <figcaption>Los colores son para que el dibujo se lea bien. Tus cables pueden ser de cualquier color; lo que importa es de dónde a dónde van. Si podés, usá negro para GND y rojo o naranja para 3V3: ayuda a no equivocarse.</figcaption>
+  </figure>
+
+  <div id="panels"></div>
+</section>
+
+<section id="probar">
+  <div class="prose">
+    <h2>Antes de enchufar</h2>
+    <p>Esto lleva 30 segundos y te salva de casi todos los sustos. Hacelo al terminar cada paso del armado.</p>
+  </div>
+  <div class="solder" style="margin-top:8px">
+    <figure>
+      <div class="fig narrow">
+        <svg viewBox="0 0 560 270" role="img" aria-label="Multímetro en modo continuidad con una punta en el riel más y otra en el riel menos">
+          <rect x="30" y="20" width="170" height="230" rx="18" fill="#f2c230"/>
+          <rect x="44" y="34" width="142" height="202" rx="10" fill="#2b2f33"/>
+          <rect x="58" y="48" width="114" height="44" rx="4" fill="#b9c7a8"/>
+          <text x="115" y="80" text-anchor="middle" font-family="var(--font-mono)" font-size="24" fill="#2b2f33">OL</text>
+          <circle cx="115" cy="150" r="40" fill="#3c4247" stroke="#1b1e21" stroke-width="3"/>
+          <path d="M115 150 L 146 128" stroke="#f2c230" stroke-width="6" stroke-linecap="round"/>
+          <text x="164" y="118" font-size="12" fill="#f2c230" font-family="var(--font-mono)">•)))</text>
+          <text x="115" y="214" text-anchor="middle" font-size="10" fill="#c9ced3" font-family="var(--font-mono)">COM   VΩ</text>
+          <circle cx="92" cy="226" r="6" fill="#111"/><circle cx="138" cy="226" r="6" fill="#d0312d"/>
+          <!-- protoboard -->
+          <rect x="300" y="110" width="240" height="90" rx="4" fill="var(--bb)" stroke="var(--bb-edge)" stroke-width="2"/>
+          <line x1="310" y1="132" x2="530" y2="132" stroke="var(--rail-red)" stroke-width="1.5"/>
+          <line x1="310" y1="176" x2="530" y2="176" stroke="var(--rail-blue)" stroke-width="1.5"/>
+          <g fill="var(--bb-hole)" id="mm-holes"></g>
+          <text x="312" y="128" font-size="11" fill="var(--rail-red)" font-weight="700">+</text>
+          <text x="312" y="194" font-size="11" fill="var(--rail-blue)" font-weight="700">−</text>
+          <!-- puntas -->
+          <path d="M138 226 C 220 260, 300 60, 440 92" fill="none" stroke="#d0312d" stroke-width="4"/>
+          <path d="M440 92 L 452 141" stroke="#d0312d" stroke-width="5" stroke-linecap="round"/>
+          <path d="M92 226 C 200 268, 320 250, 470 214" fill="none" stroke="#111" stroke-width="4"/>
+          <path d="M470 214 L 472 172" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+          <text class="lbl-s" x="420" y="236">punta negra al −</text>
+          <text class="lbl-s" x="400" y="80">punta roja al +</text>
+        </svg>
+      </div>
+      <figcaption>La perilla va en el símbolo de continuidad: el que tiene ondas de sonido, •))).</figcaption>
+    </figure>
+    <div>
+      <h3>La prueba del pitido</h3>
+      <ol>
+        <li>Todo desenchufado. Perilla en continuidad. Juntá las dos puntas entre sí: tiene que pitar. Así sabés que funciona.</li>
+        <li>Punta roja en un agujero del riel <b>+</b>, negra en uno del riel <b>−</b>. <b>No tiene que pitar.</b></li>
+        <li>Desde el paso 4: punta roja en <span class="hole">j4</span> (5V), negra en el riel −. Vale un pitido cortito, porque la placa tiene condensadores. <b>Si queda sonando, hay un corto.</b></li>
+        <li>Si pita sin parar en cualquiera de los dos: <b>no enchufes</b>. Hay un cable o una pata en un agujero equivocado. Sacá lo último que pusiste y volvé a probar.</li>
+      </ol>
+      <div class="callout ok" style="margin:0"><strong>Si no pita, enchufá el USB-C</strong>El LED rojo de la SuperMini se prende. Acercá el dorso del dedo, sin tocar, a la placa y a la pantalla: tibio es normal. Si algo quema o huele raro, desenchufá ya.</div>
+    </div>
+  </div>
+</section>
+
+<section id="despues">
+  <div class="prose">
+    <h2>Más adelante: la versión final</h2>
+    <p>No lleva batería: la versión final también funciona enchufada al USB-C, con un cargador de celular. Cuando todo ande en la protoboard, lo pasás a una placa perforada para meterlo en la carcasa. El detalle está en el <a href="https://github.com/FedeJure/0xMono#alimentación">README, sección Alimentación</a>.</p>
+  </div>
+  <div class="two">
+    <div class="card">
+      <h3>Lo que vas a soldar entonces</h3>
+      <ul class="buy">
+        <li>La SuperMini sobre la placa perforada.</li>
+        <li>Los cables de la pantalla, el DY-SV17F y los botones.</li>
+        <li>Un condensador de 220–470&nbsp;µF y 10&nbsp;V entre 5V y GND, junto al DY-SV17F, con la franja hacia GND.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Para comprar ahora</h3>
+      <ul class="buy">
+        <li><b>Cables dupont hembra–macho</b>: unos 20. Para la pantalla y el DY-SV17F.</li>
+        <li><b>Cables dupont macho–macho</b>: unos 10. Para los puentes en la protoboard.</li>
+        <li><b>2 resistencias de 10&nbsp;kΩ</b>: usás una; la otra es de repuesto.</li>
+        <li><b>Termocontraíble</b> de 2–3&nbsp;mm, o cinta aisladora.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Esta guía corresponde al firmware de este repo y a una protoboard de 30 números. Para cargar el programa: <code>cd firmware</code> y <code>cargo run --release</code>.
+</footer>
+
+</div>
+
+<script>
+(() => {
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const cssVar = (n) => `var(--${n})`;
+
+/* Protoboard genérica. Medidas relativas a un paso de 15 px (2,54 mm). */
+const COLS = { j: 58, i: 73, h: 88, g: 103, f: 118, e: 163, d: 178, c: 193, b: 208, a: 223 };
+const RAILS = { tp: 16, tm: 31, bm: 250, bp: 265 };
+function board(parent, o) {
+  const k = o.p / 15;
+  const X = (r) => o.x0 + (r - 1) * o.p;
+  const Y = (c) => o.y0 + COLS[c] * k;
+  const RY = (n) => o.y0 + RAILS[n] * k;
+  const left = o.x0 - 30 * k, right = X(o.rows) + 25 * k;
+  const g = el('g', {}, parent);
+  el('rect', { x: left, y: o.y0, width: right - left, height: 282 * k, rx: 6 * k, fill: cssVar('bb'), stroke: cssVar('bb-edge'), 'stroke-width': 1.5 }, g);
+  el('rect', { x: left + 4, y: o.y0 + 136 * k, width: right - left - 8, height: 9 * k, rx: 2, fill: cssVar('bb-edge'), opacity: 0.55 }, g);
+  // líneas de los rieles
+  const railLine = (y, color) => el('line', { x1: X(1) - 6 * k, x2: X(o.rows) + 6 * k, y1: y, y2: y, stroke: color, 'stroke-width': 1.2 * k }, g);
+  railLine(RY('tp') - 8 * k, cssVar('rail-red'));
+  railLine(RY('tm') + 8 * k, cssVar('rail-blue'));
+  railLine(RY('bm') - 8 * k, cssVar('rail-blue'));
+  railLine(RY('bp') + 8 * k, cssVar('rail-red'));
+  const sign = (x, y, s, color) => el('text', { x, y: y + 4 * k, 'font-size': 12 * k, 'font-weight': 700, fill: color, 'text-anchor': 'middle' }, g, s);
+  for (const x of [left + 12 * k, right - 11 * k]) {
+    sign(x, RY('tp'), '+', cssVar('rail-red')); sign(x, RY('tm'), '−', cssVar('rail-blue'));
+    sign(x, RY('bm'), '−', cssVar('rail-blue')); sign(x, RY('bp'), '+', cssVar('rail-red'));
+  }
+  const hs = 5 * k;
+  const holes = el('g', { fill: cssVar('bb-hole') }, g);
+  for (let r = 1; r <= o.rows; r++) {
+    for (const c in COLS) el('rect', { x: X(r) - hs / 2, y: Y(c) - hs / 2, width: hs, height: hs, rx: 1 }, holes);
+    for (const n in RAILS) el('rect', { x: X(r) - hs / 2, y: RY(n) - hs / 2, width: hs, height: hs, rx: 1 }, holes);
+    if (r === 1 || r % 5 === 0) {
+      el('text', { class: 'bb-t', x: X(r), y: o.y0 + 46 * k, 'text-anchor': 'middle', style: `font-size:${8.5 * k}px` }, g, r);
+      el('text', { class: 'bb-t', x: X(r), y: o.y0 + 241 * k, 'text-anchor': 'middle', style: `font-size:${8.5 * k}px` }, g, r);
+    }
+  }
+  for (const c in COLS) {
+    el('text', { class: 'bb-t', x: left + 12 * k, y: Y(c) + 3 * k, 'text-anchor': 'middle', style: `font-size:${8.5 * k}px` }, g, c);
+    el('text', { class: 'bb-t', x: right - 11 * k, y: Y(c) + 3 * k, 'text-anchor': 'middle', style: `font-size:${8.5 * k}px` }, g, c);
+  }
+  return {
+    k, X, Y, RY, left, right,
+    H: (ref) => ({ x: X(+ref.slice(1)), y: Y(ref[0]) }),
+    R: (n, r) => ({ x: X(r), y: RY(n) }),
+  };
+}
+
+/* ---------- Explicación de la protoboard ---------- */
+{
+  const svg = document.getElementById('bb-explain');
+  const b = board(svg, { rows: 9, x0: 70, y0: 20, p: 26 });
+  const k = b.k, hl = 'rgba(31,122,224,0.22)', hl2 = 'rgba(44,110,49,0.22)', hl3 = 'rgba(208,49,45,0.18)';
+  // columna a–e del 4, f–j del 4, riel +
+  el('rect', { x: b.X(4) - 10, y: b.Y('e') - 10, width: 20, height: b.Y('a') - b.Y('e') + 20, rx: 8, fill: hl, stroke: '#1f7ae0', 'stroke-width': 2 }, svg);
+  el('rect', { x: b.X(4) - 10, y: b.Y('j') - 10, width: 20, height: b.Y('f') - b.Y('j') + 20, rx: 8, fill: hl2, stroke: '#2c6e31', 'stroke-width': 2 }, svg);
+  el('rect', { x: b.X(1) - 10, y: b.RY('bp') - 10, width: b.X(9) - b.X(1) + 20, height: 20, rx: 8, fill: hl3, stroke: '#d0312d', 'stroke-width': 2 }, svg);
+  const note = (x, y, lines, color) => lines.forEach((t, i) => el('text', { x, y: y + i * 15, 'font-size': 12.5, fill: color, 'font-weight': i ? 400 : 700 }, svg, t));
+  note(b.right + 14, b.Y('d') - 6, ['a4, b4, c4, d4, e4', 'unidos por dentro'], '#1f7ae0');
+  note(b.right + 14, b.Y('h') - 6, ['f4 … j4: otro grupo,', 'separado del de abajo'], '#2c6e31');
+  note(b.right + 14, b.RY('bp') - 2, ['riel +: toda la', 'línea unida'], '#d0312d');
+  el('path', { d: `M${b.right + 10} ${b.Y('d') - 10} L ${b.X(4) + 14} ${b.Y('c')}`, stroke: '#1f7ae0', 'stroke-width': 1.5, fill: 'none' }, svg);
+  el('path', { d: `M${b.right + 10} ${b.Y('h') - 10} L ${b.X(4) + 14} ${b.Y('h')}`, stroke: '#2c6e31', 'stroke-width': 1.5, fill: 'none' }, svg);
+  note(b.X(1) - 6, b.Y('f') + 40 * k / 1.73, ['canal: corta'], cssVar('muted'));
+}
+
+/* ---------- Botón bien / mal ---------- */
+{
+  const svg = document.getElementById('bb-button');
+  const mini = (x0, ok) => {
+    const g = el('g', {}, svg);
+    const p = 22, X = (r) => x0 + r * p;
+    el('rect', { x: x0 - 6, y: 30, width: 6 * p + 12, height: 120, rx: 6, fill: cssVar('bb'), stroke: cssVar('bb-edge') }, g);
+    for (let r = 0; r < 6; r++) for (let c = 0; c < 5; c++) el('rect', { x: X(r) + p / 2 - 3, y: 44 + c * 22 - 3, width: 6, height: 6, rx: 1, fill: cssVar('bb-hole') }, g);
+    const r1 = 1, r2 = ok ? 3 : 1, c1 = ok ? 2 : 0, c2 = ok ? 2 : 3;
+    const p1 = { x: X(r1) + p / 2, y: 44 + c1 * 22 }, p2 = { x: X(r2) + p / 2, y: 44 + c2 * 22 };
+    const cx = (p1.x + p2.x) / 2, cy = (p1.y + p2.y) / 2;
+    el('rect', { x: cx - 22, y: cy - 22, width: 44, height: 44, rx: 4, fill: '#30363b' }, g);
+    el('circle', { cx, cy, r: 13, fill: '#596169' }, g);
+    for (const q of [p1, p2]) el('circle', { cx: q.x, cy: q.y, r: 5, fill: cssVar('pin'), stroke: '#6b5310' }, g);
+    el('text', { x: x0 + 3 * p, y: 20, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, fill: ok ? cssVar('ok') : cssVar('danger') }, g, ok ? '✓ Bien: patas en números distintos' : '✗ Mal: las dos patas en el mismo número');
+    el('text', { x: x0 + 3 * p, y: 172, 'text-anchor': 'middle', class: 'lbl-s' }, g, ok ? 'apretar une el número 2 con el 4' : 'ya están unidas: botón siempre apretado');
+  };
+  mini(40, true); mini(300, false);
+}
+
+/* ---------- Pines del DY-SV17F (figura de soldadura) ---------- */
+{
+  const holes = document.getElementById('dyholes'), pins = document.getElementById('dypins');
+  for (let i = 0; i < 9; i++) {
+    el('circle', { cx: 158 + i * 30, cy: 46, r: 5 }, holes);
+    el('circle', { cx: 158 + i * 30, cy: 146, r: 5 }, holes);
+    el('rect', { x: 156 + i * 30, y: 166, width: 4, height: 32 }, pins);
+  }
+  const mm = document.getElementById('mm-holes');
+  for (let i = 0; i < 14; i++) { el('rect', { x: 320 + i * 15, y: 140, width: 5, height: 5, rx: 1 }, mm); el('rect', { x: 320 + i * 15, y: 166, width: 5, height: 5, rx: 1 }, mm); }
+}
+
+/* ---------- Mapa de pines ---------- */
+{
+  const svg = document.getElementById('pinmap');
+  const bx = 380, bw = 160, top = 70;
+  el('rect', { x: bx + 54, y: top - 24, width: 52, height: 34, rx: 6, fill: cssVar('metal') }, svg);
+  el('text', { x: bx + 80, y: top - 32, 'text-anchor': 'middle', class: 'lbl-s' }, svg, 'USB-C');
+  el('rect', { x: bx, y: top, width: bw, height: 380, rx: 12, fill: cssVar('pcb') }, svg);
+  el('rect', { x: bx + 45, y: top + 140, width: 70, height: 70, rx: 4, fill: '#0b1824' }, svg);
+  el('text', { x: bx + 80, y: top + 172, 'text-anchor': 'middle', class: 'pcb-t', 'font-size': 11 }, svg, 'ESP32');
+  el('text', { x: bx + 80, y: top + 188, 'text-anchor': 'middle', class: 'pcb-t', 'font-size': 11 }, svg, '-C3');
+  el('rect', { x: bx + 30, y: top + 330, width: 22, height: 14, rx: 2, fill: '#dfe6ec' }, svg);
+  el('text', { x: bx + 41, y: top + 362, 'text-anchor': 'middle', class: 'pcb-t' }, svg, 'BOOT');
+  el('rect', { x: bx + 108, y: top + 330, width: 22, height: 14, rx: 2, fill: '#dfe6ec' }, svg);
+  el('text', { x: bx + 119, y: top + 362, 'text-anchor': 'middle', class: 'pcb-t' }, svg, 'RST');
+  el('text', { x: bx + 80, y: top + 410, 'text-anchor': 'middle', class: 'lbl-s' }, svg, 'SuperMini vista de arriba');
+  // Línea c de la protoboard
+  const L = [
+    ['5', 'Pantalla · DC', 'w-dc', 'agujero a4'],
+    ['6', 'Pantalla · SCL', 'w-scl', 'agujero a5'],
+    ['7', 'Pantalla · SDA', 'w-sda', 'agujero a6'],
+    ['8 ⚠', 'No usar (arranque)', 'danger', ''],
+    ['9 ⚠', 'No usar (botón BOOT)', 'danger', ''],
+    ['10', 'DY-SV17F · RXD', 'w-uart', 'agujero b9'],
+    ['20', 'Pantalla · RES', 'w-res', 'agujero a10'],
+    ['21', 'Pantalla · BLK', 'w-blk', 'agujero a11'],
+  ];
+  // Línea g de la protoboard
+  const R = [
+    ['5V', 'DY-SV17F · V5', 'w-5v', 'agujero j4'],
+    ['GND', 'Riel − (tierra)', 'w-gnd', 'agujero j5'],
+    ['3V3', 'Riel + (pantalla)', 'w-3v3', 'agujero j6'],
+    ['4', 'Libre', null, ''],
+    ['3', 'Botón A', 'w-btn', 'agujero i8'],
+    ['2 ⚠', 'No usar (arranque)', 'danger', ''],
+    ['1', 'Botón B', 'w-btn', 'agujero i10'],
+    ['0', 'Botón C', 'w-btn', 'agujero i11'],
+  ];
+  const draw = (list, side) => list.forEach(([pin, dest, color, hole], i) => {
+    const y = top + 30 + i * 40;
+    const px = side < 0 ? bx : bx + bw;
+    const strap = color === 'danger';
+    el('circle', { cx: px, cy: y, r: 7, fill: cssVar('pin') }, svg);
+    el('text', { x: px - side * 14, y: y + 4, 'text-anchor': side < 0 ? 'start' : 'end', class: 'pcb-t' + (strap ? ' strap' : ''), 'font-size': 11 }, svg, pin);
+    const tagW = 330, tx = side < 0 ? px - 40 - tagW : px + 40;
+    const used = color && !strap;
+    el('line', { x1: px + side * 7, y1: y, x2: side < 0 ? tx + tagW : tx, y2: y, stroke: used ? cssVar(color) : cssVar('line'), 'stroke-width': used ? 4 : 2, 'stroke-dasharray': used ? '' : '4 4', 'stroke-linecap': 'round' }, svg);
+    el('rect', { x: tx, y: y - 15, width: tagW, height: 30, rx: 6, fill: cssVar('surface'), stroke: used ? cssVar(color) : cssVar('line'), 'stroke-width': used ? 2 : 1 }, svg);
+    if (used) el('rect', { x: side < 0 ? tx + tagW - 10 : tx, y: y - 15, width: 10, height: 30, rx: 3, fill: cssVar(color) }, svg);
+    const textX = side < 0 ? tx + 12 : tx + 22;
+    el('text', { x: textX, y: y + 5, 'font-size': 13, 'font-weight': used ? 700 : 400, fill: strap ? cssVar('danger') : used ? cssVar('ink') : cssVar('muted') }, svg, dest);
+    if (hole) el('text', { x: side < 0 ? tx + tagW - 18 : tx + tagW - 10, y: y + 5, 'text-anchor': 'end', class: 'mono', 'font-size': 11, fill: cssVar('muted') }, svg, hole);
+  });
+  // 5V, GND y 3V3 no llevan GPIO delante
+  const named = (list) => list.map(([p, d, c, h]) => [p, (/^\d+( ⚠)?$/.test(p) ? 'GPIO' + p.replace(' ⚠', '') + ' → ' : p + ' → ') + d, c, h]);
+  draw(named(L), -1);
+  draw(named(R), 1);
+}
+
+/* ---------- Protoboard principal ---------- */
+const svg = document.getElementById('bb');
+const BY = 200;
+const b = board(svg, { rows: 30, x0: 100, y0: BY, p: 20 });
+const { H, R, X } = b;
+const layers = { parts: el('g', {}, svg), jumpers: el('g', {}, svg), mods: el('g', {}, svg), duponts: el('g', {}, svg) };
+
+function part(step, parent = layers.parts) { return el('g', { class: 'part', 'data-step': step }, parent); }
+
+// SuperMini en c4–c11 / g4–g11, USB-C a la izquierda
+{
+  const g = part(1);
+  const x1 = X(4) - 14, x2 = X(11) + 14, y1 = b.Y('g') - 8, y2 = b.Y('c') + 8;
+  el('path', { d: `M0 ${(y1 + y2) / 2} H ${x1 - 12}`, stroke: '#5b636b', 'stroke-width': 10, 'stroke-linecap': 'round' }, g);
+  el('text', { x: 6, y: (y1 + y2) / 2 - 12, class: 'lbl-s' }, g, 'USB-C');
+  el('rect', { x: x1 - 16, y: (y1 + y2) / 2 - 13, width: 22, height: 26, rx: 4, fill: cssVar('metal') }, g);
+  el('rect', { x: x1, y: y1, width: x2 - x1, height: y2 - y1, rx: 8, fill: cssVar('pcb'), opacity: 0.97 }, g);
+  el('rect', { x: X(6) + 4, y: (y1 + y2) / 2 - 20, width: 40, height: 40, rx: 3, fill: '#0b1824' }, g);
+  el('text', { x: X(6) + 24, y: (y1 + y2) / 2 + 3, 'text-anchor': 'middle', class: 'pcb-t', 'font-size': 7.5 }, g, 'ESP32-C3');
+  el('rect', { x: X(9) + 6, y: (y1 + y2) / 2 - 18, width: 10, height: 8, rx: 1, fill: '#dfe6ec' }, g);
+  el('rect', { x: X(9) + 6, y: (y1 + y2) / 2 + 10, width: 10, height: 8, rx: 1, fill: '#dfe6ec' }, g);
+  el('circle', { cx: X(4) + 2, cy: (y1 + y2) / 2, r: 3, fill: '#ff5252' }, g);
+  const lineG = ['5V', 'G', '3V3', '4', '3', '2', '1', '0'], lineC = ['5', '6', '7', '8', '9', '10', '20', '21'];
+  for (let i = 0; i < 8; i++) {
+    const r = 4 + i;
+    el('circle', { cx: X(r), cy: b.Y('c'), r: 4, fill: cssVar('pin') }, g);
+    el('circle', { cx: X(r), cy: b.Y('g'), r: 4, fill: cssVar('pin') }, g);
+    el('text', { x: X(r), y: b.Y('c') - 9, 'text-anchor': 'middle', class: 'pcb-t' + (['8', '9'].includes(lineC[i]) ? ' strap' : ''), 'font-size': 7.5 }, g, lineC[i]);
+    el('text', { x: X(r), y: b.Y('g') + 15, 'text-anchor': 'middle', class: 'pcb-t' + (lineG[i] === '2' ? ' strap' : ''), 'font-size': 7.5 }, g, lineG[i]);
+  }
+}
+
+// Botones
+const BUTTONS = [['A', 14, 16], ['B', 18, 20], ['C', 22, 24]];
+for (const [name, r1, r2] of BUTTONS) {
+  const g = part(3);
+  const cx = (X(r1) + X(r2)) / 2, cy = b.Y('g');
+  el('rect', { x: cx - 23, y: cy - 23, width: 46, height: 46, rx: 3, fill: '#30363b' }, g);
+  el('circle', { cx, cy, r: 14, fill: '#596169' }, g);
+  el('text', { x: cx, y: cy + 5, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 700, fill: '#fff' }, g, name);
+  for (const r of [r1, r2]) el('circle', { cx: X(r), cy, r: 3.5, fill: cssVar('pin'), stroke: '#6b5310' }, g);
+}
+
+// Resistencia 10 kΩ entre h25 y h29
+{
+  const g = part(4);
+  const y = b.Y('h'), xa = X(25), xb = X(29);
+  el('path', { d: `M${xa} ${y} H ${xb}`, stroke: '#8f969c', 'stroke-width': 2.2 }, g);
+  el('rect', { x: (xa + xb) / 2 - 17, y: y - 7, width: 34, height: 14, rx: 6, fill: '#d9c39a' }, g);
+  [['#6d3b16', -10], ['#111', -4], ['#e8710a', 2], ['#c9a227', 10]].forEach(([c, dx]) => el('rect', { x: (xa + xb) / 2 + dx, y: y - 7, width: 3.5, height: 14, fill: c }, g));
+  for (const x of [xa, xb]) el('circle', { cx: x, cy: y, r: 3, fill: '#8f969c' }, g);
+  el('text', { x: (xa + xb) / 2, y: y + 22, 'text-anchor': 'middle', 'font-size': 11.5, 'font-weight': 700, fill: '#3a4048' }, g, '10 kΩ');
+}
+
+// Cables
+const WIRES = {};
+function wire(id, step, color, d, ends) {
+  const g = el('g', { class: 'wire', 'data-step': step, id: 'w-' + id }, ends.layer);
+  el('path', { d, fill: 'none', stroke: cssVar('halo'), 'stroke-width': 7, 'stroke-linecap': 'round' }, g);
+  const core = el('path', { class: 'core', d, fill: 'none', stroke: cssVar(color), 'stroke-width': 4.5, 'stroke-linecap': 'round' }, g);
+  if (ends.male) {
+    // conector macho: el último tramo del cable, oscuro
+    const len = core.getTotalLength ? core.getTotalLength() : 0;
+    if (len) {
+      const p1 = core.getPointAtLength(len), p0 = core.getPointAtLength(Math.max(0, len - 13));
+      el('line', { x1: p0.x, y1: p0.y, x2: p1.x, y2: p1.y, stroke: cssVar('plastic'), 'stroke-width': 7, 'stroke-linecap': 'round' }, g);
+      el('circle', { cx: p1.x, cy: p1.y, r: 2, fill: cssVar('pin') }, g);
+    }
+  } else {
+    for (const p of ends.dots || []) el('circle', { cx: p.x, cy: p.y, r: 3, fill: cssVar('plastic') }, g);
+  }
+  if (ends.female) el('rect', { x: ends.female.x - 4.5, y: ends.female.y + (ends.female.up ? -16 : 0), width: 9, height: 16, rx: 1.5, fill: cssVar('plastic') }, g);
+  WIRES[id] = g;
+  return g;
+}
+const jump = (id, step, color, a, z, bump = 0) => {
+  const d = bump ? `M${a.x} ${a.y} Q ${(a.x + z.x) / 2} ${(a.y + z.y) / 2 + bump} ${z.x} ${z.y}` : `M${a.x} ${a.y} L ${z.x} ${z.y}`;
+  return wire(id, step, color, d, { layer: layers.jumpers, dots: [a, z] });
+};
+
+// Paso 1: rieles
+jump('p1', 1, 'w-gnd', H('j5'), R('tm', 5));
+jump('p2', 1, 'w-3v3', H('j6'), R('tp', 6));
+wire('p3', 1, 'w-gnd', `M${X(30)} ${b.RY('tm')} C ${X(30) + 60} ${b.RY('tm')}, ${X(30) + 60} ${b.RY('bm')}, ${X(30)} ${b.RY('bm')}`, { layer: layers.jumpers, dots: [R('tm', 30), R('bm', 30)] });
+wire('p4', 1, 'w-3v3', `M${X(30)} ${b.RY('tp')} C ${X(30) + 100} ${b.RY('tp')}, ${X(30) + 100} ${b.RY('bp')}, ${X(30)} ${b.RY('bp')}`, { layer: layers.jumpers, dots: [R('tp', 30), R('bp', 30)] });
+
+// Paso 3: botones
+jump('b1', 3, 'w-btn', H('i8'), H('i14'), -24);
+jump('b2', 3, 'w-btn', H('i10'), H('i18'), -40);
+jump('b3', 3, 'w-btn', H('i11'), H('i22'), -56);
+jump('b4', 3, 'w-gnd', H('j16'), R('tm', 16));
+jump('b5', 3, 'w-gnd', H('j20'), R('tm', 20));
+jump('b6', 3, 'w-gnd', H('j24'), R('tm', 24));
+
+// Módulos fuera de la protoboard
+function pinRow(g, names, x0, dx, y, up) {
+  const out = {};
+  names.forEach((n, i) => {
+    const x = x0 + i * dx;
+    el('rect', { x: x - 2, y: up ? y - 12 : y, width: 4, height: 12, fill: cssVar('pin') }, g);
+    out[n] = { x, y: up ? y - 12 : y + 12 };
+  });
+  return out;
+}
+// Pantalla, debajo de la protoboard
+const TFT = (() => {
+  const g = part(2, layers.mods);
+  el('rect', { x: 100, y: 630, width: 220, height: 170, rx: 8, fill: cssVar('pcb-tft') }, g);
+  el('rect', { x: 136, y: 652, width: 148, height: 140, rx: 3, fill: '#0b0f14', stroke: '#3a4048' }, g);
+  // un mono chiquito en la pantalla
+  el('circle', { cx: 210, cy: 714, r: 34, fill: '#7a4a2a' }, g);
+  el('ellipse', { cx: 210, cy: 724, rx: 24, ry: 20, fill: '#e3b98f' }, g);
+  el('circle', { cx: 177, cy: 700, r: 11, fill: '#7a4a2a' }, g); el('circle', { cx: 243, cy: 700, r: 11, fill: '#7a4a2a' }, g);
+  el('circle', { cx: 201, cy: 718, r: 4, fill: '#1a1a1a' }, g); el('circle', { cx: 219, cy: 718, r: 4, fill: '#1a1a1a' }, g);
+  el('path', { d: 'M201 732 Q 210 740 219 732', stroke: '#1a1a1a', 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round' }, g);
+  el('text', { x: 340, y: 656, class: 'lbl-b' }, g, 'Pantalla ST7789');
+  el('text', { x: 340, y: 674, class: 'lbl-s' }, g, 'cables dupont hembra–macho:');
+  el('text', { x: 340, y: 688, class: 'lbl-s' }, g, 'hembra en la pantalla, macho en la protoboard');
+  const names = ['GND', 'VCC', 'SCL', 'SDA', 'RES', 'DC', 'BLK'];
+  names.forEach((n, i) => el('text', { x: 120 + i * 26, y: 644, 'text-anchor': 'middle', class: 'pcb-t', 'font-size': 8 }, g, n));
+  el('rect', { x: 110, y: 624, width: 180, height: 6, fill: cssVar('plastic') }, g);
+  return pinRow(g, names, 120, 26, 630, true);
+})();
+// DY-SV17F, arriba de la protoboard
+const DY = (() => {
+  const g = part(4, layers.mods);
+  el('text', { x: 360, y: 16, 'text-anchor': 'middle', class: 'lbl-b' }, g, 'Módulo de sonido DY-SV17F');
+  el('rect', { x: 215, y: 24, width: 290, height: 106, rx: 8, fill: cssVar('pcb-dy') }, g);
+  el('rect', { x: 201, y: 60, width: 20, height: 28, rx: 3, fill: cssVar('metal') }, g);
+  el('rect', { x: 332, y: 46, width: 56, height: 44, rx: 3, fill: '#0b1824' }, g);
+  el('text', { x: 360, y: 72, 'text-anchor': 'middle', class: 'pcb-t' }, g, 'DY-SV17F');
+  const names = ['V5', 'GND', 'CON1', 'CON2', 'RXD', 'CON3', 'V33', 'TXD'];
+  names.forEach((n, i) => el('text', { x: 240 + i * 34, y: 122, 'text-anchor': 'middle', class: 'pcb-t', 'font-size': 8 }, g, n));
+  el('rect', { x: 226, y: 130, width: 266, height: 6, fill: cssVar('plastic') }, g);
+  const p = pinRow(g, names, 240, 34, 130, false);
+  el('text', { x: p.TXD.x, y: p.TXD.y + 16, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, fill: cssVar('danger') }, g, '✕');
+  // salida de parlante a la derecha
+  el('text', { x: 497, y: 58, 'text-anchor': 'end', class: 'pcb-t', 'font-size': 8 }, g, 'SPK+');
+  el('text', { x: 497, y: 102, 'text-anchor': 'end', class: 'pcb-t', 'font-size': 8 }, g, 'SPK−');
+  el('rect', { x: 505, y: 52, width: 12, height: 4, fill: cssVar('pin') }, g);
+  el('rect', { x: 505, y: 96, width: 12, height: 4, fill: cssVar('pin') }, g);
+  p['SPK+'] = { x: 517, y: 54 }; p['SPK-'] = { x: 517, y: 98 };
+  return p;
+})();
+// Parlante
+const SPK = (() => {
+  const g = part(4, layers.mods);
+  el('circle', { cx: 690, cy: 76, r: 44, fill: '#30363b' }, g);
+  el('circle', { cx: 690, cy: 76, r: 30, fill: '#596169' }, g);
+  el('circle', { cx: 690, cy: 76, r: 10, fill: '#30363b' }, g);
+  el('text', { x: 690, y: 136, 'text-anchor': 'middle', class: 'lbl-s' }, g, 'parlante 8 Ω');
+  return { p: { x: 652, y: 58 }, n: { x: 652, y: 96 } };
+})();
+
+const dup = (id, step, color, from, to, d) => wire(id, step, color, d, { layer: layers.duponts, male: true, female: from });
+// Paso 2: pantalla (de los pines hacia arriba)
+const up = (p, h, k1 = 40, k2 = 40) => `M${p.x} ${p.y} C ${p.x} ${p.y - k1}, ${h.x} ${h.y + k2}, ${h.x} ${h.y}`;
+const pinUp = (p) => ({ ...p, up: true });
+dup('d1', 2, 'w-gnd', pinUp(TFT.GND), R('bm', 2), up(TFT.GND, R('bm', 2), 24, 24));
+dup('d2', 2, 'w-3v3', pinUp(TFT.VCC), R('bp', 3), up(TFT.VCC, R('bp', 3), 20, 20));
+dup('d3', 2, 'w-scl', pinUp(TFT.SCL), H('a5'), up(TFT.SCL, H('a5')));
+dup('d4', 2, 'w-sda', pinUp(TFT.SDA), H('a6'), up(TFT.SDA, H('a6')));
+dup('d5', 2, 'w-res', pinUp(TFT.RES), H('a10'), up(TFT.RES, H('a10')));
+dup('d6', 2, 'w-dc', pinUp(TFT.DC), H('a4'), up(TFT.DC, H('a4'), 50, 50));
+dup('d7', 2, 'w-blk', pinUp(TFT.BLK), H('a11'), up(TFT.BLK, H('a11')));
+
+// Paso 4: sonido (de los pines hacia abajo)
+const down = (p, h, k1 = 34, k2 = 40) => `M${p.x} ${p.y} C ${p.x} ${p.y + k1}, ${h.x} ${h.y - k2}, ${h.x} ${h.y}`;
+dup('s2', 4, 'w-5v', DY.V5, H('j4'), `M${DY.V5.x} ${DY.V5.y} C ${DY.V5.x} 200, ${X(4)} 210, ${X(4)} ${H('j4').y}`);
+dup('s3', 4, 'w-gnd', DY.GND, R('tm', 8), down(DY.GND, R('tm', 8)));
+dup('s4', 4, 'w-gnd', DY.CON1, R('tm', 10), down(DY.CON1, R('tm', 10)));
+dup('s5', 4, 'w-gnd', DY.CON2, R('tm', 12), down(DY.CON2, R('tm', 12)));
+// RXD cruza por encima de la protoboard, por el número 13, que está libre
+dup('s1', 4, 'w-uart', DY.RXD, H('b9'), `M${DY.RXD.x} ${DY.RXD.y} C ${DY.RXD.x} 200, ${X(13)} 230, ${X(13)} 320 C ${X(13)} 420, ${X(12)} 490, ${H('b9').x} ${H('b9').y}`);
+dup('s6', 4, 'w-con', DY.CON3, H('j25'), `M${DY.CON3.x} ${DY.CON3.y} C ${DY.CON3.x} 220, ${X(25)} 190, ${X(25)} ${H('j25').y}`);
+dup('s7', 4, 'w-con', DY.V33, H('j29'), `M${DY.V33.x} ${DY.V33.y} C ${DY.V33.x} 205, ${X(29)} 175, ${X(29)} ${H('j29').y}`);
+wire('s8', 4, 'w-spk', `M${DY['SPK+'].x} ${DY['SPK+'].y} C 570 54, 600 56, ${SPK.p.x} ${SPK.p.y}`, { layer: layers.duponts, dots: [DY['SPK+'], SPK.p] });
+wire('s9', 4, 'w-gnd', `M${DY['SPK-'].x} ${DY['SPK-'].y} C 570 98, 600 98, ${SPK.n.x} ${SPK.n.y}`, { layer: layers.duponts, dots: [DY['SPK-'], SPK.n] });
+// empalmes
+for (const y of [56, 98]) el('rect', { x: 576, y: y - 5, width: 22, height: 10, rx: 4, fill: cssVar('w-gnd'), class: 'part', 'data-step': 4 }, layers.duponts);
+
+/* ---------- Instrucciones por paso ---------- */
+const sw = (c) => `<span class="sw" style="background:var(--${c})"></span>`;
+const h = (t) => `<span class="hole">${t}</span>`;
+const STEPS = {
+  1: {
+    intro: `La SuperMini queda clavada con sus pines en las líneas ${h('c')} y ${h('g')}, del número ${h('4')} al ${h('11')}, con el USB-C hacia la izquierda. Arriba de la placa quedan libres los agujeros h, i, j, y abajo los a, b. Por ahí entran los cables.`,
+    items: [
+      ['p1', 'w-gnd', `Cable de ${h('j5')} al <b>riel − de arriba</b> (línea azul).`, 'El número 5 de la línea g es el pin G de la SuperMini.'],
+      ['p2', 'w-3v3', `Cable de ${h('j6')} al <b>riel + de arriba</b> (línea roja).`, 'El número 6 de la línea g es el pin 3V3. Desde ahora el riel + tiene 3,3 V.'],
+      ['p3', 'w-gnd', `Cable largo del <b>riel − de arriba</b> al <b>riel − de abajo</b>, en el número 30.`, 'Así las dos líneas azules quedan unidas.'],
+      ['p4', 'w-3v3', `Cable largo del <b>riel + de arriba</b> al <b>riel + de abajo</b>, en el número 30.`, 'Así las dos líneas rojas quedan unidas.'],
+    ],
+    check: `<b>Prueba:</b> multímetro en continuidad entre riel + y riel −: vale un pitido cortito, pero <b>no tiene que quedar sonando</b>. Enchufá el USB-C: se prende el LED rojo. Desenchufá para seguir.`,
+  },
+  2: {
+    intro: `Siete cables dupont <b>hembra–macho</b>. La hembra va en el pin de la pantalla y el macho en la protoboard. Leé el nombre impreso al lado de cada pin de tu pantalla: el orden puede no ser el del dibujo.`,
+    items: [
+      ['d1', 'w-gnd', `Pantalla <b>GND</b> → <b>riel − de abajo</b>.`, ''],
+      ['d2', 'w-3v3', `Pantalla <b>VCC</b> → <b>riel + de abajo</b> (3V3).`, 'Nunca al 5V, aunque la pantalla diga que lo aguanta.'],
+      ['d3', 'w-scl', `Pantalla <b>SCL</b> → ${h('a5')} (GPIO6).`, 'En algunas pantallas dice SCK o CLK.'],
+      ['d4', 'w-sda', `Pantalla <b>SDA</b> → ${h('a6')} (GPIO7).`, 'En algunas dice MOSI o DIN.'],
+      ['d5', 'w-res', `Pantalla <b>RES</b> → ${h('a10')} (GPIO20).`, 'En algunas dice RST.'],
+      ['d6', 'w-dc', `Pantalla <b>DC</b> → ${h('a4')} (GPIO5).`, 'En algunas dice RS o A0.'],
+      ['d7', 'w-blk', `Pantalla <b>BLK</b> → ${h('a11')} (GPIO21).`, 'Es la luz de fondo. En algunas dice BL o LED.'],
+      [null, 'w-gnd', `Solo si tu pantalla tiene un pin <b>CS</b>: CS → <b>riel −</b>.`, 'Si no lo tiene, saltá este renglón.'],
+    ],
+    check: `<b>Prueba:</b> continuidad entre riel + y riel −: no tiene que quedar sonando. Enchufá a la PC y cargá el programa: <code>cd firmware</code> y <code>cargo run --release</code>. Tiene que aparecer la casa con el mono.`,
+  },
+  3: {
+    intro: `Los botones van en la mitad de arriba, en la línea ${h('g')}, con una pata en cada número. Las patas se pueden doblar un poquito con los dedos para que entren.`,
+    items: [
+      [null, 'w-btn', `Botón <b>A</b>: patas en ${h('g14')} y ${h('g16')}.`, 'Si no entra, usá g14 y g17, y sacá el cable de tierra de j17 en vez de j16.'],
+      [null, 'w-btn', `Botón <b>B</b>: patas en ${h('g18')} y ${h('g20')}.`, 'Si no entra, g18 y g21, con la tierra en j21.'],
+      [null, 'w-btn', `Botón <b>C</b>: patas en ${h('g22')} y ${h('g24')}.`, 'Si no entra, g22 y g25, con la tierra en j25: en ese caso corré la resistencia un número a la derecha.'],
+      ['b1', 'w-btn', `Cable de ${h('i8')} a ${h('i14')}.`, 'GPIO3 a una pata del botón A.'],
+      ['b2', 'w-btn', `Cable de ${h('i10')} a ${h('i18')}.`, 'GPIO1 a una pata del botón B.'],
+      ['b3', 'w-btn', `Cable de ${h('i11')} a ${h('i22')}.`, 'GPIO0 a una pata del botón C.'],
+      ['b4', 'w-gnd', `Cable de ${h('j16')} al <b>riel − de arriba</b>.`, 'La otra pata del botón A a tierra.'],
+      ['b5', 'w-gnd', `Cable de ${h('j20')} al <b>riel − de arriba</b>.`, ''],
+      ['b6', 'w-gnd', `Cable de ${h('j24')} al <b>riel − de arriba</b>.`, ''],
+    ],
+    check: `<b>Prueba:</b> punta roja en ${h('j8')}, negra en el riel −. Suelto: <b>no pita</b>. Apretando A: <b>pita</b>. Igual con ${h('j10')} y el botón B, y con ${h('j11')} y el botón C. Después, con el programa cargado, tocá un botón: el mono te saluda.`,
+  },
+  4: {
+    intro: `Antes de este paso, copiá los sonidos al DY-SV17F con el módulo <b>solo</b>, enchufado por su micro-USB a la PC. Después desenchufalo y recién ahí cablealo. Los cables también son dupont hembra–macho.`,
+    items: [
+      ['s2', 'w-5v', `DY <b>V5</b> → ${h('j4')} (5V de la SuperMini).`, 'El único cable con 5V de todo el armado. Va directo y no toca ningún riel. Fijate dos veces: es el agujero de al lado de G.'],
+      ['s3', 'w-gnd', `DY <b>GND</b> → <b>riel − de arriba</b>.`, ''],
+      ['s1', 'w-uart', `DY <b>RXD</b> → ${h('b9')} (GPIO10).`, 'Por acá la SuperMini le dice qué sonido tocar. Pasa por encima de la protoboard. En algunos módulos dice RX o IO1.'],
+      ['s4', 'w-gnd', `DY <b>CON1</b> → <b>riel − de arriba</b>.`, ''],
+      ['s5', 'w-gnd', `DY <b>CON2</b> → <b>riel − de arriba</b>.`, ''],
+      [null, 'w-con', `Resistencia de 10 kΩ: patas en ${h('h25')} y ${h('h29')}.`, 'No tiene lado: da igual cómo la pongas. Bandas marrón, negro, naranja.'],
+      ['s6', 'w-con', `DY <b>CON3</b> → ${h('j25')}.`, ''],
+      ['s7', 'w-con', `DY <b>V33</b> → ${h('j29')}.`, 'Es una salida de 3,3 V del propio módulo. Con la resistencia, CON3 queda en “1” al arrancar.'],
+      ['s8', 'w-spk', `Parlante <b>+</b> (rojo) → DY <b>SPK+</b>.`, 'Con el cable que empalmaste.'],
+      ['s9', 'w-gnd', `Parlante <b>−</b> (negro) → DY <b>SPK−</b>.`, ''],
+      [null, 'w-blk', `DY <b>TXD</b>: no se conecta.`, ''],
+    ],
+    check: `<b>Prueba:</b> entre riel + y riel −, y entre ${h('j4')} (5V) y riel −: no tiene que quedar sonando. Cargá el programa y tocá un botón: suena <code>00001.mp3</code>. Si la SuperMini se reinicia al sonar, poné el condensador de 220–470&nbsp;µF: pata + en ${h('i4')} y pata − (la de la franja) en ${h('i5')}.`,
+  },
+};
+
+const panels = document.getElementById('panels');
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem('armado-checks-v2') || '{}'); } catch (e) { saved = {}; }
+const save = () => { try { localStorage.setItem('armado-checks-v2', JSON.stringify(saved)); } catch (e) {} };
+
+for (const n of [1, 2, 3, 4]) {
+  const s = STEPS[n];
+  const div = document.createElement('div');
+  div.className = 'panel'; div.dataset.panel = n; div.hidden = n !== 1;
+  const items = s.items.map(([w, c, what, hint], i) => {
+    const id = `c${n}-${i}`;
+    return `<li ${w ? `data-w="${w}"` : ''}><input type="checkbox" id="${id}" ${saved[id] ? 'checked' : ''}>${sw(c)}<label for="${id}" class="what">${what}${hint ? `<span class="hint">${hint}</span>` : ''}</label></li>`;
+  }).join('');
+  div.innerHTML = `<p>${s.intro}</p><ol class="todo">${items}</ol><div class="check">${s.check}</div><p class="progress" data-progress="${n}"></p>`;
+  panels.appendChild(div);
+}
+const allPanel = document.createElement('div');
+allPanel.className = 'panel'; allPanel.dataset.panel = 'all'; allPanel.hidden = true;
+allPanel.innerHTML = `<p>Todo armado. Usá esta vista para comparar con tu protoboard. Si algo no coincide, volvé al paso que corresponda.</p>`;
+panels.appendChild(allPanel);
+
+function progress() {
+  for (const n of [1, 2, 3, 4]) {
+    const boxes = panels.querySelectorAll(`[data-panel="${n}"] input`);
+    const done = [...boxes].filter((b) => b.checked).length;
+    panels.querySelector(`[data-progress="${n}"]`).textContent = `${done} de ${boxes.length} hechos`;
+  }
+}
+panels.addEventListener('change', (e) => { if (e.target.id) { saved[e.target.id] = e.target.checked; save(); progress(); } });
+progress();
+
+const focusWire = (id, on) => {
+  const g = WIRES[id]; if (!g) return;
+  g.classList.toggle('hl', on);
+  svg.classList.toggle('focusing', on);
+};
+panels.addEventListener('mouseover', (e) => { const li = e.target.closest('li[data-w]'); if (li) focusWire(li.dataset.w, true); });
+panels.addEventListener('mouseout', (e) => { const li = e.target.closest('li[data-w]'); if (li) focusWire(li.dataset.w, false); });
+panels.addEventListener('focusin', (e) => { const li = e.target.closest('li[data-w]'); if (li) focusWire(li.dataset.w, true); });
+panels.addEventListener('focusout', (e) => { const li = e.target.closest('li[data-w]'); if (li) focusWire(li.dataset.w, false); });
+
+function show(step) {
+  document.querySelectorAll('#steps button').forEach((bt) => bt.setAttribute('aria-pressed', String(bt.dataset.step === String(step))));
+  panels.querySelectorAll('.panel').forEach((p) => { p.hidden = p.dataset.panel !== String(step); });
+  svg.querySelectorAll('[data-step]').forEach((e) => {
+    const s = +e.dataset.step;
+    e.classList.toggle('future', step !== 'all' && s > step);
+    e.classList.toggle('past', step !== 'all' && s < step && e.classList.contains('wire'));
+  });
+  try { localStorage.setItem('armado-step', String(step)); } catch (e) {}
+}
+document.getElementById('steps').addEventListener('click', (e) => {
+  const bt = e.target.closest('button'); if (!bt) return;
+  show(bt.dataset.step === 'all' ? 'all' : +bt.dataset.step);
+});
+let start = 1;
+try { const s = localStorage.getItem('armado-step'); if (s) start = s === 'all' ? 'all' : +s; } catch (e) {}
+show(start);
+})();
+</script>

@@ -1,0 +1,1448 @@
+<title>Cableado del CustomTamagochi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Pixelify+Sans:wght@500;700&display=swap">
+<style>
+/* Misma identidad que docs/armado.html: guía de banco de trabajo, una columna con figuras anchas y listas para tildar. */
+:root {
+  --bg: #eaeee8;
+  --surface: #f8faf6;
+  --ink: #1a2026;
+  --muted: #56616a;
+  --line: #cfd7cd;
+  --accent: #155fb0;
+  --accent-soft: #d9e6f5;
+  --danger: #b3261e;
+  --danger-soft: #f9e1de;
+  --warn: #9a5b00;
+  --warn-soft: #f8ebcf;
+  --ok: #2c6e31;
+  --ok-soft: #dcefdc;
+  --code-bg: #eef2ec;
+  /* objetos físicos: mismos colores en los dos temas */
+  --pcb: #183a57;
+  --pcb-ink: #e9f1f8;
+  --pcb-dy: #1f4e9c;
+  --pcb-tft: #17191c;
+  --plastic: #222629;
+  --btn-body: #3a4048;
+  --tube: #9aa4ad;
+  --spk: #5b4636;
+  --mdf: #c99b64;
+  --mdf-edge: #8f6a3f;
+  --mdf-in: #e8d6b8;
+  --mdf-hole: #4f3820;
+  --tape: #efe2a8;
+  --gold: #d4a73a;
+  --bb: #f4f4f0;
+  --bb-edge: #c9ccc4;
+  --bb-hole: #3a3f44;
+  --bb-text: #6b737a;
+  --rail-red: #d0312d;
+  --rail-blue: #1f5fbf;
+  --perf: #2c6b45;
+  --perf-edge: #1c4a2f;
+  --perf-hole: #10261a;
+  --pad: #b8c0b4;
+  --solder: #e3e7ea;
+  --leg: #c3cad0;
+  /* cables, como en la guía de armado */
+  --w-5v: #d0312d;
+  --w-3v3: #e8710a;
+  --w-gnd: #2b3238;
+  --w-scl: #d9a100;
+  --w-sda: #1f7ae0;
+  --w-dc: #2a9d5c;
+  --w-res: #c2185b;
+  --w-blk: #8d99a4;
+  --w-btn: #8a3fc0;
+  --w-uart: #0b8a7a;
+  --w-con: #8a6d1f;
+  --w-spk: #7a5a44;
+  --wire-edge: rgba(0, 0, 0, 0.32);
+  --halo: rgba(0, 0, 0, 0.28);
+  --font-display: "Pixelify Sans", "Courier New", monospace;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --step--1: 0.875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.3rem;
+  --step-2: 1.7rem;
+  --step-3: 2.4rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1215; --surface: #161c20; --ink: #e5eaee; --muted: #9ba7b0; --line: #2a333a;
+    --accent: #6cb4ff; --accent-soft: #16304c; --danger: #ff8a80; --danger-soft: #3b1714;
+    --warn: #f3b44e; --warn-soft: #36270c; --ok: #86d18b; --ok-soft: #14301a; --code-bg: #12181c;
+    --wire-edge: rgba(255, 255, 255, 0.5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1215; --surface: #161c20; --ink: #e5eaee; --muted: #9ba7b0; --line: #2a333a;
+  --accent: #6cb4ff; --accent-soft: #16304c; --danger: #ff8a80; --danger-soft: #3b1714;
+  --warn: #f3b44e; --warn-soft: #36270c; --ok: #86d18b; --ok-soft: #14301a; --code-bg: #12181c;
+  --wire-edge: rgba(255, 255, 255, 0.5);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--step-0); line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1080px; margin: 0 auto; }
+.prose { max-width: 68ch; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; }
+h1 { font-family: var(--font-display); font-size: var(--step-3); font-weight: 700; margin: 0; letter-spacing: 0.01em; }
+h2 { font-family: var(--font-display); font-size: var(--step-2); font-weight: 500; margin: 0 0 12px; }
+h3 { font-size: var(--step-1); margin: 20px 0 8px; }
+p { margin: 0 0 12px; }
+a { color: var(--accent); }
+code, kbd { font-family: var(--font-mono); font-size: 0.88em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.eyebrow { font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; }
+.muted { color: var(--muted); }
+section { padding-block: 40px 8px; border-top: 1px solid var(--line); margin-top: 32px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+nav.toc {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 6px; overflow-x: auto; padding-block: 10px;
+  margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))) calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  scrollbar-width: thin;
+}
+nav.toc a {
+  flex: none; text-decoration: none; color: var(--ink); font-size: var(--step--1);
+  border: 1px solid var(--line); background: var(--surface); padding: 4px 10px; border-radius: 999px;
+}
+nav.toc a:hover { border-color: var(--accent); color: var(--accent); }
+nav.toc a .c { color: var(--muted); font-variant-numeric: tabular-nums; margin-left: 4px; }
+.hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: start; padding-block: 32px 8px; }
+.hero .lede { font-size: var(--step-1); color: var(--muted); margin-top: 12px; max-width: 38ch; }
+@media (max-width: 820px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+.tally { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+.tally h3 { font-size: var(--step-0); margin: 0 0 10px; }
+.tally ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.tally li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: baseline; border-bottom: 1px dashed var(--line); padding-bottom: 8px; }
+.tally li:last-child { border-bottom: 0; }
+.tally .n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 600; white-space: nowrap; }
+.tally .sub { display: block; color: var(--muted); font-size: var(--step--1); }
+.tally .total { margin-top: 12px; padding-top: 10px; border-top: 2px solid var(--line); display: flex; justify-content: space-between; gap: 12px; font-weight: 700; }
+.callout { border-radius: 10px; padding: 14px 16px; margin-block: 16px; border: 1px solid var(--line); background: var(--surface); }
+.callout.ok { background: var(--ok-soft); border-color: transparent; }
+.callout.warn { background: var(--warn-soft); border-color: transparent; }
+.callout.danger { background: var(--danger-soft); border-color: transparent; }
+.callout.info { background: var(--accent-soft); border-color: transparent; }
+.callout strong:first-child { display: block; margin-bottom: 4px; }
+.callout > :last-child { margin-bottom: 0; }
+.tag {
+  display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  border-radius: 4px; padding: 1px 6px; margin-right: 6px; vertical-align: 2px;
+}
+.tag.danger { background: var(--danger-soft); color: var(--danger); }
+.tag.warn { background: var(--warn-soft); color: var(--warn); }
+.tag.ok { background: var(--ok-soft); color: var(--ok); }
+.tag.info { background: var(--accent-soft); color: var(--accent); }
+.rules { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+.rules li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.rules .why { display: block; color: var(--muted); font-size: var(--step--1); margin-top: 2px; }
+figure { margin: 16px 0; }
+.fig { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; overflow-x: auto; }
+.fig svg { display: block; width: 100%; height: auto; min-width: 680px; }
+.fig.narrow svg { min-width: 0; max-width: 560px; margin: 0 auto; }
+figcaption { font-size: var(--step--1); color: var(--muted); margin-top: 8px; }
+.scroll-hint { display: none; font-size: var(--step--1); color: var(--muted); margin: 0 0 6px; }
+@media (max-width: 700px) { .scroll-hint { display: block; } }
+svg text { font-family: var(--font-body); }
+svg .lbl { fill: var(--ink); font-size: 13px; }
+svg .lbl-b { fill: var(--ink); font-size: 14px; font-weight: 700; }
+svg .lbl-s { fill: var(--muted); font-size: 11.5px; }
+svg .pcb-t { fill: var(--pcb-ink); font-size: 11px; font-family: var(--font-mono); }
+svg .pcb-h { fill: var(--pcb-ink); font-size: 14px; font-weight: 700; }
+svg .wire-edge { stroke: var(--wire-edge); stroke-width: 6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+svg .wire { stroke-width: 3.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+svg .female { fill: var(--plastic); stroke: var(--muted); stroke-width: 1; }
+svg .tube { fill: var(--tube); stroke: var(--wire-edge); stroke-width: 1; }
+svg .dot { fill: var(--ink); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+.card h3 { margin-top: 0; }
+.card > :last-child { margin-bottom: 0; }
+.card ol, .card ul { padding-left: 1.2em; margin: 6px 0 10px; }
+.card li { margin-bottom: 6px; }
+.table-wrap { overflow-x: auto; margin: 12px 0; }
+table { border-collapse: collapse; width: 100%; font-size: var(--step--1); font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 700; }
+td b { white-space: nowrap; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; box-shadow: inset 0 0 0 1px var(--halo); }
+.pin { font-family: var(--font-mono); font-weight: 600; background: var(--code-bg); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-size: 0.9em; white-space: nowrap; }
+.todo { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
+.todo li {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px;
+}
+.todo li:hover, .todo li:focus-within { border-color: var(--accent); }
+.todo li:has(input:checked) { border-color: var(--ok); }
+.todo li:has(input:checked) .what { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--ok); }
+.todo input { width: 20px; height: 20px; margin-top: 3px; accent-color: var(--ok); }
+.todo label { cursor: pointer; }
+.todo .hint { display: block; font-size: var(--step--1); color: var(--muted); }
+.check { background: var(--ok-soft); border-radius: 10px; padding: 10px 14px; font-size: var(--step--1); margin-top: 12px; }
+.check b { color: var(--ok); }
+.progress-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; font-size: var(--step--1); color: var(--muted); }
+.meter { flex: 1; height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.meter i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .3s; }
+@media (prefers-reduced-motion: reduce) { .meter i { transition: none; } }
+.stage-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.stage-head .count { font-family: var(--font-mono); font-size: var(--step--1); color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: var(--step--1); margin-top: 8px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend svg { width: 26px; height: 14px; }
+.legend i.line { width: 18px; height: 5px; border-radius: 2px; display: inline-block; box-shadow: inset 0 0 0 1px var(--halo); }
+.parts { padding-left: 0; list-style: none; counter-reset: part; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 8px 20px; margin: 12px 0 0; }
+.parts li { counter-increment: part; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; }
+.parts li::before { content: counter(part); display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--surface); font-weight: 700; font-size: var(--step--1); margin-top: 1px; }
+.legend i.box { width: 14px; height: 14px; border-radius: 3px; display: inline-block; box-shadow: inset 0 0 0 1px var(--line); }
+.tiny-figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 10px; margin-top: 12px; }
+.tiny-figs figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.tiny-figs svg { width: 100%; height: auto; display: block; }
+.tiny-figs figcaption { margin-top: 6px; }
+button.reset { font: inherit; font-size: var(--step--1); color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; cursor: pointer; }
+button.reset:hover { color: var(--danger); border-color: var(--danger); }
+footer { margin-top: 48px; color: var(--muted); font-size: var(--step--1); }
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <div>
+    <p class="eyebrow">Guía de banco · versión final, sin protoboard</p>
+    <h1>Cableado del CustomTamagochi</h1>
+    <p class="lede">Hoy armás todos los cables que van adentro de la caja. Cada cable tiene una punta hembra que se enchufa en el pin de un módulo, y los empalmes se sueldan en el medio. Así no calentás ningún módulo y, si algo falla, desenchufás y probás.</p>
+    <p class="muted">Sin batería: todo se alimenta por el USB-C de la SuperMini, con un cargador de celular. La caja de MDF la hacés el fin de semana, con las medidas que anotás hoy.</p>
+  </div>
+  <aside class="tally" aria-labelledby="t-tally">
+    <h3 id="t-tally">El día de hoy</h3>
+    <ol>
+      <li><span>0 · Probar en la protoboard<span class="sub">no lo saltees: nunca lo viste andar</span></span><span class="n">45–90 min</span></li>
+      <li><span>1 · Preparar<span class="sub">cobre, largos y etiquetas</span></span><span class="n">30 min</span></li>
+      <li><span>2 · Pantalla<span class="sub">7 empalmes y el GND principal</span></span><span class="n">60–90 min</span></li>
+      <li><span>3 · Botones<span class="sub">6 puntos en las patas</span></span><span class="n">30–45 min</span></li>
+      <li><span>Sonido<span class="sub">más adelante, con una resistencia de 10 kΩ</span></span><span class="n">—</span></li>
+      <li><span>5 · Prueba final<span class="sub">con el cargador de celular</span></span><span class="n">15 min</span></li>
+    </ol>
+    <div class="total"><span>Total</span><span class="n">3 a 4 h</span></div>
+    <div class="progress-row"><div class="meter" aria-hidden="true"><i id="meter"></i></div><span id="total-progress">0 de 0</span></div>
+  </aside>
+</header>
+
+<nav class="toc" aria-label="Secciones">
+  <a href="#reglas">Reglas</a>
+  <a href="#completo">Armado completo</a>
+  <a href="#mapa">Mapa de pines</a>
+  <a href="#material">Material</a>
+  <a href="#tecnica">Empalmes</a>
+  <a href="#agujero">Cable al agujero</a>
+  <a href="#protoboard">Protoboard</a>
+  <a href="#e0">0 · Protoboard<span class="c" data-count="e0"></span></a>
+  <a href="#placa">Placa verde</a>
+  <a href="#e1">1 · Preparar<span class="c" data-count="e1"></span></a>
+  <a href="#e2">2 · Pantalla<span class="c" data-count="e2"></span></a>
+  <a href="#e3">3 · Botones<span class="c" data-count="e3"></span></a>
+  <a href="#e4">Sonido, después</a>
+  <a href="#e5">5 · Final<span class="c" data-count="e5"></span></a>
+  <a href="#caja">Largos para el arcade</a>
+  <a href="#fallas">Si algo falla</a>
+</nav>
+
+<section id="reglas" style="border-top:0; margin-top:0">
+  <h2>Antes de empezar</h2>
+  <p class="prose">Las reglas de siempre, más dos que son nuevas porque ahora los cables quedan soldados.</p>
+  <ul class="rules">
+    <li><span class="tag danger">Quema</span><b>Todo desenchufado mientras soldás o enchufás hembras.</b><span class="why">El USB-C se conecta solo para probar, con el soldador en su soporte y lejos.</span></li>
+    <li><span class="tag danger">Quema</span><b>El pin 5V de la SuperMini queda libre.</b><span class="why">Sin sonido no se usa. La pantalla va a 3V3. Si algo toca el 5V, se puede quemar.</span></li>
+    <li><span class="tag warn">Nuevo</span><b>Etiquetá cada cable antes de cortarlo.</b><span class="why">Una banderita de cinta de papel en cada punta, con el nombre: “SCL”, “6”. Cortados, todos los cables se parecen.</span></li>
+    <li><span class="tag warn">Nuevo</span><b>El termocontraíble entra antes de soldar.</b><span class="why">Pasalo por uno de los cables y dejalo lejos del calor. Con el empalme hecho ya no entra.</span></li>
+    <li><span class="tag info">Hábito</span><b>Una etapa por vez, y probás al terminar cada una.</b><span class="why">Si algo falla, sabés que está en lo último que hiciste.</span></li>
+    <li><span class="tag info">Hábito</span><b>Leé el nombre impreso en cada pin.</b><span class="why">Tu pantalla nueva puede traer los pines en otro orden. Si el dibujo y la pieza no coinciden, manda la pieza.</span></li>
+  </ul>
+</section>
+
+<section id="completo">
+  <div class="callout info">
+    <strong>Tu carcasa es el mini arcade</strong>
+    <p>Los dibujos de esta sección son de una caja plana. Las conexiones son las mismas, pero en el <a href="carcasa.html" target="_blank" rel="noopener">mini arcade</a> cambian el lugar de cada pieza y los largos de los cables. Los largos están en <a href="#caja">Largos para el arcade</a>.</p>
+  </div>
+  <h2>Cómo queda armado</h2>
+  <p class="prose">A la izquierda, la caja como la vas a ver. A la derecha, la misma caja como si el frente fuera transparente: todo lo que va adentro, con sus cables. Las medidas son de ejemplo. Las tuyas salen de tus piezas.</p>
+  <p class="scroll-hint">Deslizá el dibujo hacia los costados →</p>
+  <figure>
+    <div class="fig">
+      <svg id="full" viewBox="0 0 940 790" role="img" aria-labelledby="full-title full-desc">
+        <title id="full-title">El CustomTamagochi armado, de frente y por dentro</title>
+        <desc id="full-desc">De frente: caja de MDF con la pantalla arriba mostrando al mono, los botones A, B y C abajo, y el cable USB-C saliendo por abajo. Por dentro: la pantalla con sus pines arriba, siete cables juntos que bajan por detrás de la pantalla y pasan entre los botones B y C hasta la SuperMini, abajo al centro con el USB-C hacia abajo. A los costados de la SuperMini queda lugar libre para agregar el sonido más adelante. Los botones están unidos por una cadena de GND que sale del empalme principal.</desc>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i class="line" style="background:var(--w-scl)"></i><i class="line" style="background:var(--w-sda)"></i><i class="line" style="background:var(--w-dc)"></i>pantalla</span>
+      <span><i class="line" style="background:var(--w-3v3)"></i>3V3</span>
+      <span><i class="line" style="background:var(--w-gnd)"></i>GND</span>
+      <span><i class="line" style="background:var(--w-btn)"></i>botones</span>
+    </div>
+    <figcaption>En la vista por dentro, los cables pasan por detrás de la pantalla y de la SuperMini. Están dibujados encima para que se vean.</figcaption>
+  </figure>
+  <ol class="parts">
+    <li><span><b>Pantalla</b>, pegada detrás de la ventana del frente, con las hembras en sus pines mirando hacia atrás. Antes de pegarla, prendé todo y fijate de qué lado queda la imagen derecha. Si sus pines quedan abajo o al costado, no cambia nada.</span></li>
+    <li><span><b>Los 7 cables de la pantalla</b>, juntos con cinta. Bajan por detrás de la pantalla y pasan entre los botones B y C.</span></li>
+    <li><span><b>Empalme GND principal</b>, al lado de la SuperMini. De ahí salen GND a la pantalla y a los botones, más un tramo tapado con cinta para el sonido.</span></li>
+    <li><span><b>SuperMini</b>, con los chips hacia el frente y el USB-C en el agujero de la pared de abajo. Va apoyada en un taco de MDF; las hembras miran hacia atrás.</span></li>
+    <li><span><b>Lugar libre para el sonido</b>: unos 25 × 25 mm para el DY-SV17F y 22 mm para el parlante, por si lo agregás. Los pines 5V y 10 de la SuperMini quedan libres para eso.</span></li>
+    <li><span><b>Botones A, B y C</b>, cada uno con su cable a la SuperMini y la cadena de GND de pata a pata.</span></li>
+  </ol>
+  <div class="callout info">
+    <strong>Si querés que se pare sobre la mesa</strong>
+    <p>Con el USB-C abajo, el cable no deja apoyar la caja. Pegale dos patitas de MDF a los costados de abajo para que el cable pase entre ellas. La otra opción es hacer el agujero en un costado y girar la SuperMini un cuarto de vuelta: las conexiones son las mismas.</p>
+  </div>
+
+  <h3>Los cables de la pantalla salen de los dos lados</h3>
+  <p class="prose">No es problema, porque los cables no salen por los costados de la placa: salen <b>por abajo</b>, desde las hembras. Abajo los juntás en un solo atado. 3V3 cruza por debajo de la placa, entre las dos filas de hembras, y sale del otro lado por el hueco que dejan los pines 8 y 9, que no se usan. El GND de la pantalla viene del empalme principal y pasa por el mismo hueco.</p>
+  <p class="scroll-hint">Deslizá el dibujo hacia los costados →</p>
+  <figure>
+    <div class="fig">
+      <svg id="under" viewBox="0 0 760 370" role="img" aria-labelledby="under-title under-desc">
+        <title id="under-title">La SuperMini vista de abajo, con las hembras puestas</title>
+        <desc id="under-desc">Vista desde abajo con el USB-C arriba: la columna izquierda es 5V, G, 3V3, 4, 3, 2, 1, 0 y la derecha 5, 6, 7, 8, 9, 10, 20, 21. Los cables de 5, 6, 7, 20 y 21 salen a la derecha y se juntan con 3V3 y el GND de la pantalla, que cruzan por debajo de la placa y salen por el hueco de los pines 8 y 9. El atado de siete cables va a la pantalla. A la izquierda salen el GND a los botones, un tramo de GND tapado para el sonido, y los cables de los botones 3, 1 y 0. Los pines 5V y 10 quedan libres.</desc>
+      </svg>
+    </div>
+    <figcaption>Ojo: vista de abajo, las columnas quedan al revés que en el mapa de pines. Guiate por el nombre de cada pin, no por el lado.</figcaption>
+  </figure>
+
+  <h3>Cuánta profundidad necesita la caja</h3>
+  <p class="scroll-hint">Deslizá el dibujo hacia los costados →</p>
+  <figure>
+    <div class="fig">
+      <svg id="depth" viewBox="0 0 760 210" role="img" aria-labelledby="depth-title depth-desc">
+        <title id="depth-title">Capas de adelante hacia atrás</title>
+        <desc id="depth-desc">Pantalla: frente 5 mm, pantalla 4, pines 8,5, hembra 14, curva del cable 8 y fondo 5; unos 45 mm. SuperMini: frente 5, taco 5, placa 2, pines 8,5, hembra 14, curva 8 y fondo 5; unos 48 mm.</desc>
+      </svg>
+    </div>
+    <figcaption>Medidas aproximadas, de adelante hacia atrás. Medí las tuyas con las hembras puestas y los cables doblados: la parte más profunda manda.</figcaption>
+  </figure>
+</section>
+
+<section id="mapa">
+  <h2>Mapa de la SuperMini</h2>
+  <p class="prose">La SuperMini vista de arriba, con el USB-C hacia arriba. Cada pin dice adónde va su cable. A la pantalla van <b>5 cables desde un lado</b> (5, 6, 7, 20 y 21) y <b>2 desde el otro</b>: 3V3 y G.</p>
+  <p class="scroll-hint">Deslizá el dibujo hacia los costados →</p>
+  <figure>
+    <div class="fig">
+      <svg viewBox="0 0 760 440" role="img" aria-labelledby="sm-title sm-desc">
+        <title id="sm-title">Adónde va cada pin de la SuperMini</title>
+        <desc id="sm-desc">Columna izquierda, de arriba abajo: 5 a pantalla DC, 6 a pantalla SCL, 7 a pantalla SDA, 8 y 9 libres, 10 libre, 20 a pantalla RES, 21 a pantalla BLK. Columna derecha: 5V libre, G al GND principal, 3V3 a pantalla VCC, 4 libre, 3 a botón A, 2 libre, 1 a botón B, 0 a botón C.</desc>
+        <g id="map-sm"></g>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i class="box" style="background:var(--accent-soft)"></i>pantalla</span>
+      <span><i class="box" style="background:var(--ok-soft)"></i>botones</span>
+      <span><i class="box" style="background:var(--bg)"></i>GND</span>
+      <span><svg viewBox="0 0 26 14" aria-hidden="true"><rect x="8" y="2" width="10" height="10" rx="1" class="female"/></svg>hembra enchufada en el pin</span>
+    </div>
+    <figcaption>Así está impresa la placa: 5V, G y 3V3 juntos, del lado derecho del USB-C. En la protoboard, con el USB-C a la izquierda, la columna derecha es la fila de atrás. Si tu placa dice otra cosa, manda la placa.</figcaption>
+  </figure>
+
+  <h3>Cómo se reparte el GND</h3>
+  <p class="prose">El único pin <span class="pin">G</span> va a un empalme principal, y de ahí salen tres tramos.</p>
+  <p class="scroll-hint">Deslizá el dibujo hacia los costados →</p>
+  <figure>
+    <div class="fig">
+      <svg viewBox="0 0 760 220" role="img" aria-labelledby="gnd-title gnd-desc">
+        <title id="gnd-title">Reparto del GND</title>
+        <desc id="gnd-desc">El pin G de la SuperMini va al empalme principal. De ahí salen tres tramos: a la pantalla (GND y CS si existe), a los botones en cadena de A a B a C, y uno tapado con cinta para el sonido.</desc>
+        <g id="map-gnd"></g>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><svg viewBox="0 0 26 14" aria-hidden="true"><line x1="0" y1="7" x2="26" y2="7" stroke="var(--muted)" stroke-width="2"/><rect x="6" y="3" width="14" height="8" rx="3" class="tube"/></svg>empalme con termocontraíble</span>
+      <span><svg viewBox="0 0 26 14" aria-hidden="true"><circle cx="13" cy="7" r="5" class="dot"/></svg>varios cables juntos, o soldado en la pata</span>
+    </div>
+    <figcaption>La pantalla, el DY-SV17F y la resistencia se conectan como dicen las tablas de cada etapa. El orden de sus pines puede ser otro en tus piezas.</figcaption>
+  </figure>
+</section>
+
+<section id="material">
+  <h2>Material</h2>
+  <div class="two">
+    <div class="card">
+      <h3>Cuántos cables hembra–macho</h3>
+      <div class="table-wrap" style="margin:0">
+        <table>
+          <thead><tr><th>Dónde va la hembra</th><th>Cables</th></tr></thead>
+          <tbody>
+            <tr><td>SuperMini: G, 3V3, 3, 1, 0, 5, 6, 7, 20, 21</td><td>10</td></tr>
+            <tr><td>Pantalla: VCC, GND, SCL, SDA, RES, DC, BLK, y CS si tiene</td><td>7–8</td></tr>
+                        <tr><td><b>Total</b></td><td><b>17–18</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted" style="margin-top:10px">El parlante ya tiene sus dos hembras de la sesión 5 de soldadura. De cada cable usás la mitad con la hembra. Las mitades con el macho no se tiran: su cable sirve para los tramos de GND y la cadena de los botones, y el macho sirve de punta para medir.</p>
+      <p class="muted">Si no te alcanzan, conseguí cables <b>hembra–hembra</b>: cada uno reemplaza dos cables y un empalme.</p>
+    </div>
+    <div class="card">
+      <h3>Además</h3>
+      <ul>
+        <li>Termocontraíble de <b>2–3 mm</b> para los empalmes simples y de <b>5–6 mm</b> para los de GND. Si no tenés, cinta aisladora.</li>
+        <li>Cinta de papel y una birome, para las etiquetas.</li>
+        <li>Los <b>3 botones</b>.</li>
+        <li>Un <b>cargador de celular</b> de 5 V y un cable USB-C de datos.</li>
+        <li>Útil: pistola de silicona caliente, para fijar todo al final.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="tecnica">
+  <h2>Los dos empalmes que vas a hacer</h2>
+  <p class="prose">Ya hiciste los dos en la práctica y en el parlante. Lo único nuevo es que ahora son muchos. Pelá 6–8 mm, porque con menos el cable fino no se retuerce bien.</p>
+  <div class="tiny-figs">
+    <figure>
+      <svg viewBox="0 0 300 120" role="img" aria-labelledby="sp1-t">
+        <title id="sp1-t">Empalme en línea de dos cables</title>
+        <line x1="10" y1="40" x2="125" y2="40" stroke="var(--w-sda)" stroke-width="5" stroke-linecap="round"/>
+        <line x1="175" y1="46" x2="290" y2="46" stroke="var(--w-sda)" stroke-width="5" stroke-linecap="round"/>
+        <line x1="115" y1="40" x2="185" y2="46" stroke="#c8793a" stroke-width="3"/>
+        <line x1="115" y1="46" x2="185" y2="40" stroke="#c8793a" stroke-width="3"/>
+        <rect x="200" y="36" width="50" height="14" rx="4" class="tube"/>
+        <text x="150" y="24" text-anchor="middle" class="lbl-s">puntas peladas cruzadas y retorcidas</text>
+        <text x="225" y="72" text-anchor="middle" class="lbl-s">termo esperando</text>
+        <line x1="10" y1="100" x2="290" y2="100" stroke="var(--w-sda)" stroke-width="5" stroke-linecap="round"/>
+        <rect x="120" y="93" width="60" height="14" rx="4" class="tube"/>
+        <text x="150" y="86" text-anchor="middle" class="lbl-s">soldado y tapado</text>
+      </svg>
+      <figcaption><b>En línea, para unir dos cables.</b> Superponé las puntas peladas, una hacia cada lado, y retorcelas juntas. Soldá, esperá 30 s y deslizá el termo encima.</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 300 120" role="img" aria-labelledby="sp2-t">
+        <title id="sp2-t">Empalme de varios cables juntos</title>
+        <line x1="10" y1="30" x2="170" y2="56" stroke="var(--w-gnd)" stroke-width="5" stroke-linecap="round"/>
+        <line x1="10" y1="56" x2="170" y2="60" stroke="var(--w-gnd)" stroke-width="5" stroke-linecap="round"/>
+        <line x1="10" y1="82" x2="170" y2="64" stroke="var(--w-gnd)" stroke-width="5" stroke-linecap="round"/>
+        <line x1="10" y1="106" x2="170" y2="68" stroke="var(--w-gnd)" stroke-width="5" stroke-linecap="round"/>
+        <line x1="10" y1="30" x2="170" y2="56" stroke="var(--wire-edge)" stroke-width="1"/>
+        <path d="M168 54 L205 60 L168 70 Z" fill="#c8793a"/>
+        <circle cx="200" cy="61" r="7" class="dot"/>
+        <rect x="215" y="50" width="70" height="22" rx="6" class="tube"/>
+        <text x="250" y="96" text-anchor="middle" class="lbl-s">termo grueso o cinta</text>
+        <text x="186" y="36" text-anchor="middle" class="lbl-s">todas para el mismo lado</text>
+      </svg>
+      <figcaption><b>En cola, para tres o cuatro cables.</b> Todas las puntas mirando para el mismo lado, retorcidas juntas. Soldá, cortá la punta a 5 mm y tapala con termo de 5–6 mm o con cinta.</figcaption>
+    </figure>
+  </div>
+  <div class="callout info">
+    <strong>Cómo saber si un empalme quedó bien</strong>
+    <p>Meté la punta macho de un cable sobrante en cada hembra. Así las puntas del multímetro tienen dónde apoyarse. En continuidad, de hembra a hembra del mismo cable, tiene que pitar. Después tirá suave del empalme: no se tiene que mover.</p>
+  </div>
+</section>
+
+<section id="agujero">
+  <h2>Cable directo al agujero</h2>
+  <p class="prose">La hembra solo hace falta donde la pieza ya tiene pines, como la SuperMini. Si la pieza tiene el agujero de cobre libre, el cable se suelda ahí directo. Queda más firme y más plano que una hembra.</p>
+  <div class="two">
+    <figure style="margin:0">
+      <div class="fig">
+        <svg viewBox="0 0 340 210" role="img" aria-labelledby="hole-t hole-d" style="min-width:0">
+          <title id="hole-t">Cable soldado en un agujero, visto de costado</title>
+          <desc id="hole-d">El cable entra por arriba hasta que el aislante toca la placa. Abajo, el estaño forma un volcán alrededor del cable, y lo que sobra se corta al ras.</desc>
+          <rect x="20" y="96" width="300" height="16" rx="2" fill="var(--pcb)"/>
+          <rect x="150" y="96" width="20" height="16" fill="#a8652f"/>
+          <rect x="138" y="92" width="44" height="4" rx="1" fill="#c8793a"/>
+          <rect x="138" y="112" width="44" height="4" rx="1" fill="#c8793a"/>
+          <line x1="160" y1="92" x2="160" y2="146" stroke="#c8793a" stroke-width="4"/>
+          <line x1="160" y1="12" x2="160" y2="90" stroke="var(--wire-edge)" stroke-width="11" stroke-linecap="round"/>
+          <line x1="160" y1="12" x2="160" y2="90" stroke="var(--w-sda)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M136 116 Q150 117 155 128 L160 136 L165 128 Q170 117 184 116 Z" fill="#c9ced3" stroke="var(--wire-edge)" stroke-width="1"/>
+          <line x1="128" y1="138" x2="192" y2="138" stroke="var(--danger)" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <text x="148" y="42" text-anchor="end" class="lbl">entra por este lado</text>
+          <text x="148" y="58" text-anchor="end" class="lbl-s">hasta que el aislante toca la placa</text>
+          <text x="30" y="88" class="lbl-s">placa</text>
+          <text x="196" y="130" class="lbl">soldás de este lado</text>
+          <text x="196" y="146" class="lbl-s">el estaño forma un volcán</text>
+          <text x="124" y="142" text-anchor="end" class="lbl-s" fill="var(--danger)" style="fill:var(--danger)">cortás acá</text>
+          <text x="170" y="190" text-anchor="middle" class="lbl-s">pelado: 3 mm y estañado antes</text>
+        </svg>
+      </div>
+      <figcaption>Es el mismo punto que un pin. La diferencia es que el pin lo reemplaza la punta del cable.</figcaption>
+    </figure>
+    <div class="card">
+      <h3>Paso a paso</h3>
+      <ol>
+        <li><b>Pelá 3 mm.</b> Si pelás más, queda cobre al aire que puede tocar el agujero de al lado.</li>
+        <li><b>Estañá la punta antes.</b> Retorcé los hilitos y dales estaño: queda rígida, como una aguja, y entra sin que se abran los hilos.</li>
+        <li><b>Metela por un lado</b> hasta que el aislante toque la placa. La punta asoma del otro lado.</li>
+        <li><b>Sujetá el cable</b> con cinta de papel o la tercera mano, para que no se mueva.</li>
+        <li><b>Soldá del lado donde asoma la punta.</b> El soldador toca el cobre del agujero y el cable a la vez, 1–2 s. El estaño, del lado contrario. Sacás primero el estaño y después el soldador.</li>
+        <li><b>Mirá que quede un volcán</b> que cubre todo el cobre del agujero. El estaño se mete en el agujero solo.</li>
+        <li><b>Cortá lo que sobra</b> al ras del volcán, con el alicate de corte.</li>
+      </ol>
+    </div>
+  </div>
+  <ul class="rules">
+    <li><span class="tag info">Pantalla</span><b>El cable entra por atrás y soldás adelante,</b> en la franja de agujeros, como con los pines.<span class="why">Así el cable sale por atrás y no tapa el vidrio. Acercá el soldador desde afuera y no toques el vidrio ni la cinta flex.</span></li>
+    <li><span class="tag warn">Cuidado</span><b>El cable se dobla justo en el punto soldado.</b><span class="why">Con el tiempo se puede cortar ahí. Cuando todo ande, poné una gota de silicona caliente donde el cable sale de la placa.</span></li>
+    <li><span class="tag info">Ojo</span><b>Sin hembra, la unión es fija.</b><span class="why">Para cambiar el módulo hay que desoldar. Por eso conviene probar antes en la protoboard.</span></li>
+  </ul>
+  <div class="callout ok">
+    <strong>Si la pantalla nueva vino sin pines</strong>
+    <p>Soldá en cada agujero la <b>mitad macho</b> de un dupont cortado, con su etiqueta. El macho entra en la protoboard para la prueba de la etapa 0. En la etapa 2 cortás el macho y empalmás ese cable con la hembra que va a la SuperMini. Te ahorrás la tira de pines y un empalme por cable. Lo mismo sirve para el DY-SV17F si vino con los pines sueltos.</p>
+  </div>
+</section>
+
+<section id="protoboard">
+  <h2>Esquema de la protoboard</h2>
+  <p class="prose">Todo conectado para la prueba de la etapa 0, sin sonido. La SuperMini y los botones van clavados en la protoboard. La pantalla queda afuera, unida con cables. La protoboard va con el número 1 a la izquierda y la línea <b>a</b> cerca tuyo, como en la guía de armado.</p>
+  <p class="scroll-hint">Deslizá el dibujo hacia los costados →</p>
+  <figure>
+    <div class="fig">
+      <svg id="bb" viewBox="0 250 830 650" role="img" aria-labelledby="bb-title bb-desc">
+        <title id="bb-title">Esquema completo de la protoboard, sin sonido</title>
+        <desc id="bb-desc">SuperMini en las líneas c y g, del número 4 al 11, con el USB-C a la izquierda. j5 al riel menos de arriba y j6 al riel más de arriba. Los rieles de arriba y de abajo se unen en el número 30. Botones A, B y C en g14 y g16, g18 y g20, g22 y g24, con cables de i8, i10 e i11 y su otra pata al riel menos de arriba desde j16, j20 y j24. Abajo, afuera, la pantalla: GND al riel menos de abajo, VCC al riel más de abajo, SCL a a5, SDA a a6, RES a a10, DC a a4 y BLK a a11.</desc>
+      </svg>
+    </div>
+    <figcaption>Los cuadraditos negros son las puntas macho de los cables. Si tu pantalla tiene CS, va al riel − de abajo.</figcaption>
+  </figure>
+
+  <h3>Todas las conexiones</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Parte</th><th>Desde</th><th>Hasta</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="5">Placa y rieles</td><td>SuperMini</td><td>pines en <span class="pin">c4</span>–<span class="pin">c11</span> y <span class="pin">g4</span>–<span class="pin">g11</span>, USB-C a la izquierda</td></tr>
+        <tr><td><span class="pin">j5</span> (G)</td><td>riel − de arriba</td></tr>
+        <tr><td><span class="pin">j6</span> (3V3)</td><td>riel + de arriba</td></tr>
+        <tr><td>riel − de arriba</td><td>riel − de abajo, en el número 30</td></tr>
+        <tr><td>riel + de arriba</td><td>riel + de abajo, en el número 30</td></tr>
+        <tr><td rowspan="8">Pantalla</td><td>GND</td><td>riel − de abajo</td></tr>
+        <tr><td>VCC</td><td>riel + de abajo (3V3), nunca al 5V</td></tr>
+        <tr><td>SCL</td><td><span class="pin">a5</span> (GPIO6)</td></tr>
+        <tr><td>SDA</td><td><span class="pin">a6</span> (GPIO7)</td></tr>
+        <tr><td>RES</td><td><span class="pin">a10</span> (GPIO20)</td></tr>
+        <tr><td>DC</td><td><span class="pin">a4</span> (GPIO5)</td></tr>
+        <tr><td>BLK</td><td><span class="pin">a11</span> (GPIO21)</td></tr>
+        <tr><td>CS, si tiene</td><td>riel − de abajo</td></tr>
+        <tr><td rowspan="5">Botones</td><td>A</td><td>patas en <span class="pin">g14</span> y <span class="pin">g16</span></td></tr>
+        <tr><td>B</td><td>patas en <span class="pin">g18</span> y <span class="pin">g20</span></td></tr>
+        <tr><td>C</td><td>patas en <span class="pin">g22</span> y <span class="pin">g24</span></td></tr>
+        <tr><td><span class="pin">i8</span>, <span class="pin">i10</span>, <span class="pin">i11</span></td><td><span class="pin">i14</span>, <span class="pin">i18</span>, <span class="pin">i22</span>: GPIO3, 1 y 0 a una pata de A, B y C</td></tr>
+        <tr><td><span class="pin">j16</span>, <span class="pin">j20</span>, <span class="pin">j24</span></td><td>riel − de arriba: la otra pata de cada botón</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">Si un botón no entra con las patas a dos números de distancia, usá tres (por ejemplo g14 y g17) y mové su cable de tierra al número de la pata nueva (j17).</p>
+</section>
+
+<section id="e0">
+  <div class="stage-head"><h2>0 · Probar en la protoboard</h2><span class="count" data-count="e0"></span></div>
+  <p class="prose">Es la etapa más importante del día. En la protoboard, un cable mal puesto se arregla en un minuto. Soldado, lleva una hora. Si algo no anda acá, no sigas: mandame una foto y lo resolvemos antes de cortar cables.</p>
+  <ul class="todo">
+    <li><input type="checkbox" id="e0-1"><label for="e0-1" class="what">Leé los nombres de los pines de la <b>pantalla nueva</b> y sacales una foto. Si no trae pines, soldá un cable con macho en cada agujero, como en <a href="#agujero">Cable directo al agujero</a>. También podés soldarle la tira de pines, como en la <a href="soldadura.html" target="_blank" rel="noopener">sesión 3 de soldadura</a>.<span class="hint">Si la pantalla vieja dejó de andar y no sabés por qué, contame antes de enchufar la nueva, así no se repite.</span></label></li>
+    <li><input type="checkbox" id="e0-3"><label for="e0-3" class="what">Armá la protoboard con el <a href="#protoboard">esquema</a>, por partes: placa y rieles, pantalla y botones. Medí con el multímetro al terminar cada parte.<span class="hint">Entre el riel + y el riel − no tiene que quedar pitando.</span></label></li>
+    <li><input type="checkbox" id="e0-4"><label for="e0-4" class="what">Enchufá a la PC y cargá el programa: <code>cd firmware</code> y <code>cargo run --release</code>.<span class="hint">Tenés que ver la casa con el mono.</span></label></li>
+    <li><input type="checkbox" id="e0-5"><label for="e0-5" class="what">Tocá A, B y C, uno por vez. El mono reacciona.</label></li>
+    <li><input type="checkbox" id="e0-6"><label for="e0-6" class="what">Mantené B apretado. La terminal dice <code>reloj: 09:00</code>.</label></li>
+    <li><input type="checkbox" id="e0-7"><label for="e0-7" class="what">Cortá con Ctrl+C, desenchufá, esperá 5 s y volvé a correr el programa. La terminal dice <code>personaje guardado</code>.</label></li>
+  </ul>
+  <p class="check"><b>Listo cuando</b> funcionan las cuatro cosas: imagen, los tres botones, la hora y el guardado.</p>
+</section>
+
+<section id="placa">
+  <h2>Versión con placa verde</h2>
+  <p class="prose">En vez del atado de cables, todo se suelda en una placa perforada de islas. La SuperMini va soldada directo con sus pines, y de la placa salen los cables a la pantalla y a los botones. Si elegís esta versión, <b>reemplaza las etapas 1, 2 y 3</b>. Hacé primero la etapa 0 y, cuando termines acá, pasá a la <a href="#e5">etapa 5</a>.</p>
+  <div class="callout warn">
+    <strong>Corrección: la tira macho no hace falta</strong>
+    <p>Te había dicho de soldar una tira macho para enchufar los cables de la pantalla. No funciona: la pantalla también tiene pines macho, y tus cables son macho–hembra. Lo que va es <b>la hembra en la pantalla, como en la protoboard, y la otra punta del cable soldada directo en la placa</b>.</p>
+    <p>Así, las hembras de los mismos cables son tus conectores: la pantalla se desenchufa cuando quieras. La SuperMini no necesita hembras, porque se programa por el USB-C y nunca hace falta sacarla.</p>
+  </div>
+
+  <div class="two">
+    <div class="card">
+      <h3>Material</h3>
+      <ul>
+        <li>Tu placa perforada <b>de islas</b>, de 14 × 25 agujeros: números del 1 al 14 y letras de la A a la Y. El circuito usa las columnas 1 a 11 y las filas A a Q. De la R a la Y queda libre para el sonido.</li>
+        <li><b>12 cables macho–hembra</b>: 8 para la pantalla y 4 para los botones. Si tu pantalla no tiene CS, son 11.</li>
+        <li><b>8 patas</b> cortadas de tus resistencias de 1 kΩ, para las uniones cortas. Si no te alcanzan, sirven los pines sacados de tu tira macho o el cobre de un dupont pelado entero, retorcido y estañado.</li>
+        <li>Un poco de cable con forro, para 3 uniones largas y la cadena de GND de los botones. Sirven los pedazos que sobran de los dupont.</li>
+        <li>Termocontraíble para las patas de los botones.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Cómo se nombran los agujeros</h3>
+      <p>Como vienen impresos en tu placa: una letra y un número. Poné la placa con el <b>1 a la izquierda</b> y la <b>A arriba</b>. Ese es el lado de arriba, donde va la SuperMini, y su USB-C queda en el borde izquierdo, el largo.</p>
+      <p>Al dar vuelta la placa para soldar, todo se ve al revés, como en un espejo: <b>A1 queda arriba a la derecha</b>. Si de abajo no tiene nada impreso, escribí A1 con fibrón en ese agujero antes de empezar.</p>
+    </div>
+  </div>
+
+  <div class="two" style="margin-top:20px">
+    <figure style="margin:0">
+      <h3 style="margin-top:0">Vista de arriba: dónde va cada cosa</h3>
+      <div class="fig">
+      <svg id="perf-top" viewBox="0 0 460 800" style="min-width:0" role="img" aria-labelledby="pt-title pt-desc">
+        <title id="pt-title">Placa verde vista desde arriba</title>
+        <desc id="pt-desc">La SuperMini ocupa las filas F y L, columnas 1 a 8, con el USB-C sobresaliendo del borde izquierdo. Fila F: 5V, G, 3V3, 4, 3, 2, 1, 0. Fila L: 5, 6, 7, 8, 9, 10, 20, 21. En la fila C, columnas 5 a 8, salen los cables a los botones: A, GND, B y C. En la fila O, columnas 1 a 8, salen los cables a la pantalla: DC, SCL, SDA, VCC, CS, GND, RES y BLK. De la fila R a la Y queda un lugar libre para el sonido.</desc>
+      </svg>
+      </div>
+      <figcaption>Cada cable entra por arriba y se suelda abajo. CS va solo si tu pantalla lo tiene.</figcaption>
+    </figure>
+    <figure style="margin:0">
+      <h3 style="margin-top:0">Vista de abajo: las uniones</h3>
+      <div class="fig">
+      <svg id="perf-bot" viewBox="0 0 460 770" style="min-width:0" role="img" aria-labelledby="pb-title pb-desc">
+        <title id="pb-title">Placa verde vista desde abajo, con las uniones</title>
+        <desc id="pb-desc">Vista espejada. Uniones derechas con patas de resistencia: F5 a C5, F7 a C7, F8 a C8, L1 a O1, L2 a O2, L3 a O3, L7 a O7 y L8 a O8. Cables con forro: F3 a O4 para VCC, F2 a O6 para el GND de la pantalla, F2 a C6 para el GND de los botones. Puente de estaño entre O5 y O6 si la pantalla tiene CS.</desc>
+      </svg>
+      </div>
+      <figcaption>Es la placa dada vuelta, como la vas a tener al soldar: la columna 1 y el USB-C quedan a la derecha. Los cables con forro pueden ir más derechos que en el dibujo; lo único que importa son las dos puntas.</figcaption>
+    </figure>
+  </div>
+  <div class="legend">
+    <span><i class="line" style="background:var(--leg)"></i>pata de resistencia, sin forro</span>
+    <span><i class="line" style="background:var(--w-3v3)"></i><i class="line" style="background:var(--w-gnd)"></i>cable con forro</span>
+    <span><i class="box" style="background:var(--solder)"></i>punto de soldadura</span>
+  </div>
+
+  <h3>Todas las conexiones</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Qué</th><th>Desde</th><th>Hasta</th><th>Con qué</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="3">Botones</td><td><span class="pin">F5</span> (GPIO3)</td><td><span class="pin">C5</span>: cable al botón A</td><td rowspan="3">pata de resistencia</td></tr>
+        <tr><td><span class="pin">F7</span> (GPIO1)</td><td><span class="pin">C7</span>: cable al botón B</td></tr>
+        <tr><td><span class="pin">F8</span> (GPIO0)</td><td><span class="pin">C8</span>: cable al botón C</td></tr>
+        <tr><td>GND botones</td><td><span class="pin">F2</span> (G)</td><td><span class="pin">C6</span>: cable a la cadena de GND</td><td>cable con forro</td></tr>
+        <tr><td rowspan="5">Pantalla, señales</td><td><span class="pin">L1</span> (GPIO5)</td><td><span class="pin">O1</span>: DC</td><td rowspan="5">pata de resistencia</td></tr>
+        <tr><td><span class="pin">L2</span> (GPIO6)</td><td><span class="pin">O2</span>: SCL</td></tr>
+        <tr><td><span class="pin">L3</span> (GPIO7)</td><td><span class="pin">O3</span>: SDA</td></tr>
+        <tr><td><span class="pin">L7</span> (GPIO20)</td><td><span class="pin">O7</span>: RES</td></tr>
+        <tr><td><span class="pin">L8</span> (GPIO21)</td><td><span class="pin">O8</span>: BLK</td></tr>
+        <tr><td rowspan="3">Pantalla, alimentación</td><td><span class="pin">F3</span> (3V3)</td><td><span class="pin">O4</span>: VCC</td><td>cable con forro</td></tr>
+        <tr><td><span class="pin">F2</span> (G)</td><td><span class="pin">O6</span>: GND</td><td>cable con forro</td></tr>
+        <tr><td><span class="pin">O5</span>: CS, si tiene</td><td><span class="pin">O6</span></td><td>puente de estaño</td></tr>
+        <tr><td rowspan="2">Sin conectar</td><td><span class="pin">F1</span> (5V), <span class="pin">L6</span> (10)</td><td colspan="2">libres: son para el sonido</td></tr>
+        <tr><td><span class="pin">F4</span>, <span class="pin">F6</span>, <span class="pin">L4</span>, <span class="pin">L5</span></td><td colspan="2">libres. L4 y L5 son los pines 8 y 9, los de arranque: no pueden tocar nada</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Paso a paso</h3>
+    <ol>
+      <li><b>Ubicá A1 en los dos lados</b> de la placa, como se explica arriba. Si de abajo no está impreso, marcalo con fibrón.</li>
+      <li><b>Soldá la SuperMini.</b> Sus pines van en <span class="pin">F1</span>–<span class="pin">F8</span> y <span class="pin">L1</span>–<span class="pin">L8</span>, con el USB-C sobresaliendo por el borde de la columna 1. Antes de soldar, confirmá que <b>G caiga en F2</b>. Soldá primero dos esquinas, F1 y L8. Fijate que esté apoyada y derecha, y soldá los otros 14 pines, también los libres.</li>
+      <li><b>Prepará los cables.</b> Cortá cada uno al largo que necesitás, dejando la <b>hembra</b>, y sumale 4 cm. Si todavía no sabés el largo, dejalos de 12 cm. Rotulá cada uno con cinta: DC, SCL, SDA, VCC, CS, GND, RES y BLK para la pantalla, y A, GND, B y C para los botones.</li>
+      <li><b>Soldá los cables en la placa.</b> Pelá 3 mm, estañá la punta y metela desde arriba hasta que el forro toque la placa. Van en <span class="pin">C5</span>–<span class="pin">C8</span> los de los botones y en <span class="pin">O1</span>–<span class="pin">O8</span> los de la pantalla. El de CS, en O5, solo si tu pantalla lo tiene. Es la misma técnica de <a href="#agujero">Cable directo al agujero</a>.</li>
+      <li><b>Hacé las 8 uniones cortas con patas de resistencia.</b> Apoyá la pata sobre las islas, del pin al cable, y soldala en las dos puntas. Si querés que quede más firme, soldala también en las islas del medio. Cortá lo que sobre.</li>
+      <li><b>Hacé las 3 uniones con forro:</b> F3 a O4 (VCC), F2 a O6 (GND de la pantalla) y F2 a C6 (GND de los botones). Pelá 3 mm, estañá, apoyá la punta contra el pin que asoma y soldá.</li>
+      <li><b>Si tu pantalla tiene CS,</b> uní O5 con O6 con un puente de estaño.</li>
+      <li><b>Revisá con el tester en continuidad, sin USB:</b>
+        <ul>
+          <li>F2 (G) contra F3 (3V3) y contra F1 (5V): <b>no tiene que pitar</b>. Si pita apenas un instante y se calla, está bien: son los capacitores de la placa.</li>
+          <li>Cada pin de la SuperMini contra el de al lado: no tiene que pitar. Fijate bien en L4 y L5.</li>
+          <li>Cada unión de la tabla, desde el pin hasta la <b>hembra</b> del cable: tiene que pitar. Para medir la hembra, metele la punta macho de un cable sobrante.</li>
+        </ul>
+      </li>
+      <li><b>Primera prueba.</b> Enchufá las hembras en la pantalla, cada una en su nombre, y conectá el USB. Tiene que aparecer el mono. Para probar los botones antes de soldarlos, meté las patas de una resistencia de 1 kΩ en la hembra de GND y en la de A, B o C.</li>
+      <li><b>Soldá los botones.</b> Cortá las hembras de A, B, C y GND. Soldá A, B y C a una pata de cada botón. GND va a la otra pata de A, y de ahí un cable corto a B y otro a C, en cadena, como en la <a href="#e3">etapa 3</a>. Poné el termocontraíble antes de soldar.</li>
+      <li><b>Seguí con la <a href="#e5">etapa 5</a></b>, la prueba final.</li>
+    </ol>
+  </div>
+  <div class="callout info">
+    <strong>En la caja</strong>
+    <p>Atornillá la placa al fondo con separadores de 5 mm, o con tornillos y una tuerca de más como separador. Así las soldaduras de abajo no tocan la madera. El borde con el USB-C va contra el agujero del cable. Medí su altura con la placa ya soldada, antes de hacer el agujero.</p>
+  </div>
+</section>
+
+<section id="e1">
+  <div class="stage-head"><h2>1 · Preparar</h2><span class="count" data-count="e1"></span></div>
+  <p class="prose">Los largos que cortás hoy deciden cómo queda la caja. Por eso primero acomodás las piezas como van a ir adentro.</p>
+  <p class="muted">Si armás con la <a href="#placa">placa verde</a>, las etapas 1, 2 y 3 no van: esa sección las reemplaza.</p>
+  <ul class="todo">
+    <li><input type="checkbox" id="e1-1"><label for="e1-1" class="what"><b>Comprobá que tus dupont sean de cobre.</b> Cortá uno por la mitad, pelá 6 mm y estañalo.<span class="hint">Si el estaño se chupa y queda plateado parejo en 2 s, sirven. Si hace bolitas y no se pega, son de aluminio: frená y avisame. Adentro hay que ver cobre o hilos plateados que toman estaño.</span></label></li>
+    <li><input type="checkbox" id="e1-2"><label for="e1-2" class="what">Abrí el modelo 3D del <a href="carcasa.html" target="_blank" rel="noopener">mini arcade</a> y tocá “Ver por dentro”. La pantalla queda arriba, atrás de la ventana. Los botones van en el panel de adelante y la SuperMini atrás, sobre su pilar.<span class="hint">El USB-C de la SuperMini mira hacia la tapa de atrás, porque ahí va el agujero del cable.</span></label></li>
+    <li><input type="checkbox" id="e1-3"><label for="e1-3" class="what">Copiá en un papel la tabla de <a href="#caja">Largos para el arcade</a>. Ya incluye unos 4 cm de sobra en cada cable.<span class="hint">Si cambiaste las medidas de la carcasa, medí cada recorrido con un hilo y sumale 4 cm. Que sobre no molesta: se dobla y se ata. Que falte obliga a otro empalme.</span></label></li>
+    <li><input type="checkbox" id="e1-4"><label for="e1-4" class="what">Sacá la SuperMini de la protoboard tirando parejo de los dos lados. Dejá el resto armado en la protoboard por ahora: te sirve de referencia.</label></li>
+    <li><input type="checkbox" id="e1-5"><label for="e1-5" class="what">Para ubicar los pines desde abajo, poné la SuperMini como estaba: USB-C a la izquierda y chips arriba. La fila de atrás es <span class="pin">5V G 3V3 4 3 2 1 0</span>. La de adelante, <span class="pin">5 6 7 8 9 10 20 21</span>.<span class="hint">Confirmalo con lo impreso en tu placa. Los pines 4, 2, 8 y 9 quedan libres.</span></label></li>
+  </ul>
+</section>
+
+<section id="e2">
+  <div class="stage-head"><h2>2 · Pantalla y GND principal</h2><span class="count" data-count="e2"></span></div>
+  <p class="prose">Para cada fila de la tabla cortás dos cables: uno con la hembra para la SuperMini y otro con la hembra para la pantalla. Los unís con un empalme en línea. Cada mitad se corta con el largo de la <a href="#caja">tabla de largos</a>, medido desde la punta de la hembra. Ese largo ya incluye lo que pelás.</p>
+  <p class="prose">En la SuperMini, 5 de estos cables salen de una columna (5, 6, 7, 20 y 21) y 3V3 sale de la otra, al lado de G. Mirá el <a href="#mapa">mapa de la SuperMini</a>.</p>
+  <p class="prose">En el arcade, debajo de la SuperMini va el pilar, así que <b>no pases cables por debajo de la placa</b>. Cada columna sube por su costado del pilar. Cerca de la pantalla, los dos grupos se cruzan en el aire, y es normal.</p>
+  <p class="prose muted">Si en la pantalla soldaste cables directo al agujero, ese cable reemplaza a la mitad del lado de la pantalla: cortale el macho y empalmalo con la hembra de la SuperMini.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Hembra en la SuperMini</th><th>Hembra en la pantalla</th><th>Otros nombres en la pantalla</th></tr></thead>
+      <tbody>
+        <tr><td><span class="sw" style="background:var(--w-3v3)"></span><b>3V3</b>, nunca 5V</td><td><b>VCC</b></td><td>VDD, 3.3V</td></tr>
+        <tr><td><span class="sw" style="background:var(--w-scl)"></span><b>6</b></td><td><b>SCL</b></td><td>SCK, CLK</td></tr>
+        <tr><td><span class="sw" style="background:var(--w-sda)"></span><b>7</b></td><td><b>SDA</b></td><td>MOSI, DIN</td></tr>
+        <tr><td><span class="sw" style="background:var(--w-res)"></span><b>20</b></td><td><b>RES</b></td><td>RST</td></tr>
+        <tr><td><span class="sw" style="background:var(--w-dc)"></span><b>5</b></td><td><b>DC</b></td><td>RS, A0</td></tr>
+        <tr><td><span class="sw" style="background:var(--w-blk)"></span><b>21</b></td><td><b>BLK</b></td><td>BL, LED</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>El GND principal</h3>
+  <p class="prose">La SuperMini tiene un solo pin <span class="pin">G</span>, y de ahí sale todo el GND. Lo armás ahora, con los tres tramos de una vez, aunque los botones y el sonido vengan después.</p>
+  <ul class="todo">
+    <li><input type="checkbox" id="e2-1"><label for="e2-1" class="what">Hacé los <b>6 empalmes de la tabla</b>, de a uno: etiquetás, pasás el termo, pelás, retorcés, soldás y tapás.<span class="hint">Probá cada uno con continuidad de hembra a hembra apenas lo terminás.</span></label></li>
+    <li><input type="checkbox" id="e2-2"><label for="e2-2" class="what">Cortá un cable con hembra para <span class="pin">G</span>, de unos <b>5 cm</b>. Es la entrada del GND principal.</label></li>
+    <li><input type="checkbox" id="e2-3"><label for="e2-3" class="what">Prepará tres tramos con cable de las mitades macho, cada uno con su etiqueta: <b>“GND pantalla”</b>, <b>“GND botones”</b> y <b>“GND sonido”</b>. Para el arcade, de 3, 10 y 8 cm.</label></li>
+    <li><input type="checkbox" id="e2-4"><label for="e2-4" class="what">Uní los cuatro en un <b>empalme en cola</b>: la hembra de G y los tres tramos. Tapalo con termo grueso o cinta.</label></li>
+    <li><input type="checkbox" id="e2-5"><label for="e2-5" class="what">En la otra punta de “GND pantalla”, hacé otro empalme en cola con la hembra para <b>GND</b> de la pantalla. Si tu pantalla tiene <b>CS</b>, sumá también una hembra para CS.<span class="hint">CS a GND deja la pantalla siempre activa.</span></label></li>
+    <li><input type="checkbox" id="e2-6"><label for="e2-6" class="what">Tapá con cinta las puntas libres de “GND botones” y “GND sonido”. La primera la usás en la etapa 3. La segunda queda de reserva para el sonido, dentro de la caja.</label></li>
+  </ul>
+  <h3>Probar</h3>
+  <ul class="todo">
+    <li><input type="checkbox" id="e2-7"><label for="e2-7" class="what">Enchufá las hembras: 7 en la SuperMini (3V3, G, 5, 6, 7, 20, 21) y 7 u 8 en la pantalla. Revisá cada etiqueta contra el pin.</label></li>
+    <li><input type="checkbox" id="e2-8"><label for="e2-8" class="what">Medí continuidad entre los pines <span class="pin">3V3</span> y <span class="pin">G</span> de la SuperMini. Vale un pitido cortito. Si pita sin parar, no enchufes.</label></li>
+    <li><input type="checkbox" id="e2-9"><label for="e2-9" class="what">Enchufá a la PC y corré <code>cargo run --release</code>. Aparece el mono.<span class="hint">Sin botones ni sonido el programa anda igual.</span></label></li>
+    <li><input type="checkbox" id="e2-10"><label for="e2-10" class="what">Ctrl+C y desenchufá antes de seguir.</label></li>
+  </ul>
+  <p class="check"><b>Listo cuando</b> ves al mono con la pantalla conectada solo por el arnés.</p>
+</section>
+
+<section id="e3">
+  <div class="stage-head"><h2>3 · Botones</h2><span class="count" data-count="e3"></span></div>
+  <p class="prose">Los botones no tienen pines para una hembra: el cable va soldado a su pata. Tus botones tienen dos patas y da igual cuál es cuál. Una va a su GPIO y la otra a GND.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Botón</th><th>Hembra en la SuperMini</th><th>La otra pata</th></tr></thead>
+      <tbody>
+        <tr><td><b>A</b>, izquierda</td><td><span class="sw" style="background:var(--w-btn)"></span><b>3</b></td><td>GND, en cadena</td></tr>
+        <tr><td><b>B</b>, medio</td><td><span class="sw" style="background:var(--w-btn)"></span><b>1</b></td><td>GND, en cadena</td></tr>
+        <tr><td><b>C</b>, derecha</td><td><span class="sw" style="background:var(--w-btn)"></span><b>0</b></td><td>GND, en cadena</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="todo">
+    <li><input type="checkbox" id="e3-1"><label for="e3-1" class="what">En el arcade, los botones quedan a <b>2 cm</b> entre centros. Cortá los dos tramos de la cadena, de A a B y de B a C, de <b>4 cm</b> cada uno.</label></li>
+    <li><input type="checkbox" id="e3-2"><label for="e3-2" class="what">Estañá las 6 patas, de a una, con el botón sujeto con cinta o la tercera mano.<span class="hint">1–2 segundos por pata. El plástico del botón se derrite si insistís.</span></label></li>
+    <li><input type="checkbox" id="e3-3"><label for="e3-3" class="what">Cortá tres cables con hembra de <b>12 cm</b> para <span class="pin">3</span>, <span class="pin">1</span> y <span class="pin">0</span>. Etiquetalos A, B y C. Pelá 5 mm, estañá y soldá cada uno a una pata de su botón.</label></li>
+    <li><input type="checkbox" id="e3-4"><label for="e3-4" class="what">Soldá “GND botones” a la otra pata de A. Desde esa misma pata, un tramo a la pata libre de B, y desde B, otro a la de C.<span class="hint">En las patas de A y B quedan dos cables: estañalos juntos.</span></label></li>
+    <li><input type="checkbox" id="e3-5"><label for="e3-5" class="what">Tapá cada pata con un pedacito de termo o una gota de silicona. Así no tocan nada en la caja.</label></li>
+    <li><input type="checkbox" id="e3-6"><label for="e3-6" class="what">Probá con continuidad: hembra A contra la hembra de G. Pita <b>solo</b> con A apretado. Lo mismo con B y C.</label></li>
+    <li><input type="checkbox" id="e3-7"><label for="e3-7" class="what">Enchufá las tres hembras, corré el programa y tocá cada botón. El mono reacciona. Mantener B adelanta el reloj.</label></li>
+  </ul>
+  <p class="check"><b>Listo cuando</b> cada botón responde y ninguno parece “siempre apretado”.</p>
+</section>
+
+<section id="e4">
+  <div class="stage-head"><h2>Más adelante · Sonido</h2></div>
+  <div class="callout info">
+    <strong>Hoy no lo hacés</strong>
+    <p>El aparato funciona sin sonido, y el programa no cambia. Cuando consigas una resistencia de <b>10 kΩ</b> (sirve cualquiera entre 4,7 y 47 kΩ), seguí estos pasos con todo desenchufado.</p>
+  </div>
+  <div class="two">
+    <div class="card">
+      <h3>Qué vas a necesitar</h3>
+      <ul>
+        <li>El DY-SV17F con <code>00001.mp3</code> copiado. Se copia por su micro-USB, con el módulo <b>solo</b>.</li>
+        <li>El parlante y la resistencia de 10 kΩ.</li>
+        <li>Dos hembras para los pines <b>5V</b> y <b>10</b> de la SuperMini, que hoy quedan libres.</li>
+        <li>El tramo “GND sonido” que dejaste tapado en el empalme principal.</li>
+        <li>Opcional: un condensador de 220–470 µF y 10 V, si el sonido reinicia la placa.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Tu módulo</h3>
+      <p>No tiene patas y tiene dos filas de 9 agujeros. En una: SPK+, SPK−, DACL, DACR, V33, <b>V5</b>, CON3/BUSY, CON2 y CON1. En la otra: TX/IO0, RX/IO1, IO2 a IO7 y GND. Los cables van soldados directo en los agujeros, como en <a href="#agujero">Cable directo al agujero</a>.</p>
+      <p class="muted">Ojo con V5: está entre V33 y CON3.</p>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Agujero del DY-SV17F</th><th>Se une con</th><th>Cómo</th></tr></thead>
+      <tbody>
+        <tr><td><span class="sw" style="background:var(--w-5v)"></span><b>V5</b></td><td>hembra en SuperMini <b>5V</b></td><td>Empalme en línea. Es el único cable de 5V.</td></tr>
+        <tr><td><span class="sw" style="background:var(--w-uart)"></span><b>RX/IO1</b></td><td>hembra en SuperMini <b>10</b></td><td>Empalme en línea.</td></tr>
+        <tr><td><span class="sw" style="background:var(--w-gnd)"></span><b>GND</b>, <b>CON1</b>, <b>CON2</b></td><td>tramo “GND sonido”</td><td>Un cable en cada agujero, y los tres con el tramo en un empalme en cola.</td></tr>
+        <tr><td><span class="sw" style="background:var(--w-con)"></span><b>CON3/BUSY</b> y <b>V33</b></td><td>entre sí, con la resistencia</td><td>Un cable corto en cada agujero y la resistencia soldada entre las dos puntas.</td></tr>
+        <tr><td><span class="sw" style="background:var(--w-spk)"></span><b>SPK+</b> y <b>SPK−</b></td><td>parlante</td><td>Soldado directo: rojo al +, negro al −.</td></tr>
+        <tr><td>TX/IO0, DACL, DACR, IO2 a IO7</td><td>nada</td><td>No se usan.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Para probarlo</h3>
+    <ol>
+      <li>Medí continuidad entre los pines <span class="pin">5V</span> y <span class="pin">G</span> de la SuperMini. Vale un pitido cortito. Si pita sin parar, no enchufes.</li>
+      <li>Corré el programa y tocá un botón: suena el pitido.</li>
+      <li>Si la placa se reinicia al sonar, poné el condensador en los empalmes: la pata larga en el de 5V y la de la franja en el de “GND sonido”.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="e5">
+  <div class="stage-head"><h2>5 · Prueba final</h2><span class="count" data-count="e5"></span></div>
+  <ul class="todo">
+    <li><input type="checkbox" id="e5-1"><label for="e5-1" class="what">Desenchufá de la PC y enchufá al <b>cargador de celular</b>. Arranca solo, sin la terminal.</label></li>
+    <li><input type="checkbox" id="e5-2"><label for="e5-2" class="what">Poné la hora: cada vez que mantenés B, suma una hora. Arranca a las 8.</label></li>
+    <li><input type="checkbox" id="e5-3"><label for="e5-3" class="what">Tocá un botón, desenchufá, esperá y volvé a enchufar. El mono es el mismo y la hora sigue donde estaba.<span class="hint">El reloj se frena mientras está desenchufado. Se pierden como mucho 5 minutos.</span></label></li>
+    <li><input type="checkbox" id="e5-4"><label for="e5-4" class="what">Dejalo andando 15 minutos y tocá con el dorso del dedo la SuperMini y la pantalla. Tibio es normal.</label></li>
+  </ul>
+  <p class="check"><b>Listo cuando</b> anda con el cargador, guarda al desenchufar y nada calienta. El arnés queda listo para la caja.</p>
+</section>
+
+<section id="caja">
+  <h2>Largos para el mini arcade</h2>
+  <p class="prose">Calculados con las medidas de ejemplo de la <a href="carcasa.html" target="_blank" rel="noopener">carcasa</a>: 80 × 95 mm, pantalla inclinada a 28° y pantalla de 28 × 39 mm. Si cargaste otras medidas en esa página, avisame y los recalculo.</p>
+  <p class="prose">Cada largo se mide <b>desde la punta de la hembra hasta el corte</b> e incluye lo que pelás. En los cables de la pantalla, una mitad es de 5 cm y la otra de 7, alternadas. Así los empalmes no quedan todos a la misma altura y el atado sale más fino.</p>
+  <div class="two">
+    <div class="card">
+      <h3>Pantalla</h3>
+      <div class="table-wrap" style="margin:0">
+        <table>
+          <thead><tr><th>Cable</th><th>Mitad SuperMini</th><th>Mitad pantalla</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sw" style="background:var(--w-3v3)"></span>3V3 → VCC</td><td>5 cm</td><td>7 cm</td></tr>
+            <tr><td><span class="sw" style="background:var(--w-scl)"></span>6 → SCL</td><td>7 cm</td><td>5 cm</td></tr>
+            <tr><td><span class="sw" style="background:var(--w-sda)"></span>7 → SDA</td><td>5 cm</td><td>7 cm</td></tr>
+            <tr><td><span class="sw" style="background:var(--w-res)"></span>20 → RES</td><td>7 cm</td><td>5 cm</td></tr>
+            <tr><td><span class="sw" style="background:var(--w-dc)"></span>5 → DC</td><td>5 cm</td><td>7 cm</td></tr>
+            <tr><td><span class="sw" style="background:var(--w-blk)"></span>21 → BLK</td><td>7 cm</td><td>5 cm</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted" style="margin-top:10px">Ya empalmado, cada cable mide unos 11 cm de hembra a hembra. El recorrido real es de unos 7 cm: la pantalla queda casi encima de la SuperMini.</p>
+    </div>
+    <div class="card">
+      <h3>GND y botones</h3>
+      <div class="table-wrap" style="margin:0">
+        <table>
+          <thead><tr><th>Tramo</th><th>Largo</th></tr></thead>
+          <tbody>
+            <tr><td>Hembra de <b>G</b>, hasta el empalme principal</td><td>5 cm</td></tr>
+            <tr><td>“GND pantalla”, del empalme principal al de la pantalla</td><td>3 cm</td></tr>
+            <tr><td>Hembra <b>GND</b> de la pantalla (y <b>CS</b>, si tiene)</td><td>6 cm</td></tr>
+            <tr><td>Hembras de <b>3</b>, <b>1</b> y <b>0</b>, hasta la pata del botón</td><td>12 cm</td></tr>
+            <tr><td>“GND botones”, del empalme principal a la pata de A</td><td>10 cm</td></tr>
+            <tr><td>Cadena de A a B y de B a C</td><td>4 cm c/u</td></tr>
+            <tr><td>“GND sonido”, de reserva y tapado con cinta</td><td>8 cm</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted" style="margin-top:10px">Los botones quedan unos 5 cm por delante de la SuperMini y más abajo. Su cable va por el piso, por el costado del pilar.</p>
+    </div>
+  </div>
+  <div class="two" style="margin-top:16px">
+    <div class="card">
+      <h3>Cómo va cada cosa</h3>
+      <ul>
+        <li><b>SuperMini:</b> arriba del pilar, con el USB-C hacia la tapa de atrás. Las dos filas de hembras cuelgan a cada lado del pilar.</li>
+        <li><b>Columnas:</b> vista desde adelante, la columna de 5, 6, 7, 20 y 21 queda a la izquierda, y la de 5V, G, 3V3 y los botones, a la derecha.</li>
+        <li><b>Empalme principal de GND:</b> abajo a la derecha de la SuperMini, colgando al costado del pilar, no debajo de la placa.</li>
+        <li><b>Pantalla:</b> sus hembras apuntan hacia atrás y hacia abajo. Los cables bajan derecho hasta la SuperMini.</li>
+        <li><b>Botones:</b> sus cables cruzan por el piso hacia la columna derecha. El de A es el que más cruza.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Al montar</h3>
+      <ul>
+        <li><b>Enchufá todo antes de pegar la SuperMini al pilar.</b> Con la silicona puesta, ya no llegás a las hembras de adentro.</li>
+        <li><b>Recién cuando todo ande,</b> poné una gota de silicona sobre cada fila de hembras, para que no se suelten con el uso.</li>
+        <li><b>Ataduras:</b> juntá los cables de la pantalla con hilo o cinta, para que no tironeen de los empalmes al cerrar.</li>
+        <li><b>La tapa de atrás va con tornillos,</b> como dice la guía de la carcasa. Así podés agregar el sonido o arreglar un cable sin romper nada.</li>
+        <li><b>Sonido, más adelante:</b> el arcade no tiene un lugar marcado para el DY-SV17F. Cuando lo sumes, vemos dónde entra. El tramo “GND sonido” queda esperando.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="fallas">
+  <h2>Si algo falla</h2>
+  <p class="prose">Desenchufá, sacá las hembras de la etapa que falla y medí cada cable de punta a punta. Casi siempre es un empalme flojo o dos cables cambiados de pin.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Qué pasa</th><th>Qué revisar</th></tr></thead>
+      <tbody>
+        <tr><td>Pantalla negra, sin luz</td><td>3V3 → VCC, BLK y el GND de la pantalla, incluido el empalme principal.</td></tr>
+        <tr><td>Con luz, pero sin imagen</td><td>SCL, SDA, RES y DC: que cada etiqueta esté en su pin. Si hay CS, que vaya a GND.</td></tr>
+        <tr><td>Imagen con rayas</td><td>Cables muy largos o un empalme flojo en SCL o SDA. Mandame una foto: se puede bajar la velocidad en el programa.</td></tr>
+        <tr><td>Un botón no responde</td><td>Su cable y su pata. Si es B o C, el tramo de la cadena que llega a ese botón.</td></tr>
+        <tr><td>Ningún botón responde</td><td>“GND botones” y su unión al empalme principal.</td></tr>
+        <tr><td>Se reinicia solo</td><td>Probá otro cargador, de al menos 1 A, y otro cable USB-C.</td></tr>
+        <tr><td>Algo calienta o huele raro</td><td>Desenchufá ya. Revisá primero que 5V no toque G ni la pantalla.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">Si después de dos intentos no sale, mandame una foto con zoom del empalme o de las hembras enchufadas.</p>
+  <p><button class="reset" id="reset" type="button">Borrar lo tildado</button> <span class="muted" id="reset-note"></span></p>
+</section>
+
+<footer>
+  <p>Guías anteriores: <a href="soldadura.html" target="_blank" rel="noopener">soldadura</a>, <a href="armado.html" target="_blank" rel="noopener">armado en protoboard</a> y <a href="https://github.com/FedeJure/0xMono" target="_blank" rel="noopener">README del proyecto</a>. Corresponde al programa <code>casa</code> de este repo: pantalla en GPIO 5, 6, 7, 20 y 21, botones en 3, 1 y 0. El sonido, cuando lo agregues, va en GPIO10.</p>
+</footer>
+
+</div>
+
+<script>
+(() => {
+  /* ---------- Mapa de la SuperMini ---------- */
+  const NS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs, parent, text) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    parent.appendChild(e);
+    return e;
+  }
+  const v = (n) => `var(--${n})`;
+  function wire(g, d, color) {
+    el('path', { d, class: 'wire-edge' }, g);
+    el('path', { d, class: 'wire', stroke: v(color) }, g);
+  }
+  const female = (g, x, y) => el('rect', { x: x - 6, y: y - 5, width: 12, height: 10, rx: 1.5, class: 'female' }, g);
+  const tube = (g, x, y) => el('rect', { x: x - 13, y: y - 4.5, width: 26, height: 9, rx: 3.5, class: 'tube' }, g);
+  const dot = (g, x, y, r = 5) => el('circle', { cx: x, cy: y, r, class: 'dot' }, g);
+
+  const FILL = { pantalla: 'accent-soft', sonido: 'warn-soft', botones: 'ok-soft', gnd: 'bg' };
+  // [pin, destino, detalle, grupo, color del cable]; null = libre
+  const LEFT = [
+    ['5', 'Pantalla · DC', null, 'pantalla', 'w-dc'],
+    ['6', 'Pantalla · SCL', null, 'pantalla', 'w-scl'],
+    ['7', 'Pantalla · SDA', null, 'pantalla', 'w-sda'],
+    ['8', null, 'libre: no usar'],
+    ['9', null, 'libre: no usar'],
+    ['10', null, 'libre: sonido, después'],
+    ['20', 'Pantalla · RES', null, 'pantalla', 'w-res'],
+    ['21', 'Pantalla · BLK', null, 'pantalla', 'w-blk'],
+  ];
+  const RIGHT = [
+    ['5V', null, 'libre: sonido, después'],
+    ['G', 'GND principal', 'pantalla y botones', 'gnd', 'w-gnd'],
+    ['3V3', 'Pantalla · VCC', 'nunca a 5V', 'pantalla', 'w-3v3'],
+    ['4', null, 'libre'],
+    ['3', 'Botón A', null, 'botones', 'w-btn'],
+    ['2', null, 'libre: no usar'],
+    ['1', 'Botón B', null, 'botones', 'w-btn'],
+    ['0', 'Botón C', null, 'botones', 'w-btn'],
+  ];
+
+  const sm = document.getElementById('map-sm');
+  const gW = el('g', {}, sm), gP = el('g', {}, sm), gM = el('g', {}, sm);
+  const BX = 290, BW = 180, Y0 = 112, STEP = 38;
+  el('rect', { x: BX, y: 40, width: BW, height: 380, rx: 10, fill: v('pcb'), stroke: v('wire-edge') }, gP);
+  el('rect', { x: BX + BW / 2 - 26, y: 28, width: 52, height: 22, rx: 6, fill: v('tube'), stroke: v('wire-edge') }, gP);
+  el('text', { x: BX + BW / 2, y: 20, 'text-anchor': 'middle', class: 'lbl-s' }, gP, 'USB-C');
+  el('text', { x: BX + BW / 2, y: 74, 'text-anchor': 'middle', class: 'pcb-h' }, gP, 'SuperMini');
+  el('text', { x: BX + BW / 2, y: 90, 'text-anchor': 'middle', class: 'pcb-t' }, gP, 'vista de arriba');
+
+  function side(list, left) {
+    list.forEach(([pin, dest, sub, group, color], i) => {
+      const y = Y0 + i * STEP;
+      const px = left ? BX + 14 : BX + BW - 14;
+      el('circle', { cx: px, cy: y, r: 5, fill: '#d4a73a' }, gP);
+      el('text', { x: left ? px + 12 : px - 12, y: y + 4, 'text-anchor': left ? 'start' : 'end', class: 'pcb-t', 'font-weight': 600 }, gP, pin);
+      if (!dest) {
+        el('text', { x: left ? BX - 12 : BX + BW + 12, y: y + 4, 'text-anchor': left ? 'end' : 'start', class: 'lbl-s' }, gM, sub);
+        return;
+      }
+      const fx = left ? BX - 8 : BX + BW + 8;
+      const bx = left ? 20 : 550, bw = 190;
+      wire(gW, `M${fx} ${y} H${left ? bx + bw : bx}`, color);
+      female(gM, fx, y);
+      const h = sub ? 34 : 26;
+      el('rect', { x: bx, y: y - h / 2, width: bw, height: h, rx: 6, fill: v(FILL[group]), stroke: v('line') }, gM);
+      const tx = left ? bx + bw - 10 : bx + 10, anchor = left ? 'end' : 'start';
+      el('text', { x: tx, y: sub ? y - 2 : y + 5, 'text-anchor': anchor, class: 'lbl-b' }, gM, dest);
+      if (sub) el('text', { x: tx, y: y + 12, 'text-anchor': anchor, class: 'lbl-s' }, gM, sub);
+    });
+  }
+  side(LEFT, true);
+  side(RIGHT, false);
+
+  /* ---------- Reparto del GND ---------- */
+  const gg = document.getElementById('map-gnd');
+  const gw = el('g', {}, gg), gm = el('g', {}, gg);
+  const box = (x, y, w, title, sub, fill) => {
+    el('rect', { x, y: y - 20, width: w, height: 40, rx: 6, fill: v(fill), stroke: v('line') }, gm);
+    el('text', { x: x + 10, y: y - 3, class: 'lbl-b' }, gm, title);
+    el('text', { x: x + 10, y: y + 13, class: 'lbl-s' }, gm, sub);
+  };
+  box(20, 110, 150, 'SuperMini · G', 'un cable con hembra', 'bg');
+  wire(gw, 'M182 110 H260', 'w-gnd');
+  female(gm, 182, 110);
+  wire(gw, 'M260 110 C 330 110, 330 40, 400 40 H520', 'w-gnd');
+  wire(gw, 'M260 110 H520', 'w-gnd');
+  wire(gw, 'M260 110 C 330 110, 330 180, 400 180 H520', 'w-gnd');
+  dot(gm, 260, 110, 9);
+  el('text', { x: 260, y: 140, 'text-anchor': 'middle', class: 'lbl-b' }, gm, 'empalme');
+  el('text', { x: 260, y: 155, 'text-anchor': 'middle', class: 'lbl-s' }, gm, 'principal');
+  for (const y of [40, 110, 180]) dot(gm, 520, y, 6);
+  el('text', { x: 440, y: 30, 'text-anchor': 'middle', class: 'lbl-s' }, gm, 'GND pantalla');
+  el('text', { x: 440, y: 100, 'text-anchor': 'middle', class: 'lbl-s' }, gm, 'GND sonido');
+  el('text', { x: 440, y: 170, 'text-anchor': 'middle', class: 'lbl-s' }, gm, 'GND botones');
+  box(530, 40, 222, 'Pantalla · GND', 'y CS, si tu pantalla lo tiene', 'accent-soft');
+  box(530, 110, 222, 'Reserva para el sonido', 'punta tapada con cinta', 'bg');
+  box(530, 180, 222, 'Botones A → B → C', 'en cadena, una pata de cada uno', 'ok-soft');
+
+  /* ---------- Armado completo ---------- */
+  const MONO = 'data:image/png;base64,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';
+  (() => {
+    const svg = document.getElementById('full');
+    const defs = el('defs', {}, svg);
+    el('image', { id: 'mono-img', href: MONO, width: 24, height: 24, preserveAspectRatio: 'none', style: 'image-rendering: pixelated' }, defs);
+    const scaled = (ox, oy) => el('g', { transform: `translate(${ox} ${oy}) scale(5)` }, svg);
+    const T = (g, x, y, s, size, fill, extra) => el('text', Object.assign({ x, y, fill, style: `font-size:${size}px` }, extra || {}), g, s);
+    const W = (g, d, color) => {
+      el('path', { d, fill: 'none', stroke: v('wire-edge'), 'stroke-width': 0.95, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+      el('path', { d, fill: 'none', stroke: v(color), 'stroke-width': 0.6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, g);
+    };
+    const badge = (g, x, y, n) => {
+      el('circle', { cx: x, cy: y, r: 2.4, fill: v('accent'), stroke: v('surface'), 'stroke-width': 0.4 }, g);
+      T(g, x, y + 1.05, String(n), 3, v('surface'), { 'text-anchor': 'middle', 'font-weight': 700 });
+    };
+    const BTN = [['A', 25], ['B', 40], ['C', 55]];
+
+    // ----- De frente -----
+    el('text', { x: 240, y: 48, 'text-anchor': 'middle', class: 'lbl-b' }, svg, 'De frente');
+    el('text', { x: 240, y: 70, 'text-anchor': 'middle', class: 'lbl-s' }, svg, 'medidas de ejemplo: 80 × 125 mm');
+    const a = scaled(40, 90);
+    el('rect', { x: 0, y: 0, width: 80, height: 125, rx: 3, fill: v('mdf'), stroke: v('mdf-edge'), 'stroke-width': 0.4 }, a);
+    for (const [x, y, w] of [[6, 8, 30], [44, 12, 28], [8, 55, 18], [60, 58, 14], [6, 72, 12], [30, 118, 22]]) {
+      el('path', { d: `M${x} ${y} q ${w / 2} -1.2 ${w} 0`, fill: 'none', stroke: v('mdf-edge'), 'stroke-width': 0.2, opacity: 0.55 }, a);
+    }
+    el('rect', { x: 26.5, y: 17.5, width: 27, height: 27, rx: 0.8, fill: v('pcb-tft') }, a);
+    el('use', { href: '#mono-img', x: 28, y: 19 }, a);
+    for (const [n, x] of BTN) {
+      el('circle', { cx: x, cy: 80, r: 3, fill: v('mdf-hole'), opacity: 0.55 }, a);
+      el('circle', { cx: x, cy: 80, r: 2.1, fill: v('btn-body') }, a);
+      el('circle', { cx: x - 0.6, cy: 79.4, r: 0.7, fill: v('tube'), opacity: 0.5 }, a);
+      T(a, x, 89, n, 3.2, v('mdf-hole'), { 'text-anchor': 'middle', 'font-weight': 700 });
+    }
+    el('rect', { x: 37.5, y: 125, width: 5, height: 4.5, rx: 0.8, fill: v('tube'), stroke: v('wire-edge'), 'stroke-width': 0.2 }, a);
+    el('path', { d: 'M40 129.5 V137', stroke: v('plastic'), 'stroke-width': 2, 'stroke-linecap': 'round' }, a);
+    el('text', { x: 255, y: 760, class: 'lbl-s' }, svg, 'cable USB-C al cargador');
+
+    // ----- Por dentro -----
+    el('text', { x: 700, y: 48, 'text-anchor': 'middle', class: 'lbl-b' }, svg, 'Por dentro');
+    el('text', { x: 700, y: 70, 'text-anchor': 'middle', class: 'lbl-s' }, svg, 'como si el frente fuera transparente');
+    const b = scaled(500, 90);
+    const base = el('g', {}, b), under = el('g', {}, b), parts = el('g', {}, b), wires = el('g', {}, b), top = el('g', {}, b);
+    el('rect', { x: 0, y: 0, width: 80, height: 125, rx: 3, fill: v('mdf'), stroke: v('mdf-edge'), 'stroke-width': 0.4 }, base);
+    el('rect', { x: 5, y: 5, width: 70, height: 115, rx: 1, fill: v('mdf-in') }, base);
+
+    // pantalla
+    el('rect', { x: 24, y: 11, width: 32, height: 40, rx: 1, fill: v('pcb-tft') }, parts);
+    el('use', { href: '#mono-img', x: 28, y: 19, opacity: 0.45 }, parts);
+    el('rect', { x: 31.2, y: 12, width: 17.6, height: 2.4, fill: v('plastic'), stroke: v('tube'), 'stroke-width': 0.15 }, parts);
+    const HDR = { GND: 32.4, VCC: 34.94, SCL: 37.48, SDA: 40.02, RES: 42.56, DC: 45.1, BLK: 47.64 };
+    for (const x of Object.values(HDR)) el('rect', { x: x - 0.45, y: 12.75, width: 0.9, height: 0.9, fill: v('gold') }, top);
+    T(parts, 40, 49.2, 'pines de la pantalla arriba, hacia atrás', 1.5, v('pcb-ink'), { 'text-anchor': 'middle', opacity: 0.8 });
+
+    // botones
+    for (const [n, x] of BTN) {
+      el('rect', { x: x - 3, y: 77, width: 6, height: 6, rx: 0.5, fill: v('btn-body') }, parts);
+      el('circle', { cx: x, cy: 80, r: 1.7, fill: v('tube') }, parts);
+      for (const lx of [x - 3.4, x + 3.4]) el('circle', { cx: lx, cy: 80, r: 0.55, fill: v('gold') }, top);
+      T(parts, x, 87, n, 2.4, v('ink'), { 'text-anchor': 'middle', 'font-weight': 700 });
+    }
+
+    // lugar libre para el sonido, más adelante
+    const dash = { fill: 'none', stroke: v('muted'), 'stroke-width': 0.3, 'stroke-dasharray': '1 0.8' };
+    el('rect', Object.assign({ x: 5.8, y: 91.6, width: 23, height: 24.6, rx: 0.8 }, dash), parts);
+    el('circle', Object.assign({ cx: 62, cy: 104, r: 10 }, dash), parts);
+    T(parts, 17.3, 103, 'lugar para', 1.7, v('muted'), { 'text-anchor': 'middle' });
+    T(parts, 17.3, 105.4, 'el sonido', 1.7, v('muted'), { 'text-anchor': 'middle' });
+    T(parts, 62, 104.6, 'parlante, después', 1.6, v('muted'), { 'text-anchor': 'middle' });
+
+    // SuperMini: vista desde los chips, USB-C abajo
+    el('rect', { x: 31, y: 97.5, width: 18, height: 22.5, rx: 0.8, fill: v('pcb'), opacity: 0.92 }, parts);
+    el('rect', { x: 37, y: 100.5, width: 6, height: 6, rx: 0.4, fill: '#0b0d10' }, parts);
+    el('rect', { x: 36, y: 117.2, width: 8, height: 3.4, rx: 0.8, fill: v('tube'), stroke: v('wire-edge'), 'stroke-width': 0.15 }, parts);
+    const SL = ['0', '1', '2', '3', '4', '3V3', 'G', '5V'];
+    const SR = ['21', '20', '10', '9', '8', '7', '6', '5'];
+    const pin = {};
+    SL.forEach((n, i) => { pin[n] = [32.4, 99 + i * 2.54]; });
+    SR.forEach((n, i) => { pin[n] = [47.6, 99 + i * 2.54]; });
+    for (const [n, [x, y]] of Object.entries(pin)) {
+      el('rect', { x: x - 0.45, y: y - 0.45, width: 0.9, height: 0.9, fill: v('gold') }, top);
+      T(top, x < 40 ? x + 1.1 : x - 1.1, y + 0.5, n, 1.4, v('pcb-ink'), { 'text-anchor': x < 40 ? 'start' : 'end' });
+    }
+
+    // atado de la pantalla: [pin del cabezal, pin de la SuperMini o null, color, carril]
+    const BUNDLE = [
+      ['GND', null, 'w-gnd', 45.3],
+      ['VCC', '3V3', 'w-3v3', 46.1],
+      ['SCL', '6', 'w-scl', 46.9],
+      ['SDA', '7', 'w-sda', 47.7],
+      ['RES', '20', 'w-res', 48.5],
+      ['DC', '5', 'w-dc', 49.3],
+      ['BLK', '21', 'w-blk', 50.1],
+    ];
+    const HUB = [30, 88.5];
+    for (const [h, p, c, lx] of BUNDLE) {
+      const hx = HDR[h];
+      let d = `M${hx} 13.2 C${hx} 20 ${lx} 22 ${lx} 30 V86`;
+      if (p) { const [px, py] = pin[p]; d += ` C${lx} 93 ${px} ${py - 5} ${px} ${py}`; }
+      else d += ` C${lx} 92 ${HUB[0] + 4} ${HUB[1]} ${HUB[0]} ${HUB[1]}`;
+      W(wires, d, c);
+    }
+    for (const y of [58, 70]) el('rect', { x: 44.6, y, width: 6.2, height: 1.8, rx: 0.3, fill: v('tape'), stroke: v('wire-edge'), 'stroke-width': 0.12 }, top);
+    T(top, 51.6, 64.8, 'cinta', 1.8, v('ink'));
+
+    // GND
+    W(wires, `M${pin.G[0]} ${pin.G[1]} C30.6 113 30.4 95 ${HUB[0]} ${HUB[1]}`, 'w-gnd');
+    W(wires, `M${HUB[0]} ${HUB[1]} C26 ${HUB[1]} 22 89.4 18.5 89.4`, 'w-gnd');
+    W(wires, `M${HUB[0]} ${HUB[1]} C29.5 86 28.4 83 28.4 80`, 'w-gnd');
+    W(wires, 'M28.4 80 C30 85 41.8 85 43.4 80', 'w-gnd');
+    W(wires, 'M43.4 80 C45 85 56.8 85 58.4 80', 'w-gnd');
+    el('rect', { x: 16.4, y: 88.4, width: 2.4, height: 2, rx: 0.3, fill: v('tape'), stroke: v('wire-edge'), 'stroke-width': 0.12 }, top);
+    el('circle', { cx: HUB[0], cy: HUB[1], r: 1.1, fill: v('ink'), stroke: v('surface'), 'stroke-width': 0.25 }, top);
+
+    // botones
+    W(wires, `M${pin['3'][0]} ${pin['3'][1]} C30 97 21.6 90 21.6 80`, 'w-btn');
+    W(wires, `M${pin['1'][0]} ${pin['1'][1]} C32.4 92 36.6 88 36.6 80`, 'w-btn');
+    W(wires, `M${pin['0'][0]} ${pin['0'][1]} C33 90 51.6 90 51.6 80`, 'w-btn');
+
+    // sonido
+    badge(top, 21, 12.5, 1);
+    badge(top, 54.5, 70, 2);
+    badge(top, 24.6, 85.6, 3);
+    badge(top, 52.6, 118, 4);
+    badge(top, 8.4, 87.4, 5);
+    badge(top, 64, 80, 6);
+  })();
+
+  /* ---------- Detalle: SuperMini vista de abajo ---------- */
+  (() => {
+    const svg = document.getElementById('under');
+    const gB = el('g', {}, svg), gW = el('g', {}, svg), gT = el('g', {}, svg);
+    el('text', { x: 378, y: 24, 'text-anchor': 'middle', class: 'lbl-b' }, gT, 'Vista de abajo, del lado de las hembras');
+    el('rect', { x: 270, y: 70, width: 216, height: 270, rx: 10, fill: v('pcb'), stroke: v('wire-edge') }, gB);
+    el('rect', { x: 324, y: 52, width: 108, height: 26, rx: 8, fill: v('tube'), stroke: v('wire-edge') }, gB);
+    el('text', { x: 378, y: 46, 'text-anchor': 'middle', class: 'lbl-s' }, gT, 'USB-C');
+    const LC = ['5V', 'G', '3V3', '4', '3', '2', '1', '0'];
+    const RC = ['5', '6', '7', '8', '9', '10', '20', '21'];
+    const COL = { G: 'w-gnd', '3V3': 'w-3v3', '3': 'w-btn', '1': 'w-btn', '0': 'w-btn', '5': 'w-dc', '6': 'w-scl', '7': 'w-sda', '20': 'w-res', '21': 'w-blk' };
+    const P = {};
+    LC.forEach((n, i) => { P[n] = [286, 83.2 + i * 30.48]; });
+    RC.forEach((n, i) => { P[n] = [470, 83.2 + i * 30.48]; });
+    const y = (n) => P[n][1];
+
+    // derecha: el atado de la pantalla
+    const lane = { '5': 170, '6': 178, '7': 186, '3V3': 194, GNDp: 202, '20': 210, '21': 218 };
+    for (const n of ['5', '6', '7', '20', '21']) wire(gW, `M483 ${y(n)} C540 ${y(n)} 560 ${lane[n]} 600 ${lane[n]} H740`, COL[n]);
+    wire(gW, `M299 152 C360 152 400 182 457 182 C520 182 560 ${lane['3V3']} 600 ${lane['3V3']} H740`, 'w-3v3');
+    const HUB = [215, 125];
+    wire(gW, `M${HUB[0]} ${HUB[1]} C248 125 252 183 280 183 C360 183 400 198 457 198 C520 198 560 ${lane.GNDp} 600 ${lane.GNDp} H740`, 'w-gnd');
+    el('rect', { x: 612, y: 160, width: 16, height: 66, rx: 3, fill: v('tape'), stroke: v('wire-edge') }, gT);
+    el('text', { x: 600, y: 132, class: 'lbl-b' }, gT, '7 cables a la pantalla');
+    el('text', { x: 600, y: 149, class: 'lbl-s' }, gT, 'juntalos con cinta');
+
+    // izquierda
+    wire(gW, `M273 ${y('G')} C245 ${y('G')} 235 ${HUB[1]} ${HUB[0]} ${HUB[1]}`, 'w-gnd');
+    wire(gW, `M${HUB[0]} ${HUB[1]} C200 125 190 136 170 136`, 'w-gnd');
+    wire(gW, `M${HUB[0]} ${HUB[1]} C200 125 190 154 170 154`, 'w-gnd');
+    for (const n of ['3', '1', '0']) wire(gW, `M273 ${y(n)} H170`, 'w-btn');
+    el('circle', { cx: HUB[0], cy: HUB[1], r: 8, class: 'dot' }, gT);
+    el('text', { x: HUB[0], y: 108, 'text-anchor': 'middle', class: 'lbl-s' }, gT, 'empalme GND');
+    const LBL = [[136, 'GND → botones'], [154, 'GND sonido: tapado'], [y('3'), '3 → botón A'], [y('1'), '1 → botón B'], [y('0'), '0 → botón C']];
+    for (const [yy, s] of LBL) el('text', { x: 162, y: yy + 4, 'text-anchor': 'end', class: 'lbl' }, gT, s);
+
+    // hembras y pines libres
+    for (const [n, [x, yy]] of Object.entries(P)) {
+      if (COL[n]) {
+        el('rect', { x: x - 13, y: yy - 13, width: 26, height: 26, rx: 2, class: 'female' }, gT);
+        el('circle', { cx: x, cy: yy, r: 5, fill: v(COL[n]), stroke: v('wire-edge') }, gT);
+      } else {
+        el('rect', { x: x - 4, y: yy - 4, width: 8, height: 8, fill: v('gold') }, gT);
+      }
+      const left = x < 378;
+      el('text', { x: left ? 304 : 452, y: yy + 4, 'text-anchor': left ? 'start' : 'end', class: 'pcb-t', 'font-weight': 600 }, gT, n);
+    }
+  })();
+
+  /* ---------- Profundidad ---------- */
+  (() => {
+    const svg = document.getElementById('depth');
+    const K = 11, X0 = 140;
+    const rows = [
+      ['Pantalla', 40, [['frente', 5, 'mdf'], ['pantalla', 4, 'pcb-tft'], ['pines', 8.5, 'gold'], ['hembra', 14, 'plastic'], ['curva del cable', 8, 'w-sda'], ['fondo', 5, 'mdf']]],
+      ['SuperMini', 125, [['frente', 5, 'mdf'], ['taco', 5, 'mdf-in'], ['placa', 2, 'pcb'], ['pines', 8.5, 'gold'], ['hembra', 14, 'plastic'], ['curva del cable', 8, 'w-sda'], ['fondo', 5, 'mdf']]],
+    ];
+    const DARK = { 'pcb-tft': 1, plastic: 1, pcb: 1, 'w-sda': 1 };
+    for (const [name, y0, segs] of rows) {
+      el('text', { x: X0 - 12, y: y0 + 22, 'text-anchor': 'end', class: 'lbl-b' }, svg, name);
+      let x = X0, total = 0;
+      for (const [n, mm, c] of segs) {
+        const w = mm * K;
+        el('rect', { x, y: y0, width: w, height: 34, fill: v(c), stroke: v('surface'), 'stroke-width': 1.5 }, svg);
+        el('text', { x: x + w / 2, y: y0 + 22, 'text-anchor': 'middle', fill: DARK[c] ? '#ffffff' : '#1a2026', style: 'font-size:12px; font-family: var(--font-mono)' }, svg, String(mm).replace('.', ','));
+        el('text', { x: x + w / 2, y: y0 + 52, 'text-anchor': 'middle', class: 'lbl-s' }, svg, n);
+        x += w; total += mm;
+      }
+      el('text', { x: x + 10, y: y0 + 22, class: 'lbl-b' }, svg, `≈ ${Math.round(total)} mm`);
+    }
+  })();
+
+  /* ---------- Esquema de la protoboard ---------- */
+  (() => {
+    const svg = document.getElementById('bb');
+    const P = 22, K = P / 15, Y0 = 270;
+    const X = (n) => 100 + (n - 1) * P;
+    const LINES = { j: 58, i: 73, h: 88, g: 103, f: 118, e: 163, d: 178, c: 193, b: 208, a: 223 };
+    const RAILS = { tp: 16, tm: 31, bm: 250, bp: 265 };
+    const Y = (l) => Y0 + LINES[l] * K;
+    const R = (r) => Y0 + RAILS[r] * K;
+    const gBoard = el('g', {}, svg), gParts = el('g', {}, svg), gWires = el('g', {}, svg), gTop = el('g', {}, svg);
+    const left = X(1) - 30 * K, right = X(30) + 25 * K;
+
+    // protoboard
+    el('rect', { x: left, y: Y0, width: right - left, height: 282 * K, rx: 8, fill: v('bb'), stroke: v('bb-edge'), 'stroke-width': 1.5 }, gBoard);
+    el('rect', { x: left + 4, y: Y0 + 136 * K, width: right - left - 8, height: 9 * K, rx: 2, fill: v('bb-edge'), opacity: 0.55 }, gBoard);
+    const railLine = (yy, c) => el('line', { x1: X(1) - 8, x2: X(30) + 8, y1: yy, y2: yy, stroke: v(c), 'stroke-width': 1.6 }, gBoard);
+    railLine(R('tp') - 11, 'rail-red'); railLine(R('tm') + 11, 'rail-blue');
+    railLine(R('bm') - 11, 'rail-blue'); railLine(R('bp') + 11, 'rail-red');
+    for (const x of [left + 15, right - 14]) {
+      for (const [r, sgn, c] of [['tp', '+', 'rail-red'], ['tm', '−', 'rail-blue'], ['bm', '−', 'rail-blue'], ['bp', '+', 'rail-red']]) {
+        el('text', { x, y: R(r) + 5, 'text-anchor': 'middle', fill: v(c), style: 'font-size:15px; font-weight:700' }, gBoard, sgn);
+      }
+    }
+    const hs = 7;
+    for (let n = 1; n <= 30; n++) {
+      for (const l in LINES) el('rect', { x: X(n) - hs / 2, y: Y(l) - hs / 2, width: hs, height: hs, rx: 1.2, fill: v('bb-hole') }, gBoard);
+      for (const r in RAILS) el('rect', { x: X(n) - hs / 2, y: R(r) - hs / 2, width: hs, height: hs, rx: 1.2, fill: v('bb-hole') }, gBoard);
+      for (const yy of [(R('tm') + Y('j')) / 2 + 4, (Y('a') + R('bm')) / 2 + 4]) {
+        el('text', { x: X(n), y: yy, 'text-anchor': 'middle', fill: v('bb-text'), style: 'font-size:9px; font-family: var(--font-mono)' }, gBoard, String(n));
+      }
+    }
+    for (const l in LINES) {
+      for (const x of [left + 13, right - 12]) el('text', { x, y: Y(l) + 4, 'text-anchor': 'middle', fill: v('bb-text'), style: 'font-size:11px; font-family: var(--font-mono); font-weight:600' }, gBoard, l);
+    }
+
+    // SuperMini
+    const smL = X(4) - 13, smR = X(11) + 11;
+    el('rect', { x: smL - 30, y: (Y('g') + Y('c')) / 2 - 14, width: 34, height: 28, rx: 5, fill: v('tube'), stroke: v('wire-edge') }, gParts);
+    el('text', { x: smL - 13, y: (Y('g') + Y('c')) / 2 - 20, 'text-anchor': 'middle', class: 'lbl-s' }, gParts, 'USB-C');
+    el('rect', { x: smL, y: Y('g') - 13, width: smR - smL, height: Y('c') - Y('g') + 26, rx: 8, fill: v('pcb'), opacity: 0.95 }, gParts);
+    el('text', { x: (smL + smR) / 2, y: (Y('g') + Y('c')) / 2 + 5, 'text-anchor': 'middle', class: 'pcb-h' }, gParts, 'SuperMini');
+    const GROW = ['5V', 'G', '3V3', '4', '3', '2', '1', '0'];
+    const CROW = ['5', '6', '7', '8', '9', '10', '20', '21'];
+    const FREE = { '4': 1, '2': 1, '8': 1, '9': 1 };
+    GROW.forEach((n, i) => {
+      el('circle', { cx: X(4 + i), cy: Y('g'), r: 4.5, fill: v('gold'), opacity: FREE[n] ? 0.45 : 1 }, gParts);
+      el('text', { x: X(4 + i), y: Y('g') + 19, 'text-anchor': 'middle', class: 'pcb-t', 'font-weight': 600, opacity: FREE[n] ? 0.55 : 1 }, gParts, n);
+    });
+    CROW.forEach((n, i) => {
+      el('circle', { cx: X(4 + i), cy: Y('c'), r: 4.5, fill: v('gold'), opacity: FREE[n] ? 0.45 : 1 }, gParts);
+      el('text', { x: X(4 + i), y: Y('c') - 10, 'text-anchor': 'middle', class: 'pcb-t', 'font-weight': 600, opacity: FREE[n] ? 0.55 : 1 }, gParts, n);
+    });
+
+    // botones
+    for (const [n, a, b] of [['A', 14, 16], ['B', 18, 20], ['C', 22, 24]]) {
+      const cx = (X(a) + X(b)) / 2;
+      el('rect', { x: cx - 17, y: Y('g') - 17, width: 34, height: 34, rx: 4, fill: v('btn-body') }, gParts);
+      el('circle', { cx, cy: Y('g'), r: 10, fill: v('tube') }, gParts);
+      el('text', { x: cx, y: Y('g') + 5, 'text-anchor': 'middle', fill: '#1a2026', style: 'font-size:13px; font-weight:700' }, gParts, n);
+      for (const m of [a, b]) el('circle', { cx: X(m), cy: Y('g'), r: 4, fill: v('gold') }, gTop);
+    }
+
+    // cables
+    const end = (x, yy) => el('rect', { x: x - 4, y: yy - 4, width: 8, height: 8, rx: 1, fill: v('plastic'), stroke: v('muted') }, gTop);
+    const link = (d, c, ex, ey) => { wire(gWires, d, c); if (ex != null) end(ex, ey); };
+    // placa y rieles
+    link(`M${X(5)} ${Y('j')} V${R('tm')}`, 'w-gnd', X(5), R('tm')); end(X(5), Y('j'));
+    link(`M${X(6)} ${Y('j')} V${R('tp')}`, 'w-3v3', X(6), R('tp')); end(X(6), Y('j'));
+    link(`M${X(30)} ${R('tm')} C795 ${R('tm')} 795 ${R('bm')} ${X(30)} ${R('bm')}`, 'w-gnd', X(30), R('tm')); end(X(30), R('bm'));
+    link(`M${X(30)} ${R('tp')} C815 ${R('tp')} 815 ${R('bp')} ${X(30)} ${R('bp')}`, 'w-3v3', X(30), R('tp')); end(X(30), R('bp'));
+    // botones
+    const arch = (a, b, hgt) => link(`M${X(a)} ${Y('i')} C${X(a)} ${Y('i') - hgt} ${X(b)} ${Y('i') - hgt} ${X(b)} ${Y('i')}`, 'w-btn', X(b), Y('i'));
+    arch(8, 14, 34); end(X(8), Y('i'));
+    arch(10, 18, 44); end(X(10), Y('i'));
+    arch(11, 22, 54); end(X(11), Y('i'));
+    for (const m of [16, 20, 24]) { link(`M${X(m)} ${Y('j')} V${R('tm')}`, 'w-gnd', X(m), R('tm')); end(X(m), Y('j')); }
+    // pantalla, afuera abajo
+    el('text', { x: 100, y: 815, 'text-anchor': 'end', class: 'lbl-b' }, gParts, 'Pantalla');
+    el('rect', { x: 110, y: 735, width: 230, height: 150, rx: 8, fill: v('pcb-tft') }, gParts);
+    el('use', { href: '#mono-img', transform: 'translate(170 770) scale(4.6)' }, gParts);
+    const SP = [['GND', 135, 'w-gnd', X(2), R('bm')], ['VCC', 162, 'w-3v3', X(3), R('bp')], ['SCL', 189, 'w-scl', X(5), Y('a')], ['SDA', 216, 'w-sda', X(6), Y('a')], ['RES', 243, 'w-res', X(10), Y('a')], ['DC', 270, 'w-dc', X(4), Y('a')], ['BLK', 297, 'w-blk', X(11), Y('a')]];
+    for (const [n, x, c, tx, ty] of SP) {
+      link(`M${x} 735 C${x} 700 ${tx} ${ty + 50} ${tx} ${ty}`, c, tx, ty);
+      el('rect', { x: x - 4, y: 737, width: 8, height: 8, fill: v('gold') }, gTop);
+      el('text', { x, y: 760, 'text-anchor': 'middle', class: 'pcb-t' }, gTop, n);
+    }
+  })();
+
+  /* ---------- Placa verde ---------- */
+  (() => {
+    const Q = 24, OX = 72, OY = 100, NC = 14, ROWS = 'ABCDEFGHIJKLMNOPQRSTUVWXY';
+    const ri = (r) => ROWS.indexOf(r.toUpperCase());
+    const TOPROW = ['5V', 'G', '3V3', '4', '3', '2', '1', '0'];
+    const BOTROW = ['5', '6', '7', '8', '9', '10', '20', '21'];
+    const FREE = { '5V': 1, '4': 1, '2': 1, '8': 1, '9': 1, '10': 1 };
+    const BTN = [[5, 'A', 'w-btn'], [6, 'GND', 'w-gnd'], [7, 'B', 'w-btn'], [8, 'C', 'w-btn']];
+    const SCR = [[1, 'DC', 'w-dc'], [2, 'SCL', 'w-scl'], [3, 'SDA', 'w-sda'], [4, 'VCC', 'w-3v3'], [5, 'CS', 'w-gnd', 1], [6, 'GND', 'w-gnd'], [7, 'RES', 'w-res'], [8, 'BLK', 'w-blk']];
+    const HALO = 'paint-order:stroke; stroke:var(--perf); stroke-width:3px; stroke-linejoin:round';
+    const mono = (sz, w) => `font-size:${sz}px; font-family: var(--font-mono)${w ? '; font-weight:' + w : ''}`;
+
+    function base(svg, flip) {
+      const X = (c) => OX + ((flip ? NC + 1 - c : c) - 1) * Q;
+      const Y = (r) => OY + ri(r) * Q;
+      const g = { b: el('g', {}, svg), p: el('g', {}, svg), w: el('g', {}, svg), t: el('g', {}, svg) };
+      const bl = OX - 0.9 * Q, bt = OY - 0.9 * Q, bw = (NC - 1) * Q + 1.8 * Q, bh = (ROWS.length - 1) * Q + 1.8 * Q;
+      el('rect', { x: bl, y: bt, width: bw, height: bh, rx: 6, fill: v('perf'), stroke: v('perf-edge'), 'stroke-width': 2 }, g.b);
+      for (let c = 1; c <= NC; c++) {
+        for (const r of ROWS) {
+          el('circle', { cx: X(c), cy: Y(r), r: 0.36 * Q, fill: v('pad'), opacity: 0.8 }, g.b);
+          el('circle', { cx: X(c), cy: Y(r), r: 0.13 * Q, fill: v('perf-hole') }, g.b);
+        }
+        for (const yy of [bt - 7, bt + bh + 15]) el('text', { x: X(c), y: yy, 'text-anchor': 'middle', class: 'lbl-s', style: mono(10) }, g.b, String(c));
+      }
+      for (const r of ROWS) for (const xx of [22, 438]) el('text', { x: xx, y: Y(r) + 4, 'text-anchor': 'middle', class: 'lbl-s', style: mono(11, 600) }, g.b, r);
+      // lugar para el sonido
+      const fx = Math.min(X(1), X(NC)) - 0.5 * Q, fw = NC * Q, fy = Y('R') - 0.5 * Q, fh = (ri('Y') - ri('R') + 1) * Q;
+      el('rect', { x: fx, y: fy, width: fw, height: fh, rx: 8, fill: 'none', stroke: v('pcb-ink'), 'stroke-width': 2, 'stroke-dasharray': '7 6', opacity: 0.8 }, g.p);
+      const lx = (X(9) + X(NC)) / 2, lw = 6 * Q + 4;
+      el('rect', { x: lx - lw / 2, y: Y('T') - 4, width: lw, height: 78, rx: 6, fill: v('perf'), opacity: 0.92 }, g.p);
+      el('text', { x: lx, y: Y('U') - 2, 'text-anchor': 'middle', class: 'pcb-h' }, g.t, 'Libre para');
+      el('text', { x: lx, y: Y('U') + 16, 'text-anchor': 'middle', class: 'pcb-h' }, g.t, 'el sonido');
+      el('text', { x: lx, y: Y('U') + 36, 'text-anchor': 'middle', class: 'pcb-t' }, g.t, 'DY-SV17F, después');
+      return { X, Y, g, bt, bh };
+    }
+    const pinLabels = (X, Y, g, extra) => {
+      TOPROW.forEach((n, i) => el('text', { x: X(i + 1), y: Y('f') + 0.85 * Q, 'text-anchor': 'middle', class: 'pcb-t', 'font-weight': 600, opacity: FREE[n] ? 0.6 : 1, style: extra || '' }, g, n));
+      BOTROW.forEach((n, i) => el('text', { x: X(i + 1), y: Y('l') - 0.55 * Q, 'text-anchor': 'middle', class: 'pcb-t', 'font-weight': 600, opacity: FREE[n] ? 0.6 : 1, style: extra || '' }, g, n));
+    };
+
+    // vista de arriba
+    (() => {
+      const { X, Y, g, bt, bh } = base(document.getElementById('perf-top'), false);
+      const ml = X(1) - 1.0 * Q, mr = X(8) + 0.9 * Q, mt = Y('f') - 0.62 * Q, mb = Y('l') + 0.62 * Q, mid = (Y('f') + Y('l')) / 2;
+      el('rect', { x: ml, y: mt, width: mr - ml, height: mb - mt, rx: 7, fill: v('pcb') }, g.p);
+      el('rect', { x: X(1) - 1.45 * Q, y: mid - 1.7 * Q, width: 1.9 * Q, height: 3.4 * Q, rx: 5, fill: v('tube'), stroke: v('wire-edge') }, g.p);
+      el('text', { x: (ml + mr) / 2 + 12, y: mid - 4, 'text-anchor': 'middle', class: 'pcb-h' }, g.p, 'SuperMini');
+      el('text', { x: (ml + mr) / 2 + 12, y: mid + 14, 'text-anchor': 'middle', class: 'pcb-t' }, g.p, '← USB-C al borde');
+      TOPROW.forEach((n, i) => el('circle', { cx: X(i + 1), cy: Y('f'), r: 4.5, fill: v('gold'), opacity: FREE[n] ? 0.5 : 1 }, g.p));
+      BOTROW.forEach((n, i) => el('circle', { cx: X(i + 1), cy: Y('l'), r: 4.5, fill: v('gold'), opacity: FREE[n] ? 0.5 : 1 }, g.p));
+      pinLabels(X, Y, g.p);
+      const tip = (x, yy, faded) => el('rect', { x: x - 0.43 * Q, y: yy - 0.43 * Q, width: 0.86 * Q, height: 0.86 * Q, rx: 2, fill: v('plastic'), stroke: v('muted'), 'stroke-dasharray': faded ? '3 2' : 'none', opacity: faded ? 0.6 : 1 }, g.t);
+      // botones: salen para arriba
+      for (const [c, n, col] of BTN) {
+        const gw = el('g', {}, g.w);
+        wire(gw, `M${X(c)} ${Y('c')} V44`, col);
+        tip(X(c), Y('c'));
+        el('text', { x: X(c), y: 34, 'text-anchor': 'middle', class: 'lbl', style: mono(11, 700) }, g.t, n);
+      }
+      el('text', { x: X(9), y: 38, class: 'lbl-s' }, g.t, '↑ a los botones');
+      // pantalla: sale para abajo
+      const yEnd = bt + bh + 30;
+      SCR.forEach(([c, n, col, opt]) => {
+        const gw = el('g', { opacity: opt ? 0.5 : 1 }, g.w);
+        wire(gw, `M${X(c)} ${Y('o')} V${yEnd}`, col);
+        tip(X(c), Y('o'), opt);
+        el('text', { x: X(c) - 4, y: yEnd + 8, class: 'lbl', style: mono(11, 700), opacity: opt ? 0.6 : 1, transform: `rotate(90 ${X(c) - 4} ${yEnd + 8})` }, g.t, n);
+      });
+      el('text', { x: X(9), y: yEnd + 14, class: 'lbl-s' }, g.t, '↓ a la pantalla,');
+      el('text', { x: X(9), y: yEnd + 30, class: 'lbl-s' }, g.t, 'cada hembra en su pin');
+      el('text', { x: X(9), y: yEnd + 46, class: 'lbl-s' }, g.t, 'CS solo si la tiene');
+    })();
+
+    // vista de abajo, espejada
+    (() => {
+      const { X, Y, g, bt, bh } = base(document.getElementById('perf-bot'), true);
+      // contorno de la SuperMini, del otro lado
+      const xa = X(8) - 0.9 * Q, xb = X(1) + 1.0 * Q, mid = (Y('f') + Y('l')) / 2;
+      el('rect', { x: xa, y: Y('f') - 0.62 * Q, width: xb - xa, height: Y('l') - Y('f') + 1.24 * Q, rx: 7, fill: 'none', stroke: v('pcb-ink'), 'stroke-width': 1.5, 'stroke-dasharray': '5 4', opacity: 0.7 }, g.p);
+      el('rect', { x: X(1) - 0.45 * Q, y: mid - 1.7 * Q, width: 1.9 * Q, height: 3.4 * Q, rx: 5, fill: 'none', stroke: v('pcb-ink'), 'stroke-width': 1.5, 'stroke-dasharray': '5 4', opacity: 0.7 }, g.p);
+      el('text', { x: X(1) + 1.2 * Q, y: mid + 4, 'text-anchor': 'middle', class: 'pcb-t', transform: `rotate(90 ${X(1) + 1.2 * Q} ${mid})`, style: HALO }, g.t, 'USB-C');
+      // patas de resistencia
+      const LEGS = [[5, 'c', 'f'], [7, 'c', 'f'], [8, 'c', 'f'], [1, 'l', 'o'], [2, 'l', 'o'], [3, 'l', 'o'], [7, 'l', 'o'], [8, 'l', 'o']];
+      for (const [c, r1, r2] of LEGS) {
+        el('line', { x1: X(c), y1: Y(r1), x2: X(c), y2: Y(r2), stroke: v('perf-hole'), 'stroke-width': 6, 'stroke-linecap': 'round' }, g.w);
+        el('line', { x1: X(c), y1: Y(r1), x2: X(c), y2: Y(r2), stroke: v('leg'), 'stroke-width': 3.5, 'stroke-linecap': 'round' }, g.w);
+      }
+      // cables con forro
+      const path = (pts) => pts.map(([c, r], i) => `${i ? 'L' : 'M'}${X(c)} ${Y(r)}`).join(' ');
+      wire(g.w, path([[3, 'f'], [3, 'i'], [11, 'i'], [11, 'q'], [4, 'q'], [4, 'o']]), 'w-3v3');
+      wire(g.w, path([[2, 'f'], [2, 'j'], [10, 'j'], [10, 'p'], [6, 'p'], [6, 'o']]), 'w-gnd');
+      wire(g.w, path([[2, 'f'], [2, 'a'], [6, 'a'], [6, 'c']]), 'w-gnd');
+      el('text', { x: (X(4) + X(11)) / 2, y: Y('R') + 4, 'text-anchor': 'middle', class: 'pcb-t', style: HALO }, g.t, '3V3 → VCC');
+      el('text', { x: X(6) - 10, y: Y('b') + 4, 'text-anchor': 'end', class: 'pcb-t', style: HALO }, g.t, 'G → GND botones');
+      // puente de CS
+      el('rect', { x: Math.min(X(5), X(6)) - 4, y: Y('o') - 0.3 * Q, width: Q + 8, height: 0.6 * Q, rx: 0.3 * Q, fill: v('solder'), opacity: 0.55, stroke: v('perf-hole'), 'stroke-dasharray': '3 2' }, g.t);
+      // soldaduras
+      const blob = (x, yy, faded) => el('circle', { cx: x, cy: yy, r: 0.42 * Q, fill: v('solder'), stroke: '#7d868d', 'stroke-width': 1, opacity: faded ? 0.55 : 1 }, g.t);
+      for (let i = 1; i <= 8; i++) { blob(X(i), Y('f')); blob(X(i), Y('l')); }
+      for (const [c] of BTN) blob(X(c), Y('c'));
+      for (const [c, , , opt] of SCR) blob(X(c), Y('o'), opt);
+      pinLabels(X, Y, g.t, HALO);
+      // nombres de los cables, afuera del borde
+      for (const [c, n] of BTN) el('text', { x: X(c), y: bt - 26, 'text-anchor': 'middle', class: 'lbl', style: mono(11, 700) }, g.t, n);
+      for (const [c, n, , opt] of SCR) el('text', { x: X(c), y: bt + bh + 36, 'text-anchor': 'middle', class: 'lbl', style: mono(11, 700), opacity: opt ? 0.6 : 1 }, g.t, n);
+      el('text', { x: X(8) - 0.8 * Q, y: bt - 26, 'text-anchor': 'end', class: 'lbl-s' }, g.t, 'cables a los botones →');
+      el('text', { x: X(8) - 0.8 * Q, y: bt + bh + 36, 'text-anchor': 'end', class: 'lbl-s' }, g.t, 'cables a la pantalla →');
+    })();
+  })();
+
+  /* ---------- Tildes ---------- */
+  const KEY = 'cableado-checks';
+  const stages = ['e0', 'e1', 'e2', 'e3', 'e5'];
+  const boxes = [...document.querySelectorAll('.todo input[type="checkbox"]')];
+  let checks = {};
+  try { checks = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { checks = {}; }
+
+  function render() {
+    for (const b of boxes) b.checked = !!checks[b.id];
+    for (const id of stages) {
+      const inStage = boxes.filter((b) => b.closest('section').id === id);
+      const done = inStage.filter((b) => b.checked).length;
+      for (const out of document.querySelectorAll(`[data-count="${id}"]`)) {
+        out.textContent = out.closest('nav') ? `${done}/${inStage.length}` : `${done} de ${inStage.length}`;
+      }
+    }
+    const done = boxes.filter((b) => b.checked).length;
+    document.getElementById('total-progress').textContent = `${done} de ${boxes.length}`;
+    document.getElementById('meter').style.width = `${boxes.length ? (done / boxes.length) * 100 : 0}%`;
+  }
+  function persist() { try { localStorage.setItem(KEY, JSON.stringify(checks)); } catch (e) {} }
+
+  document.addEventListener('change', (ev) => {
+    const b = ev.target;
+    if (!b.matches || !b.matches('.todo input[type="checkbox"]')) return;
+    checks[b.id] = b.checked;
+    render();
+    persist();
+  });
+
+  const reset = document.getElementById('reset');
+  let armed = false;
+  reset.addEventListener('click', () => {
+    if (!armed) {
+      armed = true;
+      reset.textContent = 'Tocá otra vez para borrar';
+      document.getElementById('reset-note').textContent = '';
+      setTimeout(() => { armed = false; reset.textContent = 'Borrar lo tildado'; }, 4000);
+      return;
+    }
+    armed = false;
+    checks = {};
+    persist();
+    render();
+    reset.textContent = 'Borrar lo tildado';
+    document.getElementById('reset-note').textContent = 'Listo, quedó todo sin tildar.';
+  });
+
+  render();
+})();
+</script>

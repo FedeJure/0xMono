@@ -1,0 +1,23 @@
+# Workspace de host (PC). El firmware vive en `firmware/` con su propio
+# target (riscv32imc-unknown-none-elf) y por eso queda fuera del workspace.
+[workspace]
+resolver = "2"
+members = [
+    "assets",
+    "simulator",
+    "crates/captive",
+    "crates/companion",
+    "crates/engine",
+    "crates/fonts",
+    "crates/games",
+    "crates/habitat",
+    "crates/miner",
+    "crates/settings",
+    "crates/sound",
+    "crates/ui",
+]
+exclude = ["firmware"]
+
+[workspace.package]
+edition = "2024"
+license = "MIT"

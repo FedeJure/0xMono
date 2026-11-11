@@ -1,0 +1,8 @@
+[package]
+name = "companion"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "La vida del personaje del cuadro: agenda diaria con el reloj real, reacciones y guardado (no_std)"
+
+[dependencies]

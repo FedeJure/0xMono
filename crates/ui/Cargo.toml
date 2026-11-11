@@ -1,0 +1,16 @@
+[package]
+name = "ui"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Menú y pantallas del 0xMono (embedded-graphics, no_std): el mismo dibujo en el simulador y en la placa"
+
+[dependencies]
+captive = { path = "../captive" }
+companion = { path = "../companion" }
+embedded-graphics = "0.8"
+fonts = { path = "../fonts" }
+games = { path = "../games" }
+heapless = "0.9"
+qrcodegen-no-heap = "1.8"
+settings = { path = "../settings" }

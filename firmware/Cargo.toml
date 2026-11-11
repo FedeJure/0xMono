@@ -1,0 +1,85 @@
+[package]
+edition      = "2024"
+name         = "firmware"
+rust-version = "1.95"
+version      = "0.1.0"
+# `cargo run --release` a secas compila, graba y abre el monitor de `casa`.
+default-run  = "casa"
+
+[features]
+# Cuenta ciclos por etapa del rasterizado (para los benchmarks).
+profile = ["engine3d/profile"]
+
+[dependencies]
+esp-hal = { version = "~1.2.2", features = ["esp32c3", "log-04", "unstable"] }
+
+esp-rtos = { version = "0.4.0", features = ["embassy", "esp-alloc", "esp-radio", "esp32c3", "log-04"] }
+
+esp-bootloader-esp-idf = { version = "0.6.0", features = ["esp32c3", "log-04"] }
+log                    = "0.4.27"
+
+embassy-executor = { version = "0.10.0", features = ["log"] }
+embassy-time = { version = "0.5.0", features = ["log"] }
+esp-backtrace = { version = "0.20.0", features = [
+  "esp32c3",
+  "panic-handler",
+  "println",
+] }
+esp-println = { version = "0.18.0", features = ["esp32c3", "log-04"] }
+
+critical-section = "1.2.0"
+static_cell      = "2.1.1"
+embedded-graphics = "0.8"
+engine3d = { version = "0.1.0", path = "../crates/engine", features = ["iram"] }
+assets = { path = "../assets", features = ["iram"] }
+habitat = { path = "../crates/habitat" }
+companion = { path = "../crates/companion" }
+miner = { path = "../crates/miner" }
+captive = { path = "../crates/captive" }
+settings = { path = "../crates/settings" }
+ui = { path = "../crates/ui" }
+games = { path = "../crates/games" }
+sound = { path = "../crates/sound" }
+
+# WiFi, red propia con DHCP y DNS, memoria dinámica y la pantalla ST7789.
+esp-radio = { version = "1.0.0-beta.1", features = ["esp32c3", "esp-alloc", "log-04", "wifi"] }
+esp-alloc = { version = "0.11.0", features = ["esp32c3"] }
+esp-storage = { version = "0.10.0", features = ["esp32c3"] }
+embassy-net = { version = "0.9.0", features = ["dhcpv4", "dns", "medium-ethernet", "proto-ipv4", "tcp", "udp"] }
+embassy-futures = "0.1"
+embedded-io-async = "0.7"
+edge-dhcp = "0.8.0"
+edge-nal = "0.7.0"
+edge-nal-embassy = "0.9.0"
+mipidsi = "0.10.0"
+embedded-hal-bus = "0.3.0"
+heapless = "0.9"
+embassy-sync = "0.8"
+embedded-hal = "1.0"
+
+
+# For fine tuning these settings, please refer to https://doc.rust-lang.org/cargo/reference/profiles.html
+[profile.dev]
+# The default debug profile is too slow and too big for resource-constrained devices.
+# Always build with some optimizations enabled.
+opt-level = "s"
+
+[profile.release]
+codegen-units = 1     # LLVM can perform better optimizations using a single thread
+debug         = 2     # prefer slower builds but better debugging experience
+lto           = 'fat'
+opt-level     = 's'
+
+# Los blobs del WiFi necesitan esp-radio optimizado (lo pide su documentación).
+[profile.dev.package.esp-radio]
+opt-level = 3
+
+[profile.release.package.esp-radio]
+opt-level = 3
+
+# El motor 3D se optimiza por velocidad aunque el resto del firmware priorice tamaño.
+[profile.dev.package.engine3d]
+opt-level = 3
+
+[profile.release.package.engine3d]
+opt-level = 3

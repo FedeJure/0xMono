@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<title>0xMono · Manual de uso</title>
+<meta name="author" content="0xMono">
+<meta name="description" content="Manual de uso de 0xMono">
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+
+<!-- ============================ 1 · TAPA ============================ -->
+<section class="page cover-page">
+  <div class="cover-card">
+    <div class="cover-head"><span>Manual de uso</span><span>Rev. 1.0 · 2026</span></div>
+    <div class="logo"><span class="x">0x</span>Mono</div>
+    <p class="cover-sub">El avatar del trabajo, ahora con <b>casa propia</b>. En tu escritorio.</p>
+
+    <div class="device dl cover-device">
+      <img class="body" src="img/device-line.svg">
+      <div class="marquee"><span class="x">0x</span>Mono</div>
+      <img class="screen px" src="img/s-cover.png">
+      <div class="lbl" style="left:26%; top:77.9%">A</div>
+      <div class="lbl" style="left:45%; top:77.9%">B</div>
+      <div class="lbl" style="left:64%; top:77.9%">C</div>
+    </div>
+
+    <div class="cover-specs">
+      <b>0xMONO · MOD. 01</b>
+      ESP32-C3 · 160 MHz<br>
+      IPS 1,3″ · 240 × 240<br>
+      WiFi 2,4 GHz · USB-C 5 V<br>
+      MDF 5 mm · hecho a mano<br>
+      Incluye: 1 mono
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 2 · HOLA ============================ -->
+<section class="page" id="p-hola">
+  <div class="eyebrow"><span><b>§00</b> · Bienvenida</span><span>README</span></div>
+  <div class="hola-head">
+    <img class="pic shot px" src="img/s-hola.png">
+    <h1>Hola.<br>Me ascendieron.</h1>
+  </div>
+
+  <div class="letter">
+    <p>Hasta ahora era un avatar: un cuadradito al lado de tu nombre en el chat del trabajo. Ahora tengo casa propia, con jardín y bananero, y vivo en tu escritorio.</p>
+    <p>Tengo rutina: me levanto, desayuno, programo (smart contracts; mejor no preguntes), tomo mate, toco la guitarra y a la noche salgo a mirar las estrellas. Tengo reuniones. Miro el mercado más de lo recomendable.</p>
+    <p>No hace falta que me des de comer ni que me cuides. Necesito un enchufe y, de vez en cuando, que me saludes. El resto está en este manual.</p>
+    <p class="sign">— 0xMono, ahora en hardware</p>
+  </div>
+
+  <h2 style="margin-top:5mm">Contenido</h2>
+  <ul class="toc">
+    <li><a href="#p-conoce">Conocé tu 0xMono</a></li>
+    <li><a href="#p-pasos">Primeros pasos</a></li>
+    <li><a href="#p-dia">Un día típico</a></li>
+    <li><a href="#p-unico">Nunca dos días iguales</a></li>
+    <li><a href="#p-hablar">Hablarle</a></li>
+    <li><a href="#p-menu">El menú</a></li>
+    <li><a href="#p-wifi">WiFi y hora desde el celular</a></li>
+    <li><a href="#p-juego">Minijuego: Cocos Rodantes</a></li>
+    <li><a href="#p-cuidados">Cuidados</a></li>
+    <li><a href="#p-faq">Si algo falla</a></li>
+    <li><a href="#p-datos">Datos técnicos y garantía</a></li>
+  </ul>
+
+  <div class="gift">
+    <div>Para</div>
+    <div>De</div>
+  </div>
+</section>
+
+<!-- ============================ 3 · CONOCÉ ============================ -->
+<section class="page" id="p-conoce">
+  <div class="eyebrow"><span><b>§01</b> · Hardware</span><span>Vista frontal / trasera</span></div>
+  <h1>Conocé tu 0xMono</h1>
+  <p class="lede">Un mini arcade de MDF con una pantalla a color. Adentro corre una casa en 3D con un mono que hace su vida. Vos mirás.</p>
+
+  <div class="parts">
+    <div class="device dt devfront">
+      <img class="body" src="img/device-tech.svg">
+      <div class="marquee"><span class="x">0x</span>Mono</div>
+      <img class="screen px" src="img/t-code.png">
+      <div class="lbl" style="left:19.8%; top:77.9%">A</div>
+      <div class="lbl" style="left:35%; top:77.9%">B</div>
+      <div class="lbl" style="left:50.2%; top:77.9%">C</div>
+      <div class="badge" style="left:92.8%; top:11.03%">1</div>
+      <div class="badge" style="left:92.8%; top:45.5%">2</div>
+      <div class="badge" style="left:92.8%; top:77.9%">3</div>
+    </div>
+    <ul class="legend">
+      <li><span class="n">1</span><div><b>Marquesina</b>El nombre. Por si te olvidás.</div></li>
+      <li><span class="n">2</span><div><b>Pantalla</b>IPS de 1,3″ y 240 × 240 píxeles. Es un vidrio fino: se mira, no se aprieta.</div></li>
+      <li><span class="n">3</span><div><b>Botones <span class="k">A</span> <span class="k">B</span> <span class="k">C</span></b>Hablarle, abrir el menú, jugar. Tres botones, ninguna configuración avanzada.</div></li>
+    </ul>
+  </div>
+
+  <div class="back-row">
+    <div class="device devback">
+      <img class="body" src="img/device-back.svg">
+      <div class="badge" style="left:92.8%; top:81%">4</div>
+      <div class="badge" style="left:92.8%; top:18.6%">5</div>
+    </div>
+    <ul class="legend" style="margin-left:4mm">
+      <li><span class="n">4</span><div><b>USB-C</b>La única entrada. Alimentación de cualquier cargador de celular.</div></li>
+      <li><span class="n">5</span><div><b>Tapa trasera</b>Cuatro tornillos. Adentro no hay nada que cambiar: ni pilas, ni cartucho, ni sorpresas.</div></li>
+    </ul>
+  </div>
+
+  <div class="note" style="margin-top:4mm">
+    <span class="tag">En la caja</span>
+    <p class="small">El 0xMono y este manual. Cable USB-C y cargador: sirven los del celular.</p>
+  </div>
+</section>
+
+<!-- ============================ 4 · PRIMEROS PASOS ============================ -->
+<section class="page" id="p-pasos">
+  <div class="eyebrow"><span><b>§02</b> · Setup</span><span>~3 min</span></div>
+  <h1>Primeros pasos</h1>
+  <p class="lede">Tiempo estimado: lo que tarda en calentarse el agua del mate.</p>
+
+  <ol class="steps">
+    <li>
+      <h3>Enchufalo</h3>
+      <p>Elegí un lugar lejos del sol directo y de los líquidos. Cable USB-C atrás, cargador a la pared. No tiene botón de encendido: arranca solo y en unos segundos aparece la casa.</p>
+    </li>
+    <li>
+      <h3>Dejalo despertar</h3>
+      <p>La primera vez cree que son las <b>8:00</b>. Optimista, pero probablemente equivocado.</p>
+    </li>
+    <li>
+      <h3>Ponelo en hora</h3>
+      <p><b>Con WiFi</b> (p. <a href="#p-wifi" class="pnum"></a>): se pone en hora solo cada vez que lo enchufás. Es lo recomendable.</p>
+      <p><b>Sin WiFi:</b> mantené <span class="k">B</span> y el reloj avanza una hora. Repetí hasta llegar. Los minutos no se ajustan; se tolera cierta imprecisión.</p>
+    </li>
+  </ol>
+
+  <div class="box">
+    <span class="tag">Sin batería</span>
+    <p class="small" style="margin:0">Vive enchufado. Desenchufado se pausa y el reloj se frena. Al volver, con WiFi se pone en hora solo; si no puede, te dice por qué y sigue con la hora que tenía. Sin WiFi: <span class="k">B</span>.</p>
+    <div class="strip mini">
+      <figure><img class="px" src="img/ui-hora_1_conectando.png"><figcaption>Sincronizando</figcaption></figure>
+      <figure><img class="px" src="img/ui-hora_2_listo.png"><figcaption>En hora</figcaption></figure>
+      <figure><img class="px" src="img/ui-hora_3_fallo.png"><figcaption>Error, con motivo</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 5 · UN DÍA (1) ============================ -->
+<section class="page" id="p-dia">
+  <div class="eyebrow"><span><b>§03</b> · Rutina</span><span>Lun–Vie</span></div>
+  <h1>Un día típico</h1>
+  <p style="margin-bottom:4mm">Sigue el reloj real: a las 8:30 está desayunando. Los horarios varían un poco cada día, como los de cualquiera.</p>
+
+  <div class="day">
+    <div class="card"><img class="px" src="img/t-wake.png"><h3><span class="t">07:30</span>Se levanta</h3><p>Se estira. Evalúa sus decisiones.</p></div>
+    <div class="card"><img class="px" src="img/t-stretch.png"><h3><span class="t">08:00</span>Elonga</h3><p>En la colchoneta del jardín.</p></div>
+    <div class="card"><img class="px" src="img/t-breakfast.png"><h3><span class="t">08:30</span>Desayuna</h3><p>Banana. Sorpresa para nadie.</p></div>
+    <div class="card"><img class="px" src="img/t-mate.png"><h3><span class="t">09:00</span>Mate</h3><p>En el sillón, sin apuro.</p></div>
+    <div class="card"><img class="px" src="img/t-code.png"><h3><span class="t">09:30</span>Programa</h3><p>Dev de blockchain. De 9 a 18.</p></div>
+    <div class="card"><img class="px" src="img/t-meeting.png"><h3><span class="t">11:30</span>Reunión</h3><p>Videollamada. Podría haber sido un mail.</p></div>
+    <div class="card"><img class="px" src="img/t-cook.png"><h3><span class="t">13:00</span>Cocina</h3><p>A veces algo se prende fuego.</p></div>
+    <div class="card"><img class="px" src="img/t-trading.png"><h3><span class="t">15:00</span>Mira el mercado</h3><p>Velas verdes, velas rojas. Su cara acompaña.</p></div>
+    <div class="card"><img class="px" src="img/t-snack.png"><h3><span class="t">17:00</span>Merienda</h3><p>Adiviná qué.</p></div>
+  </div>
+</section>
+
+<!-- ============================ 6 · UN DÍA (2) ============================ -->
+<section class="page">
+  <div class="eyebrow"><span><b>§03</b> · Rutina</span><span>18:00 →</span></div>
+  <h2 style="font-size:15pt; margin-bottom:4mm">Después de las seis</h2>
+  <div class="day">
+    <div class="card"><img class="px" src="img/t-garden.png"><h3><span class="t">18:00</span>Riega</h3><p>Planta por planta.</p></div>
+    <div class="card"><img class="px" src="img/t-bananas.png"><h3><span class="t">18:30</span>Va al bananero</h3><p>Directo del productor.</p></div>
+    <div class="card"><img class="px" src="img/t-guitar.png"><h3><span class="t">19:30</span>Guitarra</h3><p>Sentado en la cama. Practica.</p></div>
+    <div class="card"><img class="px" src="img/t-dance.png"><h3><span class="t">20:00</span>Baila</h3><p>Como si nadie lo viera. Vos lo ves.</p></div>
+    <div class="card"><img class="px" src="img/t-games.png"><h3><span class="t">21:30</span>Consola</h3><p>Ranked. No molestar.</p></div>
+    <div class="card"><img class="px" src="img/t-movie.png"><h3><span class="t">22:30</span>Película</h3><p>Con las luces de la casa prendidas.</p></div>
+    <div class="card"><img class="px" src="img/t-read.png"><h3><span class="t">23:00</span>Lee</h3><p>Un capítulo más. Dos.</p></div>
+    <div class="card"><img class="px" src="img/t-stars.png"><h3><span class="t">23:30</span>Mira las estrellas</h3><p>Sale al jardín cuando oscurece.</p></div>
+    <div class="card"><img class="px" src="img/t-sleep.png"><h3><span class="t">00:30</span>Duerme</h3><p>Manta hasta el cuello.</p></div>
+  </div>
+  <p class="small muted" style="margin-top:3mm">También: siesta, cena, barrer, ejercicio, llamadas, mirar por la ventana. <b>26 actividades</b>. Entre una y otra esquiva muebles, corre la silla para sentarse y agarra las cosas con la mano.</p>
+</section>
+
+<!-- ============================ 7 · NUNCA DOS DÍAS IGUALES ============================ -->
+<section class="page" id="p-unico">
+  <div class="eyebrow"><span><b>§04</b> · Comportamiento</span><span>seed: única</span></div>
+  <h1>Nunca dos días iguales</h1>
+
+  <div class="two" style="margin-bottom:4mm">
+    <div class="note">
+      <span class="tag">Semana / finde</span>
+      <p class="small">Lunes a viernes trabaja (el viernes se va antes). Sábado: limpieza, cocina, siesta, consola. Domingo: mate largo, almuerzo largo, siesta larga, llamada a la familia y a dormir temprano.</p>
+    </div>
+    <div class="note">
+      <span class="tag">Personalidad</span>
+      <p class="small">Cada 0xMono nace de una semilla aleatoria: más dormilón o madrugador, más comilón, deportista o charlatán. Y cada día arranca con un humor distinto.</p>
+    </div>
+  </div>
+
+  <h2>Comportamientos conocidos</h2>
+  <p class="small muted" style="margin-bottom:3mm">No son bugs. Están documentados.</p>
+  <div class="issues" style="margin-bottom:5mm">
+    <div class="issue"><img class="px" src="img/g-fart.png"><div><b><span>#01</span> · durmiendo</b>Nubecita verde bajo la manta. Él sonríe. Vos no lo oliste.</div></div>
+    <div class="issue"><img class="px" src="img/g-fire2.png"><div><b><span>#02</span> · cocinando</b>Se prende la olla. Busca el matafuego, apaga, lo guarda. Protocolo impecable.</div></div>
+    <div class="issue"><img class="px" src="img/g-sweat.png"><div><b><span>#03</span> · ejercicio</b>Aprieta los dientes y transpira. Las gotas son parte del entrenamiento.</div></div>
+    <div class="issue"><img class="px" src="img/t-away.png"><div><b><span>#04</span> · casa vacía</b>Salió de visita. Vuelve. Siempre vuelve.</div></div>
+  </div>
+
+  <h2>Iluminación según la hora</h2>
+  <div class="strip">
+    <figure><img class="px" src="img/l-0640.png"><figcaption>06:40<span>amanecer</span></figcaption></figure>
+    <figure><img class="px" src="img/l-1230.png"><figcaption>12:30<span>mediodía</span></figcaption></figure>
+    <figure><img class="px" src="img/l-1910.png"><figcaption>19:10<span>atardecer</span></figcaption></figure>
+    <figure><img class="px" src="img/l-2330.png"><figcaption>23:30<span>noche</span></figcaption></figure>
+  </div>
+  <p class="small muted" style="margin-top:2.5mm">De noche, si está despierto, prende las lámparas. Dormido, solo luz de luna.</p>
+</section>
+
+<!-- ============================ 8 · HABLARLE ============================ -->
+<section class="page" id="p-hablar">
+  <div class="eyebrow"><span><b>§05</b> · Interfaz</span><span>A / B / C</span></div>
+  <h1>Hablarle</h1>
+  <p class="lede">Tocá <span class="k">A</span>, <span class="k">B</span> o <span class="k">C</span>. Te mira, pone cara y contesta en un globo blanco, moviendo la boca. Lee el contexto.</p>
+
+  <div class="two" style="margin-bottom:4mm">
+    <figure class="strip" style="display:block; margin:0"><img class="px" src="img/s-say.png" style="width:100%; display:block; border:.3mm solid #1E1B18; border-radius:.8mm"><figcaption>Le hablaste <span>globo blanco</span></figcaption></figure>
+    <figure class="strip" style="display:block; margin:0"><img class="px" src="img/s-think.png" style="width:100%; display:block; border:.3mm solid #1E1B18; border-radius:.8mm"><figcaption>Piensa en voz alta <span>globo lila, cada tanto, solo</span></figcaption></figure>
+  </div>
+
+  <p>Tiene cientos de frases y elige según lo que está haciendo, la hora, el día y cómo viene el mercado. Probá en plena reunión.</p>
+
+  <div class="box two" style="align-items:center; gap:4mm">
+    <img class="px shot" src="img/f-squint.png" style="flex:none; width:20mm">
+    <div>
+      <span class="tag">Si está durmiendo</span>
+      <p class="small" style="margin:0">Si insistís, se despierta. De mal humor. Queda medio dormido, con cara de lunes, hasta que vuelve a la cama.</p>
+    </div>
+  </div>
+
+  <table class="gestures">
+    <tr><td>Tocar A, B o C</td><td>Le hablás. Contesta en un globo.</td></tr>
+    <tr><td>Mantener B</td><td>El reloj avanza una hora.</td></tr>
+    <tr><td>Mantener A + C · 2 s</td><td>Abre el <a href="#p-menu"><b>menú</b></a>.</td></tr>
+  </table>
+</section>
+
+<!-- ============================ 9 · MENÚ ============================ -->
+<section class="page" id="p-menu">
+  <div class="eyebrow"><span><b>§06</b> · Interfaz</span><span>A + C · 2 s</span></div>
+  <h1>El menú</h1>
+  <p class="lede">Mantené <span class="k">A</span> y <span class="k">C</span> juntos dos segundos, desde cualquier lado (también en pleno juego).</p>
+
+  <div class="subscreens">
+    <figure><div class="screen-frame"><img class="px" src="img/ui-menu_1_principal.png"></div><figcaption>Menú</figcaption></figure>
+    <figure><div class="screen-frame"><img class="px" src="img/ui-menu_3_minijuegos.png"></div><figcaption>Minijuegos</figcaption></figure>
+    <figure><div class="screen-frame"><img class="px" src="img/ui-menu_5_configuracion.png"></div><figcaption>Configuración</figcaption></figure>
+  </div>
+
+  <div class="btn-legend">
+    <div><span class="k big">A</span><div><b>Baja</b><span class="d">siguiente opción</span></div></div>
+    <div><span class="k big">B</span><div><b>Sube</b><span class="d">opción anterior</span></div></div>
+    <div><span class="k big">C</span><div><b>Elige</b><span class="d">entra en la marcada</span></div></div>
+  </div>
+
+  <ul class="tree">
+    <li><span class="item">Volver con el mono</span> <span class="desc">Cierra el menú.</span></li>
+    <li><span class="item">Minijuegos</span>
+      <div class="sub">
+        <div><span class="item">Cocos Rodantes</span> <span class="desc">p. <a href="#p-juego" class="pnum"></a></span></div>
+        <div><span class="item">Volver</span></div>
+      </div>
+    </li>
+    <li><span class="item">Configuración</span>
+      <div class="sub">
+        <div><span class="item">Desde el celular</span> <span class="desc">WiFi y hora, p. <a href="#p-wifi" class="pnum"></a></span></div>
+        <div><span class="item">Hora por internet</span> <span class="desc">Ya mismo. Sin WiFi, te ofrece «Desde el celular».</span></div>
+        <div><span class="item">Acerca del 0xMono</span> <span class="desc">Versión, WiFi, hora y zona.</span></div>
+        <div><span class="item">Volver</span></div>
+      </div>
+    </li>
+  </ul>
+
+  <div class="note" style="margin-top:3mm">
+    <p class="small">La opción marcada es la del recuadro. Las listas son circulares: después de la última viene la primera.</p>
+  </div>
+</section>
+
+<!-- ============================ 10 · WIFI (1) ============================ -->
+<section class="page" id="p-wifi">
+  <div class="eyebrow"><span><b>§07</b> · Configuración</span><span>192.168.4.1</span></div>
+  <h1>WiFi y hora desde el celular</h1>
+  <p class="lede">Una sola vez. Sin app, sin cuenta, sin instalar nada.</p>
+
+  <div class="two" style="gap:5mm; align-items:flex-start">
+    <ol class="steps" style="flex:1">
+      <li>
+        <h3>Abrí la configuración</h3>
+        <p>Menú, <b>Configuración</b>, <b>Desde el celular</b>. Durante unos segundos dice “Preparando mi red WiFi…”.</p>
+      </li>
+      <li>
+        <h3>Conectate a su red</h3>
+        <p>Aparece un QR, el nombre de su red (empieza con <code>0xMono-</code>) y una clave de 8 caracteres. Escaneá el QR con la cámara y aceptá, o conectate a mano.</p>
+      </li>
+    </ol>
+    <figure class="scr"><div class="screen-frame"><img class="px" src="img/ui-config_2_unirse.png"></div><figcaption>Paso 02 · tu red tiene otro nombre</figcaption></figure>
+  </div>
+
+  <div class="two" style="gap:5mm; align-items:flex-start; margin-top:1mm">
+    <ol class="steps start-3" style="flex:1">
+      <li>
+        <h3>Abrí la página</h3>
+        <p>Cuando el celular se conecta, la pantalla dice “¡Ya estás conectado!”. En general la página se abre sola; si no, escaneá el segundo QR o entrá a <code>http://192.168.4.1</code>.</p>
+        <p class="small muted">Mientras estás en la red del mono el celular no tiene internet. Es esperable: después vuelve solo a tu WiFi.</p>
+      </li>
+    </ol>
+    <figure class="scr"><div class="screen-frame"><img class="px" src="img/ui-config_3_abrir.png"></div><figcaption>Paso 03 · QR de la página</figcaption></figure>
+  </div>
+
+  <div class="note">
+    <span class="tag">Cancelar</span>
+    <p class="small"><span class="k">C</span> en el aparato vuelve a la casa sin guardar. Si pasan 10 minutos sin guardar, vuelve solo.</p>
+  </div>
+</section>
+
+<!-- ============================ 11 · WIFI (2) ============================ -->
+<section class="page">
+  <div class="eyebrow"><span><b>§07</b> · Configuración</span><span>en el celular</span></div>
+  <h2 style="font-size:15pt; margin-bottom:4mm">La página de configuración</h2>
+  <div class="portal">
+    <div class="phone"><img src="img/portal-phone.png"></div>
+    <ol class="steps start-4" style="flex:1">
+      <li>
+        <h3>Mi WiFi</h3>
+        <p>Elegí tu red: la más fuerte arriba; la ya guardada dice “guardada ✓”. Solo ve <b>2,4 GHz</b>: si tu router tiene dos redes, la que no dice “5G”. ¿Red oculta? <b>Otra red</b>.</p>
+        <p>Después, la <b>clave</b> (vacía, usa la de antes). O <b>Sin WiFi por ahora</b>.</p>
+      </li>
+    </ol>
+  </div>
+  <div class="portal" style="margin-top:3mm">
+    <ol class="steps start-5" style="flex:1">
+      <li>
+        <h3>La hora</h3>
+        <p><b>Automática por internet</b>, con tu zona horaria (por defecto, Argentina, UTC-3). O <b>La pongo yo</b>, que ya trae la hora del celular.</p>
+      </li>
+      <li>
+        <h3>¡Guardar!</h3>
+        <p>El botón rosa. El celular muestra “¡Listo!”, el mono dice “¡Guardado!”, se reinicia y vuelve a su casa.</p>
+      </li>
+    </ol>
+    <div class="phone"><img src="img/portal-phone-2.png"></div>
+  </div>
+
+  <div class="box" style="margin-top:4mm">
+    <span class="tag">Empezar de nuevo · plegado, al final de la página</span>
+    <div class="two">
+      <p class="small" style="margin:0"><b>Mono nuevo.</b> El tuyo se va de viaje y llega otro, con otra personalidad y otra rutina. WiFi y hora no se tocan.</p>
+      <p class="small" style="margin:0"><b>Restablecer de fábrica.</b> Borra WiFi, hora y mono. Como recién salido de la caja.</p>
+    </div>
+    <p class="small muted" style="margin:1.4mm 0 0">Los dos piden tildar una casilla “Sí, …”. Nadie trae un mono nuevo sin querer.</p>
+  </div>
+</section>
+
+<!-- ============================ 12 · JUEGO ============================ -->
+<section class="page" id="p-juego">
+  <div class="eyebrow"><span><b>§08</b> · Minijuego</span><span>Menú → Minijuegos</span></div>
+  <h1>Cocos Rodantes</h1>
+  <p>Un tucán se robó las bananas y se atrincheró arriba de una torre de andamios. Tira cocos. Subí y recuperalas.</p>
+
+  <div class="subscreens" style="margin-top:3mm">
+    <figure><div class="screen-frame"><img class="px" src="img/cocos-1_portada.png"></div><figcaption>C empieza · B sale</figcaption></figure>
+    <figure><div class="screen-frame"><img class="px" src="img/cocos-3_jugando.png"></div><figcaption>Puntos · nivel · vidas · bono</figcaption></figure>
+    <figure><div class="screen-frame"><img class="px" src="img/cocos-4_fin.png"></div><figcaption>C otra vez · B sale</figcaption></figure>
+  </div>
+
+  <div class="two" style="gap:5mm; margin-top:4mm">
+    <div>
+      <h3>Controles</h3>
+      <div class="controls">
+        <div><span class="keys"><span class="k">A</span></span> <span>Izquierda</span></div>
+        <div><span class="keys"><span class="k">C</span></span> <span>Derecha</span></div>
+        <div><span class="keys"><span class="k">B</span></span> <span>Salta. En el aire, A y C corrigen.</span></div>
+      </div>
+      <h3 style="margin-top:2.5mm">Escaleras</h3>
+      <p class="small">Al pie de una escalera titila una flecha sobre el mono: <span class="k">B</span> para agarrarte. Mantené <span class="k">B</span> para subir; soltalo y queda colgado; <span class="k">A</span> o <span class="k">C</span> para bajar. En los extremos se baja solo. Las escaleras rotas no se suben, pero los cocos sí pueden caer por ellas.</p>
+    </div>
+    <div>
+      <h3>Puntaje</h3>
+      <table class="score">
+        <tr><td>Saltar un coco</td><td>+100</td></tr>
+        <tr><td>Cada banana (hay 4)</td><td>+200</td></tr>
+        <tr><td>Llegar arriba</td><td>+1000 + bono</td></tr>
+      </table>
+      <p class="small" style="margin-top:2mm">El bono arranca en 3000 y baja 100 cada 2 s; en rojo, queda poco. Un coco que tiembla con un <b>!</b> rojo está por bajar por una escalera.</p>
+      <p class="small">3 vidas. Caer por un hueco no cuenta. Cada nivel, más cocos y más rápidos; los pares, espejados.</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <p class="small">Al final: puntos, mejor marca de la sesión y, si corresponde, “¡Nuevo récord!”. Si aparece alguien, <span class="nowrap"><span class="k">A</span> + <span class="k">C</span></span> abre el menú en pleno juego.</p>
+  </div>
+</section>
+
+<!-- ============================ 13 · CUIDADOS ============================ -->
+<section class="page" id="p-cuidados">
+  <div class="eyebrow"><span><b>§09</b> · Mantenimiento</span><span>handle with care</span></div>
+  <h1>Cuidados</h1>
+  <p class="lede">Hardware hecho a mano. Tratalo como a un prototipo, no como a un ladrillo.</p>
+
+  <div class="care">
+    <div><h3><span class="mono">01</span>Líquidos</h3><p>Lejos del agua, el mate y el café. La electrónica no tiene seguro.</p></div>
+    <div><h3><span class="mono">02</span>Pantalla</h3><p>No se aprieta. Atrás tiene una cinta flex finita que se rompe con poco.</p></div>
+    <div><h3><span class="mono">03</span>Alimentación</h3><p>Cualquier cargador de celular de 5 V. No hace falta carga rápida.</p></div>
+    <div><h3><span class="mono">04</span>Abrirlo</h3><p>No hay nada para cambiar adentro. Si igual lo abrís: desenchufado.</p></div>
+    <div><h3><span class="mono">05</span>Temperatura</h3><p>Ni sol directo, ni auto cerrado, ni estufa. El MDF y la pantalla lo agradecen.</p></div>
+    <div><h3><span class="mono">06</span>Limpieza</h3><p>Paño seco y suave. Sin alcohol, sin limpiavidrios.</p></div>
+    <div><h3><span class="mono">07</span>Caídas</h3><p>Por fuera es madera; por dentro, no. Lejos del borde del escritorio.</p></div>
+    <div><h3><span class="mono">08</span>Uso continuo</h3><p>Está pensado para vivir enchufado, todos los días.</p></div>
+  </div>
+
+  <div class="box two" style="align-items:center; gap:4mm; margin-top:5mm">
+    <img class="px shot" src="img/t-nap.png" style="flex:none; width:28mm">
+    <div>
+      <span class="tag">Ausencias prolongadas</span>
+      <p class="small">¿Vacaciones? Desenchufalo sin culpa: se pausa y te espera.</p>
+      <p class="small" style="margin:0">Al volver, con WiFi se pone en hora solo. Sin WiFi, <span class="k">B</span>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 14 · SI ALGO FALLA ============================ -->
+<section class="page" id="p-faq">
+  <div class="eyebrow"><span><b>§10</b> · Diagnóstico</span><span>FAQ</span></div>
+  <h1>Si algo falla</h1>
+
+  <dl class="faq">
+    <dt>Pantalla negra, o se quedó trabado</dt>
+    <dd>Revisá el cable de los dos lados y que el enchufe ande. Desenchufalo 10 segundos y volvé a enchufarlo: el mono está guardado, no se pierde. Si sigue igual, otro cable y otro cargador.</dd>
+    <dt>La hora está mal</dt>
+    <dd>Si estuvo desenchufado, el reloj quedó parado. Con WiFi: desenchufar y enchufar, o menú, <b>Configuración</b>, <b>Hora por internet</b>. Sin WiFi: <span class="k">B</span> suma horas.</dd>
+    <dt>Le erra por exactamente una hora</dt>
+    <dd>Las zonas horarias son fijas: no sabe del horario de verano. Si tu zona cambia la hora, cambiá la zona en la página de configuración.</dd>
+    <dt>Dice “No pude ponerme en hora”</dt>
+    <dd>Te dice por qué: clave incorrecta, no encuentra la red (solo ve <b>2,4 GHz</b>; elegí la que no dice “5G”) o no hay internet. Mientras tanto sigue con su reloj. Corregilo en menú, <b>Configuración</b>, <b>Desde el celular</b>.</dd>
+    <dt>No aparece la red 0xMono en el celular</dt>
+    <dd>Esperá a que la pantalla diga “¡Conectate a mi red!” y actualizá la lista. O escaneá el QR, que se conecta solo.</dd>
+    <dt>Me conecté, pero no abre la página</dt>
+    <dd>Escaneá el segundo QR (“¡Ya estás conectado!”) o entrá a <code>http://192.168.4.1</code>. Si tampoco, apagá un momento los datos móviles.</dd>
+    <dt>Volvió a la casa en medio de la configuración</dt>
+    <dd>Pasaron 10 minutos sin guardar, o alguien apretó <span class="k">C</span>. Empezá de nuevo desde el menú. (¿Y si no hay nadie en la casa? Salió de visita: ver #04.)</dd>
+    <dt>Rayas o colores raros en la pantalla</dt>
+    <dd>Probablemente la cinta flex. No la aprietes; avisale a quien te lo regaló. Tiene arreglo.</dd>
+    <dt>Quiero empezar de cero</dt>
+    <dd>Página de configuración, al final: <b>Empezar de nuevo</b>. <b>Mono nuevo</b> conserva WiFi y hora; <b>Restablecer de fábrica</b> borra todo.</dd>
+  </dl>
+</section>
+
+<!-- ============================ 15 · DATOS ============================ -->
+<section class="page" id="p-datos">
+  <div class="eyebrow"><span><b>§11</b> · Especificaciones</span><span>v0.1.0</span></div>
+  <h1>Datos técnicos</h1>
+  <table class="specs" style="margin-bottom:5mm">
+    <tr><td>CPU</td><td>ESP32-C3, RISC-V a 160 MHz, WiFi 2,4 GHz</td></tr>
+    <tr><td>Pantalla</td><td>IPS 1,3″, 240 × 240, ST7789</td></tr>
+    <tr><td>Entrada</td><td>3 botones: A, B, C</td></tr>
+    <tr><td>Energía</td><td>USB-C, 5 V. Sin batería</td></tr>
+    <tr><td>Carcasa</td><td>MDF de 5 mm, cortado y pegado a mano</td></tr>
+    <tr><td>Software</td><td>Rust. Casa y mono en 3D, dibujados en tiempo real</td></tr>
+    <tr><td>Versión</td><td>0.1.0 · Menú, Configuración, Acerca del 0xMono</td></tr>
+  </table>
+
+  <div class="oss" style="margin-bottom:7mm">
+    <img src="img/qr-github.svg">
+    <div>
+      <h3>Código abierto</h3>
+      <p class="small">Firmware, modelos 3D y planos de la carcasa están publicados. Forks bienvenidos.</p>
+      <p class="small" style="margin:0"><code>github.com/FedeJure/0xMono</code></p>
+    </div>
+  </div>
+
+  <div class="legal">
+    <div class="stamp">QC · OK</div>
+    <h2>Garantía limitada</h2>
+    <p>Este producto está cubierto contra defectos de fabricación por tiempo indeterminado, sujeto a la disponibilidad del fabricante y de su soldador.</p>
+    <p>La garantía no cubre: líquidos derramados (mate incluido), caídas desde el escritorio, cambios de humor del mono, pérdidas en el mercado cripto ni sus opiniones sobre tu código. El mono no brinda asesoramiento financiero. Rendimientos pasados de bananas no garantizan rendimientos futuros.</p>
+    <div class="sign-line"><div>Firma del fabricante</div><div>Fecha</div></div>
+  </div>
+</section>
+
+<!-- ============================ 16 · CONTRATAPA ============================ -->
+<section class="page cover-page">
+  <div class="back-card">
+    <div class="logo"><span class="x">0x</span>Mono</div>
+    <p class="quote">El avatar del trabajo, versión física. Trabaja de 9 a 18, como todos.</p>
+    <div class="back-strip">
+      <img class="px" src="img/t-mate.png"><img class="px" src="img/t-guitar.png"><img class="px" src="img/t-games.png">
+    </div>
+    <div class="back-feats">
+      <div><span>Pantalla</span><span>240 × 240</span></div>
+      <div><span>Actividades</span><span>26</span></div>
+      <div><span>Botones</span><span>3</span></div>
+      <div><span>Minijuegos</span><span>1</span></div>
+      <div><span>Hora</span><span>auto · WiFi</span></div>
+      <div><span>Código</span><span>abierto</span></div>
+      <div><span>Bananas reales</span><span>0</span></div>
+      <div><span>Monos</span><span>1</span></div>
+    </div>
+    <p class="back-note">El mono no brinda asesoramiento financiero.<br>Sus opiniones sobre tu código son solo suyas.</p>
+    <div class="back-foot">
+      <span>Hecho a mano en Argentina · 2026<br>Edición: 1 de 1</span>
+      <img src="img/banana.svg">
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

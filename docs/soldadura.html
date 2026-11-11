@@ -1,0 +1,1025 @@
+<title>Soldadura del CustomTamagochi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Pixelify+Sans:wght@500;700&display=swap">
+<style>
+/* Misma identidad que docs/armado.html: guía de banco de trabajo, con el progreso marcado renglón por renglón. */
+:root {
+  --bg: #eaeee8;
+  --surface: #f8faf6;
+  --ink: #1a2026;
+  --muted: #56616a;
+  --line: #cfd7cd;
+  --accent: #155fb0;
+  --accent-soft: #d9e6f5;
+  --danger: #b3261e;
+  --danger-soft: #f9e1de;
+  --warn: #9a5b00;
+  --warn-soft: #f8ebcf;
+  --ok: #2c6e31;
+  --ok-soft: #dcefdc;
+  --code-bg: #eef2ec;
+  /* objetos físicos: mismos colores en los dos temas */
+  --bb: #f4f4f0;
+  --bb-edge: #c9ccc4;
+  --bb-hole: #3a3f44;
+  --pcb: #183a57;
+  --pcb-ink: #e9f1f8;
+  --pcb-tft: #17191c;
+  --pcb-green: #2e6b3e;
+  --pin: #d4a73a;
+  --plastic: #222629;
+  --metal: #9aa4ad;
+  --solder: #c9ced3;
+  --copper: #c8793a;
+  --w-5v: #d0312d;
+  --w-3v3: #e8710a;
+  --w-gnd: #2b3238;
+  --w-uart: #0b8a7a;
+  --font-display: "Pixelify Sans", "Courier New", monospace;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --step--1: 0.875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.3rem;
+  --step-2: 1.7rem;
+  --step-3: 2.4rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1215; --surface: #161c20; --ink: #e5eaee; --muted: #9ba7b0; --line: #2a333a;
+    --accent: #6cb4ff; --accent-soft: #16304c; --danger: #ff8a80; --danger-soft: #3b1714;
+    --warn: #f3b44e; --warn-soft: #36270c; --ok: #86d18b; --ok-soft: #14301a; --code-bg: #12181c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1215; --surface: #161c20; --ink: #e5eaee; --muted: #9ba7b0; --line: #2a333a;
+  --accent: #6cb4ff; --accent-soft: #16304c; --danger: #ff8a80; --danger-soft: #3b1714;
+  --warn: #f3b44e; --warn-soft: #36270c; --ok: #86d18b; --ok-soft: #14301a; --code-bg: #12181c;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--step-0); line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1080px; margin: 0 auto; }
+.prose { max-width: 68ch; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; }
+h1 { font-family: var(--font-display); font-size: var(--step-3); font-weight: 700; margin: 0; letter-spacing: 0.01em; }
+h2 { font-family: var(--font-display); font-size: var(--step-2); font-weight: 500; margin: 0 0 12px; }
+h3 { font-size: var(--step-1); margin: 24px 0 8px; }
+p { margin: 0 0 12px; }
+a { color: var(--accent); }
+code { font-family: var(--font-mono); font-size: 0.88em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+pre { font-family: var(--font-mono); font-size: var(--step--1); background: var(--code-bg); border-radius: 8px; padding: 10px 12px; overflow-x: auto; margin: 8px 0 12px; }
+.eyebrow { font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: var(--step--1); }
+section { padding-block: 40px 8px; border-top: 1px solid var(--line); margin-top: 32px; scroll-margin-top: 56px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+nav.toc {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 6px; overflow-x: auto; padding-block: 10px;
+  scrollbar-width: thin;
+}
+nav.toc a {
+  flex: none; text-decoration: none; color: var(--ink); font-size: var(--step--1);
+  border: 1px solid var(--line); background: var(--surface); padding: 4px 10px; border-radius: 999px;
+}
+nav.toc a:hover { border-color: var(--accent); color: var(--accent); }
+
+.hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: start; padding-block: 32px 8px; }
+.hero .lede { font-size: var(--step-1); color: var(--muted); margin-top: 12px; max-width: 36ch; }
+@media (max-width: 820px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+
+.tally { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+.tally h3 { font-size: var(--step-0); margin: 0 0 10px; }
+.tally ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.tally li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: baseline; border-bottom: 1px dashed var(--line); padding-bottom: 8px; }
+.tally li:last-child { border-bottom: 0; }
+.tally a { color: var(--ink); text-decoration: none; }
+.tally a:hover { color: var(--accent); }
+.tally .n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 600; white-space: nowrap; font-size: var(--step--1); }
+.tally .sub { display: block; color: var(--muted); font-size: var(--step--1); }
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+.meter { height: 10px; background: var(--code-bg); border-radius: 999px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line); margin-top: 10px; }
+.meter i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .2s; }
+@media (prefers-reduced-motion: reduce) { .meter i { transition: none; } }
+button.chip { cursor: pointer; font: inherit; font-size: var(--step--1); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px; }
+button.chip[aria-pressed="true"] { background: var(--ok-soft); border-color: var(--ok); }
+
+.callout { border-radius: 10px; padding: 14px 16px; margin-block: 16px; border: 1px solid var(--line); background: var(--surface); }
+.callout.ok { background: var(--ok-soft); border-color: transparent; }
+.callout.warn { background: var(--warn-soft); border-color: transparent; }
+.callout.danger { background: var(--danger-soft); border-color: transparent; }
+.callout.info { background: var(--accent-soft); border-color: transparent; }
+.callout strong:first-child { display: block; margin-bottom: 4px; }
+.callout > :last-child { margin-bottom: 0; }
+
+.tag { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 4px; padding: 1px 6px; margin-right: 6px; vertical-align: 2px; }
+.tag.danger { background: var(--danger-soft); color: var(--danger); }
+.tag.warn { background: var(--warn-soft); color: var(--warn); }
+.tag.ok { background: var(--ok-soft); color: var(--ok); }
+.tag.info { background: var(--accent-soft); color: var(--accent); }
+
+.rules { list-style: none; padding: 0; margin: 16px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+.rules li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.rules .why { display: block; color: var(--muted); font-size: var(--step--1); margin-top: 2px; }
+
+figure { margin: 16px 0; }
+.fig { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; overflow-x: auto; }
+.fig svg { display: block; width: 100%; height: auto; min-width: 640px; }
+.fig.narrow svg { min-width: 0; }
+figcaption { font-size: var(--step--1); color: var(--muted); margin-top: 8px; }
+svg text { font-family: var(--font-body); }
+svg .lbl { fill: var(--ink); font-size: 13px; }
+svg .lbl-b { fill: var(--ink); font-size: 14px; font-weight: 700; }
+svg .lbl-s { fill: var(--muted); font-size: 11.5px; }
+svg .num { fill: var(--accent); font-family: var(--font-display); font-size: 18px; }
+svg .pcb-t { fill: var(--pcb-ink); font-size: 9px; font-family: var(--font-mono); }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; margin-block: 16px; }
+.split { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: start; margin-block: 16px; }
+.split figure { margin: 0; }
+@media (max-width: 820px) { .split { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+.card h3 { margin-top: 0; font-size: var(--step-0); }
+.card > :last-child { margin-bottom: 0; }
+
+.frames { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+@media (max-width: 760px) { .frames { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.frames figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px; }
+.frames svg { width: 100%; height: auto; display: block; }
+.frames figcaption { margin: 6px 2px 2px; color: var(--ink); }
+.frames figcaption b { display: block; }
+.frames figcaption span { color: var(--muted); }
+
+.joints { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+@media (max-width: 560px) { .joints { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.joints figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px; text-align: center; }
+.joints svg { width: 100%; height: auto; max-height: 130px; }
+.joints figcaption { margin: 4px 0 0; }
+
+.table-wrap { overflow-x: auto; margin: 12px 0; }
+table { border-collapse: collapse; width: 100%; font-size: var(--step--1); font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 700; }
+td:first-child { min-width: 150px; }
+
+.todo { list-style: none; padding: 0; margin: 10px 0; display: grid; gap: 6px; }
+.todo li { display: block; }
+.todo label {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px;
+}
+.todo label:hover, .todo input:focus-visible + .what { border-color: var(--accent); }
+.todo label:has(input:checked) { border-color: var(--ok); }
+.todo label:has(input:checked) .what { color: var(--muted); }
+.todo label:has(input:checked) .what b { text-decoration: line-through; text-decoration-color: var(--ok); }
+.todo input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--ok); }
+.todo .what b { font-weight: 700; }
+.todo .hint { display: block; font-size: var(--step--1); color: var(--muted); }
+.progress { font-size: var(--step--1); color: var(--muted); font-variant-numeric: tabular-nums; font-family: var(--font-mono); font-weight: 400; }
+.head { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; justify-content: space-between; }
+.gate { background: var(--ok-soft); border-radius: 10px; padding: 12px 16px; margin-block: 14px; }
+.gate b:first-child { color: var(--ok); }
+.buy { padding-left: 1.1em; margin: 8px 0 0; }
+.buy li { margin-bottom: 6px; }
+footer { margin-top: 48px; color: var(--muted); font-size: var(--step--1); }
+</style>
+
+<div class="wrap">
+
+<header class="hero" id="inicio">
+  <div>
+    <div class="eyebrow">Guía de banco · desde cero</div>
+    <h1>Soldadura del CustomTamagochi</h1>
+    <p class="lede">Empezás sin haber soldado nunca y terminás con todas las piezas listas para la protoboard. Son cinco sesiones cortas, y cada una termina con una prueba.</p>
+    <p class="muted">Tené esta página abierta en el celular mientras trabajás y marcá cada renglón al terminarlo. Botones, resistencia y cables dupont no se sueldan: van enchufados en la protoboard.</p>
+    <div class="tools">
+      <button type="button" class="chip" id="wake" aria-pressed="false">Mantener la pantalla prendida</button>
+      <span class="small muted" id="store-note">El progreso se guarda en este navegador.</span>
+    </div>
+  </div>
+  <aside class="tally" aria-label="Las sesiones de soldadura">
+    <h3>Tu recorrido <span class="progress" id="total-progress"></span></h3>
+    <ol>
+      <li><a href="#practica">1 · Preparar y practicar<span class="sub">sin tocar ninguna pieza del proyecto</span></a><span class="n">60–90 min</span></li>
+      <li><a href="#supermini">2 · SuperMini<span class="sub">16 puntos</span></a><span class="n">30 min</span></li>
+      <li><a href="#pantalla">3 · Pantalla ST7789<span class="sub">7 u 8 puntos, si vino sin pines</span></a><span class="n">20 min</span></li>
+      <li><a href="#dy">4 · DY-SV17F<span class="sub">9 puntos o más, si vino sin pines</span></a><span class="n">30 min</span></li>
+      <li><a href="#parlante">5 · Parlante<span class="sub">2 empalmes de cable</span></a><span class="n">30 min</span></li>
+    </ol>
+    <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+    <p class="muted small" style="margin:10px 0 0">Tiempos estimados para alguien que recién empieza. Podés hacer cada sesión en un día distinto. La <a href="#etapa2">placa final</a> viene más adelante.</p>
+  </aside>
+</header>
+
+<nav class="toc" aria-label="Secciones">
+  <a href="#flux">Sin flux</a>
+  <a href="#mesa">La mesa</a>
+  <a href="#punto">Cómo se hace un punto</a>
+  <a href="#practica">1 · Práctica</a>
+  <a href="#supermini">2 · SuperMini</a>
+  <a href="#clavar">Clavar los pines</a>
+  <a href="#pantalla">3 · Pantalla</a>
+  <a href="#dy">4 · DY-SV17F</a>
+  <a href="#parlante">5 · Parlante</a>
+  <a href="#errores">Si algo sale mal</a>
+  <a href="#etapa2">Más adelante</a>
+</nav>
+
+<section id="flux">
+  <div class="prose">
+    <h2>Soldar sin flux: se puede, con una condición</h2>
+    <p>El flux limpia el óxido del metal en el momento de soldar. Sin él, el estaño no se pega: hace bolitas y resbala. Lo que te falta es el flux <b>aparte</b>, en frasco o jeringa. Si tu estaño es de electrónica, casi seguro ya trae flux en un núcleo adentro del alambre, y para soldar pines eso alcanza.</p>
+  </div>
+  <h3>Primero, comprobá tu estaño</h3>
+  <ul class="todo">
+    <li><label><input type="checkbox" id="f1"><span class="what"><b>Leé la etiqueta.</b><span class="hint">Buscá “rosin core”, “flux core”, “núcleo de resina” o un porcentaje como “2 % flux”. También te dice qué aleación es, y la vas a necesitar para la temperatura.</span></span></label></li>
+    <li><label><input type="checkbox" id="f2"><span class="what"><b>Si no hay etiqueta, derretí un poco.</b><span class="hint">Con el soldador caliente, fundí 1 cm. Si sale un hilito de humo con olor a resina, tiene flux. Si no sale humo y el estaño se queda en bola, no tiene.</span></span></label></li>
+  </ul>
+  <div class="callout danger">
+    <strong>Si tu estaño no tiene flux, frená acá</strong>
+    <p>Con ese estaño no vas a lograr puntos confiables. Comprá estaño para electrónica con núcleo de flux, de 0,6 a 1 mm. Es más barato que reemplazar una placa.</p>
+  </div>
+  <h3>Tres costumbres que reemplazan al frasco de flux</h3>
+  <div class="two">
+    <div class="card">
+      <h3>El estaño va a la unión, no a la punta</h3>
+      <p>El flux del núcleo se quema en uno o dos segundos sobre la punta caliente. Si llevás una gota en la punta hasta el pin, llega sin flux y no se pega.</p>
+    </div>
+    <div class="card">
+      <h3>Cada retoque lleva estaño nuevo</h3>
+      <p>Recalentar un punto no sirve: su flux ya se gastó. Agregá 1 o 2 mm de alambre y el flux nuevo hace el trabajo. Es la solución a casi todos los errores.</p>
+    </div>
+    <div class="card">
+      <h3>Nunca más de 5 segundos</h3>
+      <p>Si no fluyó en 5 segundos, insistir empeora todo y puede despegar el cobre. Retirá, esperá 15 segundos, limpiá la punta y volvé a empezar.</p>
+    </div>
+  </div>
+  <div class="callout warn">
+    <strong>Dónde vas a extrañar el flux</strong>
+    <p>En arreglar puentes y en los cables finitos del parlante. Si en la práctica eso te cuesta mucho, comprá flux para electrónica, en líquido, gel o pasta, que diga <b>sin ácido</b> (“rosin” o “no-clean”). Para la <a href="#etapa2">placa final</a> te recomiendo tenerlo igual.</p>
+    <p><b>No uses pasta para soldar caños o chapa.</b> Es ácida y corroe las pistas de la placa con el tiempo.</p>
+  </div>
+</section>
+
+<section id="mesa">
+  <div class="prose">
+    <h2>Armar la mesa</h2>
+    <p>Marcá lo que tenés antes de calentar nada. Si falta algo de la primera lista, conseguilo primero.</p>
+  </div>
+  <div class="two">
+    <div>
+      <h3 style="margin-top:0">Imprescindible</h3>
+      <ul class="todo">
+        <li><label><input type="checkbox" id="m1"><span class="what"><b>Soldador con soporte</b><span class="hint">Mejor si regula temperatura. Punta plana chica o fina.</span></span></label></li>
+        <li><label><input type="checkbox" id="m2"><span class="what"><b>Estaño de 0,6 a 1 mm con núcleo de flux</b></span></label></li>
+        <li><label><input type="checkbox" id="m3"><span class="what"><b>Limpiador de punta</b><span class="hint">Viruta de latón, o una esponja mojada y bien escurrida.</span></span></label></li>
+        <li><label><input type="checkbox" id="m4"><span class="what"><b>Multímetro con continuidad</b><span class="hint">Es el que pita.</span></span></label></li>
+        <li><label><input type="checkbox" id="m5"><span class="what"><b>Protoboard</b><span class="hint">Sostiene los pines derechos mientras soldás.</span></span></label></li>
+        <li><label><input type="checkbox" id="m6"><span class="what"><b>Tiras de pines</b><span class="hint">Dos de 8 para la SuperMini, más las de la pantalla y el DY-SV17F si vinieron sueltas.</span></span></label></li>
+        <li><label><input type="checkbox" id="m7"><span class="what"><b>Dos cables dupont con punta hembra</b><span class="hint">Para el parlante, y aparte de los del armado. En total necesitás 14 o 15 hembra–macho para pantalla y sonido, estos 2 y 10 macho–macho. No uses cables contados para practicar.</span></span></label></li>
+        <li><label><input type="checkbox" id="m8"><span class="what"><b>Termocontraíble de 2–3 mm o cinta aisladora</b></span></label></li>
+        <li><label><input type="checkbox" id="m9"><span class="what"><b>Alicate de corte o pelacables</b></span></label></li>
+        <li><label><input type="checkbox" id="m10"><span class="what"><b>Anteojos de protección</b><span class="hint">Los comunes de lectura también sirven.</span></span></label></li>
+        <li><label><input type="checkbox" id="m11"><span class="what"><b>Azulejo o tabla de madera</b><span class="hint">Protege la mesa de las gotas de estaño.</span></span></label></li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Para practicar, elegí uno</h3>
+      <ul class="todo">
+        <li><label><input type="checkbox" id="m12"><span class="what"><b>Placa perforada y pines sobrantes</b><span class="hint">Es lo mejor, porque se parece a la soldadura real.</span></span></label></li>
+        <li><label><input type="checkbox" id="m13"><span class="what"><b>Una placa de un aparato chico roto</b><span class="hint">Un control remoto o un juguete. No uses fuentes, televisores ni microondas: guardan carga peligrosa.</span></span></label></li>
+        <li><label><input type="checkbox" id="m14"><span class="what"><b>Un cable viejo</b><span class="hint">USB o de auriculares rotos: pelá el forro y adentro hay cables finitos como los del parlante. También sirven las dos mitades macho que sobran al cortar los dupont del parlante. Alcanza para los ejercicios 1 y 2. Para los pines, conseguí algo de lo anterior.</span></span></label></li>
+      </ul>
+      <h3>Ayuda mucho</h3>
+      <ul class="buy">
+        <li><b>Tercera mano</b> o cinta de papel, para sujetar cables.</li>
+        <li><b>Pinza</b> de puntas finas.</li>
+        <li><b>Malla desoldante o sacaestaño</b>, para corregir.</li>
+        <li><b>Alcohol isopropílico</b>, para limpiar pads opacos.</li>
+        <li>La <b>cámara del celular</b> sirve de lupa para revisar.</li>
+      </ul>
+    </div>
+  </div>
+
+  <figure>
+    <div class="fig narrow">
+      <svg viewBox="0 0 720 350" role="img" aria-label="Mesa vista desde arriba: el trabajo en el centro sobre un azulejo, el soldador a la derecha en su soporte, el estaño a la izquierda y el humo alejándose de la cara">
+        <defs><marker id="smoke" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker></defs>
+        <rect x="16" y="14" width="688" height="290" rx="10" fill="var(--code-bg)" stroke="var(--line)" stroke-width="2"/>
+        <!-- azulejo y protoboard -->
+        <rect x="240" y="120" width="240" height="160" rx="4" fill="var(--surface)" stroke="var(--line)" stroke-width="2"/>
+        <rect x="266" y="152" width="188" height="96" rx="4" fill="var(--bb)" stroke="var(--bb-edge)" stroke-width="2"/>
+        <text class="lbl-s" x="360" y="272" text-anchor="middle">azulejo o tabla</text>
+        <text x="360" y="204" text-anchor="middle" font-size="12" fill="#56616a">protoboard</text>
+        <!-- humo -->
+        <path d="M360 146 C 350 110, 372 90, 360 42" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#smoke)"/>
+        <text class="lbl-s" x="376" y="66">el humo se aleja de tu cara</text>
+        <text class="lbl-s" x="376" y="82">ventilador chico o ventana abierta</text>
+        <!-- estaño -->
+        <circle cx="130" cy="190" r="42" fill="var(--solder)" stroke="var(--metal)" stroke-width="2"/>
+        <circle cx="130" cy="190" r="14" fill="var(--code-bg)" stroke="var(--metal)" stroke-width="2"/>
+        <text class="lbl" x="130" y="256" text-anchor="middle">estaño</text>
+        <text class="lbl-s" x="130" y="272" text-anchor="middle">mano izquierda</text>
+        <!-- multímetro -->
+        <rect x="52" y="34" width="62" height="88" rx="8" fill="#f2c230"/>
+        <rect x="62" y="44" width="42" height="24" rx="2" fill="#b9c7a8"/>
+        <circle cx="83" cy="96" r="14" fill="#3c4247"/>
+        <text class="lbl-s" x="124" y="76">multímetro</text>
+        <!-- soporte y soldador -->
+        <rect x="552" y="176" width="96" height="74" rx="6" fill="var(--plastic)"/>
+        <path d="M566 214 L 618 196 L 634 214 L 618 232 Z" fill="var(--metal)"/>
+        <path d="M618 214 L 690 120" stroke="var(--w-5v)" stroke-width="16" stroke-linecap="round"/>
+        <text class="lbl" x="600" y="268" text-anchor="middle">soldador en su soporte</text>
+        <text class="lbl-s" x="600" y="284" text-anchor="middle">mano derecha</text>
+        <!-- limpiador -->
+        <rect x="548" y="66" width="76" height="44" rx="6" fill="var(--pin)"/>
+        <text class="lbl-s" x="586" y="52" text-anchor="middle">limpiador de punta</text>
+        <!-- vos -->
+        <path d="M300 348 Q 360 300, 420 348 Z" fill="var(--muted)"/>
+        <text x="360" y="340" text-anchor="middle" font-size="13" font-weight="700" fill="var(--surface)">vos</text>
+      </svg>
+    </div>
+    <figcaption>Disposición para una persona diestra. Si sos zurdo o zurda, invertí los lados. Dejá el cable del soldador por detrás, donde no lo puedas enganchar con el brazo.</figcaption>
+  </figure>
+
+  <h3>Seguridad</h3>
+  <ul class="rules">
+    <li><span class="tag danger">Quema</span><b>Si se te cae el soldador, dejalo caer.</b><span class="why">El reflejo de atajarlo es la peor quemadura posible. Corré las manos y las piernas.</span></li>
+    <li><span class="tag danger">Quema</span><b>Siempre vuelve al soporte.</b><span class="why">Nunca lo apoyes sobre la mesa, ni por un segundo. Agarralo solo del mango.</span></li>
+    <li><span class="tag danger">Quema</span><b>Nada enchufado a la placa mientras soldás.</b><span class="why">El USB-C se conecta solamente en las pruebas, con el soldador lejos.</span></li>
+    <li><span class="tag danger">Ojos</span><b>Anteojos puestos.</b><span class="why">El flux puede salpicar, y el estaño caliente también.</span></li>
+    <li><span class="tag warn">Humo</span><b>No respires el humo.</b><span class="why">Ventana abierta y la cara al costado, no justo encima del punto.</span></li>
+    <li><span class="tag warn">Plomo</span><b>Lavate las manos al terminar.</b><span class="why">Sobre todo si el estaño tiene plomo. No comas ni tomes mate en la mesa de trabajo.</span></li>
+    <li><span class="tag info">Hábito</span><b>Pelo atado, mangas cortas o arremangadas.</b><span class="why">Y sin mascotas ni chicos cerca mientras el soldador está caliente.</span></li>
+    <li><span class="tag info">Hábito</span><b>Tocá algo de metal antes de agarrar una placa.</b><span class="why">Descarga la estática de tu cuerpo.</span></li>
+  </ul>
+  <div class="callout danger">
+    <strong>Si te quemás</strong>
+    <p>Poné la zona bajo agua fría corriente entre 10 y 20 minutos. No uses hielo, pasta dental ni cremas. Si la ampolla es grande, o la quemadura es en la cara o los ojos, andá a la guardia.</p>
+  </div>
+
+  <h3>Temperatura según tu estaño</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Lo que dice la etiqueta</th><th>Tipo</th><th>Temperatura del soldador</th></tr></thead>
+    <tbody>
+      <tr><td><code>60/40</code>, <code>63/37</code>, <code>Sn60Pb40</code></td><td>Con plomo. Es el más fácil.</td><td><b>330–350 °C</b></td></tr>
+      <tr><td><code>SAC305</code>, <code>Sn99</code>, “lead free”</td><td>Sin plomo. Es menos brillante y pide un poco más de calor.</td><td><b>360–380 °C</b></td></tr>
+      <tr><td>Soldador sin perilla</td><td>Funciona, pero se calienta de más si lo dejás parado.</td><td>Esperá 5 minutos. Limpiá la punta seguido y hacé contactos cortos.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="punto">
+  <div class="prose">
+    <h2>Cómo se hace un punto</h2>
+    <p>Soldar no es pegar con estaño derretido. Calentás las dos piezas de metal, el pin y el cobre de la placa, y son ellas las que derriten el estaño. Por eso el estaño se acerca del lado contrario a la punta: si funde, las piezas ya están a temperatura.</p>
+    <p>Agarrá el soldador como un lápiz, a unos 45°, y apoyá la muñeca en la mesa para que no tiemble. Usá la parte plana de la punta, porque la puntita casi no transfiere calor.</p>
+  </div>
+  <div class="frames">
+    <figure>
+      <svg viewBox="0 0 200 150" aria-hidden="true">
+        <circle cx="100" cy="112" r="26" fill="var(--w-3v3)" opacity="0.28"/>
+        <rect x="10" y="118" width="180" height="14" fill="var(--pcb-green)"/><rect x="78" y="114" width="44" height="4" fill="var(--copper)"/><rect x="96" y="26" width="8" height="118" fill="var(--pin)"/>
+        <path d="M105 115 L 126 88 L 192 40 L 198 54 L 136 102 Z" fill="var(--metal)"/><path d="M105 115 L 126 88 L 136 102 Z" fill="var(--w-gnd)"/>
+      </svg>
+      <figcaption><b>1 · Calentá</b><span>1–2 s. La punta toca el pin y el cobre a la vez.</span></figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 200 150" aria-hidden="true">
+        <rect x="10" y="118" width="180" height="14" fill="var(--pcb-green)"/><rect x="78" y="114" width="44" height="4" fill="var(--copper)"/><rect x="96" y="26" width="8" height="118" fill="var(--pin)"/>
+        <path d="M84 114 Q 93 112, 96 98 L 104 98 Q 107 112, 116 114 Z" fill="var(--solder)"/>
+        <path d="M105 115 L 126 88 L 192 40 L 198 54 L 136 102 Z" fill="var(--metal)"/><path d="M105 115 L 126 88 L 136 102 Z" fill="var(--w-gnd)"/>
+        <path d="M8 44 C 40 54, 66 84, 89 108" fill="none" stroke="var(--solder)" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+      <figcaption><b>2 · Dale estaño</b><span>1 s, del lado opuesto. Unos 3–4 mm de alambre.</span></figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 200 150" aria-hidden="true">
+        <rect x="10" y="118" width="180" height="14" fill="var(--pcb-green)"/><rect x="78" y="114" width="44" height="4" fill="var(--copper)"/><rect x="96" y="26" width="8" height="118" fill="var(--pin)"/>
+        <path d="M78 114 Q 92 112, 96 84 L 104 84 Q 108 112, 122 114 Z" fill="var(--solder)"/>
+        <path d="M105 115 L 126 88 L 192 40 L 198 54 L 136 102 Z" fill="var(--metal)"/><path d="M105 115 L 126 88 L 136 102 Z" fill="var(--w-gnd)"/>
+        <path d="M8 26 C 26 32, 40 44, 54 60" fill="none" stroke="var(--solder)" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+      <figcaption><b>3 · Sacá el estaño</b><span>Primero el alambre. La punta sigue apoyada.</span></figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 200 150" aria-hidden="true">
+        <rect x="10" y="118" width="180" height="14" fill="var(--pcb-green)"/><rect x="78" y="114" width="44" height="4" fill="var(--copper)"/><rect x="96" y="26" width="8" height="118" fill="var(--pin)"/>
+        <path d="M78 114 Q 92 112, 96 84 L 104 84 Q 108 112, 122 114 Z" fill="var(--solder)"/>
+      </svg>
+      <figcaption><b>4 · Sacá el soldador</b><span>Hacia arriba. Sin mover nada durante 3 s.</span></figcaption>
+    </figure>
+  </div>
+  <p class="muted" style="margin-top:12px">En total son unos 3 o 4 segundos. El orden importa: si sacás primero el soldador, el alambre queda pegado al punto.</p>
+
+  <h3>Cómo leer el resultado</h3>
+  <div class="joints">
+    <figure><svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="62" width="100" height="10" fill="var(--pcb-green)"/><rect x="56" y="10" width="8" height="72" fill="var(--pin)"/><path d="M34 62 Q 50 60, 56 30 L 64 30 Q 70 60, 86 62 Z" fill="var(--solder)"/></svg>
+      <figcaption><span class="tag ok">Bien</span>Volcán liso y parejo que cubre el cobre.</figcaption></figure>
+    <figure><svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="62" width="100" height="10" fill="var(--pcb-green)"/><rect x="56" y="10" width="8" height="72" fill="var(--pin)"/><circle cx="60" cy="44" r="15" fill="var(--metal)"/></svg>
+      <figcaption><span class="tag danger">Fría</span>Bola que no moja el cobre. Faltó calor.</figcaption></figure>
+    <figure><svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="62" width="100" height="10" fill="var(--pcb-green)"/><rect x="34" y="59" width="52" height="3" fill="var(--copper)"/><rect x="56" y="10" width="8" height="72" fill="var(--pin)"/><path d="M47 62 Q 54 60, 56 48 L 64 48 Q 66 60, 73 62 Z" fill="var(--solder)"/></svg>
+      <figcaption><span class="tag warn">Poco</span>Se ve cobre sin cubrir. Agregá estaño.</figcaption></figure>
+    <figure><svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="62" width="100" height="10" fill="var(--pcb-green)"/><rect x="56" y="6" width="8" height="76" fill="var(--pin)"/><path d="M30 62 Q 28 18, 60 16 Q 92 18, 90 62 Z" fill="var(--solder)"/></svg>
+      <figcaption><span class="tag warn">Mucho</span>Tapa el pin y puede tocar al vecino.</figcaption></figure>
+    <figure><svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="62" width="100" height="10" fill="var(--pcb-green)"/><rect x="34" y="18" width="8" height="64" fill="var(--pin)"/><rect x="78" y="18" width="8" height="64" fill="var(--pin)"/><path d="M22 62 Q 38 40, 60 48 Q 82 40, 98 62 Z" fill="var(--solder)"/></svg>
+      <figcaption><span class="tag danger">Puente</span>Dos pines unidos. Es un cortocircuito.</figcaption></figure>
+    <figure><svg viewBox="0 0 120 90" aria-hidden="true"><rect x="10" y="62" width="100" height="10" fill="var(--pcb-green)"/><rect x="56" y="10" width="8" height="72" fill="var(--pin)"/><path d="M34 62 Q 50 60, 56 30 L 64 30 Q 70 60, 86 62 Z" fill="var(--metal)"/><g fill="var(--bb-hole)" opacity="0.55"><circle cx="46" cy="56" r="1.6"/><circle cx="52" cy="50" r="1.6"/><circle cx="72" cy="55" r="1.6"/><circle cx="67" cy="46" r="1.6"/><circle cx="54" cy="58" r="1.6"/><circle cx="66" cy="58" r="1.6"/></g></svg>
+      <figcaption><span class="tag warn">Movido</span>Opaco y granulado. Se movió al enfriar.</figcaption></figure>
+  </div>
+  <p class="muted" style="margin-top:12px">El estaño sin plomo queda más mate aunque el punto esté bien. En ese caso fijate en la forma, no en el brillo. Cada error tiene su arreglo en <a href="#errores">Si algo sale mal</a>.</p>
+</section>
+
+<section id="practica">
+  <div class="head"><h2>Sesión 1 · Preparar y practicar</h2><span class="progress" data-count="practica"></span></div>
+  <div class="prose"><p>Acá no tocás ninguna pieza del proyecto. El objetivo es equivocarte en material que no importa, y también arreglar esos errores.</p></div>
+
+  <h3>Estañar la punta</h3>
+  <p class="prose">Una punta limpia y plateada transmite el calor. Una negra casi no lo transmite, y esa es la causa más común de que “no funde”.</p>
+  <ul class="todo">
+    <li><label><input type="checkbox" id="p1"><span class="what"><b>Enchufá el soldador y esperá a que caliente.</b><span class="hint">Probá apoyando el estaño en la punta: tiene que fundirse enseguida.</span></span></label></li>
+    <li><label><input type="checkbox" id="p2"><span class="what"><b>Cubrí toda la punta con estaño.</b><span class="hint">En un soldador nuevo hacé esto apenas caliente, antes de que se oxide.</span></span></label></li>
+    <li><label><input type="checkbox" id="p3"><span class="what"><b>Limpiá con la viruta o la esponja.</b><span class="hint">Tiene que quedar plateada y brillante. Repetí esto cada 3 o 4 puntos.</span></span></label></li>
+    <li><label><input type="checkbox" id="p4"><span class="what"><b>Antes de dejarlo en el soporte, poné una gotita de estaño en la punta.</b><span class="hint">Esa gota la protege del óxido. Al volver a usarlo, limpiala.</span></span></label></li>
+  </ul>
+  <p class="muted small prose">Si la punta se pone negra, frotala con la viruta y estaño nuevo. No la lijes ni la limes: se rompe la capa que la protege y se arruina.</p>
+
+  <h3>Conocer el multímetro</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Modo</th><th>Símbolo</th><th>Para qué lo usás acá</th></tr></thead>
+    <tbody>
+      <tr><td><b>Continuidad</b></td><td><code>•)))</code></td><td>Saber si dos puntos están unidos. Juntá las puntas: tiene que pitar.</td></tr>
+      <tr><td><b>Resistencia</b></td><td><code>Ω</code></td><td>Medir el parlante, que debe dar cerca de 8 Ω.</td></tr>
+      <tr><td><b>Tensión continua</b></td><td><code>V⎓</code></td><td>Medir 5 V y 3,3 V con la placa enchufada. Si tiene escalas, usá 20 V.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Ejercicios</h3>
+  <ul class="todo">
+    <li><label><input type="checkbox" id="p5"><span class="what"><b>1 · Estañá 3 puntas de cable.</b><span class="hint">Pelá 5 mm, retorcé los hilos y sujetá el cable con cinta. Apoyá la punta abajo y el estaño arriba: se tiene que chupar el estaño. Al terminar, el cable queda rígido y plateado.</span></span></label></li>
+    <li><label><input type="checkbox" id="p6"><span class="what"><b>2 · Hacé 2 empalmes de cable.</b><span class="hint">Es la misma técnica del parlante. Tirá suave: no se tiene que soltar.</span></span></label></li>
+    <li><label><input type="checkbox" id="p7"><span class="what"><b>3 · Soldá 10 pines seguidos en la placa perforada.</b><span class="hint">Usá la secuencia de 4 pasos. Limpiá la punta cada 3 o 4 puntos.</span></span></label></li>
+    <li><label><input type="checkbox" id="p8"><span class="what"><b>4 · Revisá cada punto con la cámara, con zoom.</b><span class="hint">Comparalos con los seis dibujos de arriba.</span></span></label></li>
+    <li><label><input type="checkbox" id="p9"><span class="what"><b>5 · Hacé un puente a propósito y sacalo.</b><span class="hint">Uní dos pines con estaño y separalos como se explica en <a href="#errores">Si algo sale mal</a>. Si esto te sale, ya no le vas a tener miedo a equivocarte.</span></span></label></li>
+    <li><label><input type="checkbox" id="p12"><span class="what"><b>Si no conseguís pines: uní dos cables estañados y separalos.</b><span class="hint">Apoyalos juntos sobre el azulejo, sujetos con cinta. Hacé un puente de estaño y sacalo con la punta limpia. Reemplaza al ejercicio 5, pero no enseña a soldar un pin: en ese caso, revisá muy bien las primeras dos esquinas de la SuperMini antes de seguir.</span></span></label></li>
+    <li><label><input type="checkbox" id="p10"><span class="what"><b>6 · Hacé un punto frío a propósito y arreglalo.</b><span class="hint">Fundí estaño apenas tocando el pin. Después arreglalo agregando estaño nuevo.</span></span></label></li>
+    <li><label><input type="checkbox" id="p11"><span class="what"><b>7 · Medí con continuidad los 10 pines.</b><span class="hint">Probá cada pin contra el de al lado: ninguno tiene que pitar.</span></span></label></li>
+  </ul>
+  <div class="gate"><b>Pasás a la sesión 2 cuando</b> te salen <b>5 puntos seguidos</b> con forma de volcán, sin bolas ni puentes, y podés sacar un puente vos solo o sola. Si no llegás, repetí otra tanda. Soldar 20 puntos más sale gratis y una SuperMini no.</div>
+</section>
+
+<section id="supermini">
+  <div class="head"><h2>Sesión 2 · SuperMini</h2><span class="progress" data-count="supermini"></span></div>
+  <div class="prose"><p>Son 16 puntos con los pines bien separados. Es una buena primera pieza real, y la protoboard hace de sostén.</p></div>
+
+  <div id="clavar" style="scroll-margin-top:56px">
+    <h3>Empezá acá: qué significa clavar los pines</h3>
+    <p class="prose">Clavar es empujar los pines con la mano dentro de los agujeros de la protoboard. No hace falta ninguna herramienta y todavía no calentás nada. Sirve para que los pines queden derechos mientras soldás.</p>
+
+    <div class="split">
+      <figure>
+        <div class="fig narrow">
+          <svg viewBox="0 0 440 200" role="img" aria-label="A la izquierda, la SuperMini con 16 agujeros en sus bordes. A la derecha, una tira de pines: barra de plástico negro con 8 pines dorados, parte corta arriba y parte larga abajo">
+            <text class="lbl-b" x="105" y="20" text-anchor="middle">SuperMini</text>
+            <rect x="6" y="74" width="30" height="42" rx="4" fill="var(--metal)"/>
+            <rect x="24" y="36" width="170" height="118" rx="8" fill="var(--pcb)"/>
+            <rect x="86" y="72" width="46" height="46" rx="3" fill="#0b1824"/>
+            <g fill="#0b1824" stroke="var(--pin)" stroke-width="3">
+              <circle cx="42" cy="50" r="5"/><circle cx="61" cy="50" r="5"/><circle cx="80" cy="50" r="5"/><circle cx="99" cy="50" r="5"/><circle cx="118" cy="50" r="5"/><circle cx="137" cy="50" r="5"/><circle cx="156" cy="50" r="5"/><circle cx="175" cy="50" r="5"/>
+              <circle cx="42" cy="140" r="5"/><circle cx="61" cy="140" r="5"/><circle cx="80" cy="140" r="5"/><circle cx="99" cy="140" r="5"/><circle cx="118" cy="140" r="5"/><circle cx="137" cy="140" r="5"/><circle cx="156" cy="140" r="5"/><circle cx="175" cy="140" r="5"/>
+            </g>
+            <text class="lbl" x="105" y="174" text-anchor="middle">16 agujeros, sin patas</text>
+            <text class="lbl-b" x="320" y="20" text-anchor="middle">Tira de pines (2)</text>
+            <g fill="var(--pin)">
+              <rect x="246" y="52" width="5" height="100"/><rect x="266" y="52" width="5" height="100"/><rect x="286" y="52" width="5" height="100"/><rect x="306" y="52" width="5" height="100"/><rect x="326" y="52" width="5" height="100"/><rect x="346" y="52" width="5" height="100"/><rect x="366" y="52" width="5" height="100"/><rect x="386" y="52" width="5" height="100"/>
+            </g>
+            <rect x="238" y="78" width="162" height="16" rx="2" fill="var(--plastic)"/>
+            <text class="lbl" x="320" y="44" text-anchor="middle">parte corta</text>
+            <text class="lbl" x="320" y="174" text-anchor="middle">parte larga</text>
+            <text class="lbl-s" x="406" y="90">plástico</text>
+          </svg>
+        </div>
+        <figcaption>Las patas de la SuperMini vienen aparte, como dos tiras negras con 8 pines dorados.</figcaption>
+      </figure>
+      <div>
+        <h3 style="margin-top:0">Paso 1 · Reconocé las piezas</h3>
+        <p>Es correcto que la SuperMini se apoye sin entrar: todavía no tiene patas. Tiene 16 agujeros en los bordes.</p>
+        <p>Buscá en la bolsita de la placa las dos tiras negras. Cada pin tiene una parte corta y una larga, separadas por el plástico.</p>
+        <p>Si las tiras son más largas que 8 pines, partilas con un alicate para dejar 8.</p>
+      </div>
+    </div>
+
+    <div class="split">
+      <figure>
+        <div class="fig narrow">
+          <svg viewBox="0 0 420 345" role="img" aria-label="Parte izquierda de la protoboard vista desde arriba, con el número 1 a la izquierda. Una tira ocupa la línea g y otra la línea c, las dos del número 4 al 11">
+            <defs><pattern id="holes-a" x="49" y="55" width="22" height="22" patternUnits="userSpaceOnUse"><rect x="7.5" y="7.5" width="7" height="7" rx="1" fill="#3a3f44"/></pattern></defs>
+            <rect x="14" y="20" width="392" height="312" rx="6" fill="var(--bb)" stroke="var(--bb-edge)" stroke-width="2"/>
+            <rect x="20" y="176" width="380" height="22" fill="#dcdcd6"/>
+            <rect x="49" y="55" width="308" height="110" fill="url(#holes-a)"/>
+            <rect x="49" y="209" width="308" height="110" fill="url(#holes-a)"/>
+            <g font-family="var(--font-mono)" font-size="13" fill="#56616a" text-anchor="middle">
+              <text x="34" y="71">j</text><text x="34" y="93">i</text><text x="34" y="115">h</text><text x="34" y="159">f</text><text x="34" y="225">e</text><text x="34" y="247">d</text><text x="34" y="291">b</text><text x="34" y="313">a</text>
+              <text x="60" y="44">1</text><text x="104" y="44">3</text><text x="192" y="44">7</text><text x="324" y="44">13</text>
+            </g>
+            <g font-family="var(--font-mono)" font-size="16" font-weight="700" fill="#155fb0" text-anchor="middle">
+              <text x="34" y="138">g</text><text x="34" y="270">c</text><text x="126" y="44">4</text><text x="280" y="44">11</text>
+            </g>
+            <path d="M126 50 V 118 M280 50 V 118" stroke="#155fb0" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <rect x="114" y="123" width="178" height="18" rx="2" fill="var(--plastic)"/>
+            <rect x="114" y="255" width="178" height="18" rx="2" fill="var(--plastic)"/>
+            <g fill="var(--pin)">
+              <circle cx="126" cy="132" r="5"/><circle cx="148" cy="132" r="5"/><circle cx="170" cy="132" r="5"/><circle cx="192" cy="132" r="5"/><circle cx="214" cy="132" r="5"/><circle cx="236" cy="132" r="5"/><circle cx="258" cy="132" r="5"/><circle cx="280" cy="132" r="5"/>
+              <circle cx="126" cy="264" r="5"/><circle cx="148" cy="264" r="5"/><circle cx="170" cy="264" r="5"/><circle cx="192" cy="264" r="5"/><circle cx="214" cy="264" r="5"/><circle cx="236" cy="264" r="5"/><circle cx="258" cy="264" r="5"/><circle cx="280" cy="264" r="5"/>
+            </g>
+            <text x="398" y="192" text-anchor="end" font-size="12" fill="#56616a">sigue hasta el 30 →</text>
+          </svg>
+        </div>
+        <figcaption>Las dos tiras vistas desde arriba, ya clavadas: una en la línea g y otra en la línea c.</figcaption>
+      </figure>
+      <div>
+        <h3 style="margin-top:0">Paso 2 · Encontrá los agujeros</h3>
+        <p>Girá la protoboard para que el número 1 quede a la izquierda. Los agujeros se buscan como en la batalla naval: una letra y un número. <b>c4</b> es el cruce de la línea c con el número 4.</p>
+        <p>Una tira va en la línea <b>c</b>, del número <b>4</b> al <b>11</b>. La otra va en la línea <b>g</b>, también del <b>4</b> al <b>11</b>.</p>
+        <p class="muted small">Si en tu protoboard la letra a queda arriba, no la gires: buscá las mismas letras y los mismos números.</p>
+      </div>
+    </div>
+
+    <div class="split">
+      <figure>
+        <div class="fig narrow">
+          <svg viewBox="0 0 440 210" role="img" aria-label="Protoboard vista de costado. Antes: la tira arriba, con la parte larga hacia abajo. Después: los pines adentro de los agujeros y el plástico apoyado sobre la protoboard">
+            <defs><marker id="push" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker></defs>
+            <text class="lbl-b" x="105" y="18" text-anchor="middle">Antes</text>
+            <g fill="var(--pin)"><rect x="43" y="32" width="4" height="88"/><rect x="83" y="32" width="4" height="88"/><rect x="123" y="32" width="4" height="88"/><rect x="163" y="32" width="4" height="88"/></g>
+            <rect x="32" y="52" width="146" height="14" rx="2" fill="var(--plastic)"/>
+            <path d="M198 44 V 104" stroke="var(--accent)" stroke-width="3" marker-end="url(#push)"/>
+            <rect x="12" y="136" width="194" height="56" rx="3" fill="var(--bb)" stroke="var(--bb-edge)" stroke-width="2"/>
+            <g fill="#3a3f44"><rect x="41" y="136" width="8" height="36"/><rect x="81" y="136" width="8" height="36"/><rect x="121" y="136" width="8" height="36"/><rect x="161" y="136" width="8" height="36"/></g>
+            <text x="109" y="186" text-anchor="middle" font-size="12" fill="#56616a">protoboard</text>
+            <text class="lbl-b" x="335" y="18" text-anchor="middle">Después</text>
+            <rect x="238" y="136" width="194" height="56" rx="3" fill="var(--bb)" stroke="var(--bb-edge)" stroke-width="2"/>
+            <g fill="#3a3f44"><rect x="267" y="136" width="8" height="36"/><rect x="307" y="136" width="8" height="36"/><rect x="347" y="136" width="8" height="36"/><rect x="387" y="136" width="8" height="36"/></g>
+            <g fill="var(--pin)"><rect x="269" y="96" width="4" height="74"/><rect x="309" y="96" width="4" height="74"/><rect x="349" y="96" width="4" height="74"/><rect x="389" y="96" width="4" height="74"/></g>
+            <rect x="258" y="122" width="146" height="14" rx="2" fill="var(--plastic)"/>
+            <text class="lbl" x="335" y="80" text-anchor="middle">asoma la parte corta</text>
+            <text class="lbl-s" x="335" y="208" text-anchor="middle">el plástico toca la protoboard</text>
+          </svg>
+        </div>
+        <figcaption>Clavar es pasar de la imagen de la izquierda a la de la derecha: los pines largos quedan escondidos en los agujeros.</figcaption>
+      </figure>
+      <div>
+        <h3 style="margin-top:0">Paso 3 · Clavá las dos tiras</h3>
+        <ol class="buy">
+          <li>Agarrá una tira con la parte larga hacia abajo.</li>
+          <li>Apoyá las 8 puntas sobre los agujeros de c4 a c11.</li>
+          <li>Empujá con el pulgar sobre el plástico, parejo, hasta que el plástico toque la protoboard.</li>
+          <li>Hacé lo mismo con la otra tira, de g4 a g11.</li>
+        </ol>
+        <p class="muted small" style="margin-top:10px">Es normal que entren duro. Si un pin se dobla, sacá la tira y enderezalo con cuidado.</p>
+      </div>
+    </div>
+
+    <div class="split">
+      <figure>
+        <div class="fig narrow">
+          <svg viewBox="0 0 420 345" role="img" aria-label="La SuperMini apoyada sobre las dos tiras, con el USB-C a la izquierda. Los 16 pines asoman por sus agujeros. Quedan libres las líneas a y b abajo, y h, i y j arriba">
+            <defs><pattern id="holes-b" x="49" y="55" width="22" height="22" patternUnits="userSpaceOnUse"><rect x="7.5" y="7.5" width="7" height="7" rx="1" fill="#3a3f44"/></pattern></defs>
+            <rect x="14" y="20" width="392" height="312" rx="6" fill="var(--bb)" stroke="var(--bb-edge)" stroke-width="2"/>
+            <rect x="20" y="176" width="380" height="22" fill="#dcdcd6"/>
+            <rect x="49" y="55" width="308" height="110" fill="url(#holes-b)"/>
+            <rect x="49" y="209" width="308" height="110" fill="url(#holes-b)"/>
+            <g font-family="var(--font-mono)" font-size="13" fill="#56616a" text-anchor="middle">
+              <text x="34" y="71">j</text><text x="34" y="93">i</text><text x="34" y="115">h</text><text x="34" y="137">g</text><text x="34" y="159">f</text><text x="34" y="225">e</text><text x="34" y="247">d</text><text x="34" y="269">c</text><text x="34" y="291">b</text><text x="34" y="313">a</text>
+              <text x="60" y="44">1</text><text x="126" y="44">4</text><text x="280" y="44">11</text>
+            </g>
+            <rect x="82" y="176" width="48" height="44" rx="5" fill="var(--metal)"/>
+            <rect x="104" y="120" width="198" height="156" rx="8" fill="var(--pcb)"/>
+            <rect x="172" y="172" width="58" height="52" rx="3" fill="#0b1824"/>
+            <text class="pcb-t" x="201" y="201" text-anchor="middle">SuperMini</text>
+            <g fill="var(--pin)" stroke="#0b1824" stroke-width="1.5">
+              <circle cx="126" cy="132" r="5"/><circle cx="148" cy="132" r="5"/><circle cx="170" cy="132" r="5"/><circle cx="192" cy="132" r="5"/><circle cx="214" cy="132" r="5"/><circle cx="236" cy="132" r="5"/><circle cx="258" cy="132" r="5"/><circle cx="280" cy="132" r="5"/>
+              <circle cx="126" cy="264" r="5"/><circle cx="148" cy="264" r="5"/><circle cx="170" cy="264" r="5"/><circle cx="192" cy="264" r="5"/><circle cx="214" cy="264" r="5"/><circle cx="236" cy="264" r="5"/><circle cx="258" cy="264" r="5"/><circle cx="280" cy="264" r="5"/>
+            </g>
+            <text x="68" y="202" text-anchor="middle" font-size="12" fill="#56616a">USB-C</text>
+            <text x="398" y="192" text-anchor="end" font-size="12" fill="#56616a">sigue hasta el 30 →</text>
+          </svg>
+        </div>
+        <figcaption>Cada pin dorado entra en un agujero de la SuperMini. La placa tapa las líneas d, e y f. Las líneas a, b, h, i y j quedan libres para enchufar los cables.</figcaption>
+      </figure>
+      <div>
+        <h3 style="margin-top:0">Paso 4 · Apoyá la SuperMini sobre los pines</h3>
+        <p>Con los chips hacia arriba y el USB-C a la izquierda, bajá la placa para que los 16 pines entren en sus 16 agujeros. Las puntas cortas asoman por arriba.</p>
+        <p>Lo que viste al apoyarla es lo que hace funcionar esto: sus agujeros están a la misma distancia que los de la protoboard. Con la placa bien ubicada coinciden los 16 a la vez.</p>
+        <p class="muted small">Si una fila entra y la otra no, una tira quedó en la línea equivocada. Contá de nuevo y no fuerces.</p>
+      </div>
+    </div>
+
+    <h3>Paso 5 · Recién acá se suelda</h3>
+    <p class="prose">El soldador toca arriba, donde cada punta corta asoma por la SuperMini. Los pasos completos y las pruebas están más abajo. Este dibujo muestra cómo queda todo, visto de costado.</p>
+  </div>
+  <figure>
+    <div class="fig narrow">
+      <svg viewBox="0 0 560 270" role="img" aria-label="Vista de costado: tiras de pines clavadas en la protoboard, la SuperMini apoyada encima y el soldador tocando un pin desde arriba">
+        <rect x="30" y="182" width="500" height="58" rx="4" fill="var(--bb)" stroke="var(--bb-edge)" stroke-width="2"/>
+        <g fill="var(--bb-hole)"><rect x="136" y="182" width="8" height="30"/><rect x="176" y="182" width="8" height="30"/><rect x="216" y="182" width="8" height="30"/><rect x="256" y="182" width="8" height="30"/><rect x="296" y="182" width="8" height="30"/><rect x="336" y="182" width="8" height="30"/><rect x="376" y="182" width="8" height="30"/><rect x="416" y="182" width="8" height="30"/></g>
+        <g fill="var(--pin)"><rect x="138" y="104" width="4" height="104"/><rect x="178" y="104" width="4" height="104"/><rect x="218" y="104" width="4" height="104"/><rect x="258" y="104" width="4" height="104"/><rect x="298" y="104" width="4" height="104"/><rect x="338" y="104" width="4" height="104"/><rect x="378" y="104" width="4" height="104"/><rect x="418" y="104" width="4" height="104"/></g>
+        <rect x="124" y="156" width="312" height="16" rx="2" fill="var(--plastic)"/>
+        <rect x="112" y="128" width="336" height="12" rx="2" fill="var(--pcb)"/>
+        <rect x="250" y="112" width="70" height="16" rx="2" fill="#0b1824"/>
+        <rect x="100" y="118" width="26" height="18" rx="4" fill="var(--metal)"/>
+        <g fill="var(--solder)"><path d="M130 128 Q 137 126, 138 112 L 142 112 Q 143 126, 150 128 Z"/><path d="M170 128 Q 177 126, 178 112 L 182 112 Q 183 126, 190 128 Z"/><path d="M210 128 Q 217 126, 218 112 L 222 112 Q 223 126, 230 128 Z"/><path d="M250 128 Q 257 126, 258 112 L 262 112 Q 263 126, 270 128 Z"/><path d="M290 128 Q 297 126, 298 112 L 302 112 Q 303 126, 310 128 Z"/><path d="M330 128 Q 337 126, 338 112 L 342 112 Q 343 126, 350 128 Z"/></g>
+        <path d="M378 118 L 404 84 L 520 14 L 538 34 L 420 104 Z" fill="var(--metal)"/><path d="M378 118 L 404 84 L 420 104 Z" fill="var(--w-gnd)"/>
+        <path d="M470 150 C 440 146, 410 136, 392 124" fill="none" stroke="var(--solder)" stroke-width="5" stroke-linecap="round"/>
+        <text class="num" x="36" y="215">1</text><text class="lbl-s" x="52" y="214">parte LARGA</text><text class="lbl-s" x="52" y="228">de los pines, abajo</text>
+        <text class="num" x="36" y="100">2</text><text class="lbl-s" x="52" y="98">la placa encima,</text><text class="lbl-s" x="52" y="112">chips arriba</text>
+        <text class="num" x="290" y="60">3</text><text class="lbl-s" x="306" y="59">soldás arriba</text>
+        <text class="lbl-s" x="478" y="166">estaño</text>
+      </svg>
+    </div>
+    <figcaption>La parte larga de los pines va clavada en la protoboard. Así los pines quedan derechos y paralelos.</figcaption>
+  </figure>
+
+  <h3>Antes de calentar</h3>
+  <ul class="todo">
+    <li><label><input type="checkbox" id="s1"><span class="what"><b>Clavá las dos tiras de 8 pines en las columnas c y g, del número 4 al 11.</b><span class="hint">Parte larga hacia abajo y plástico contra la protoboard.</span></span></label></li>
+    <li><label><input type="checkbox" id="s2"><span class="what"><b>Apoyá la SuperMini encima, sin soldar.</b><span class="hint">Chips y USB-C hacia arriba, USB-C a la izquierda. Tiene que bajar sola, sin forzar. Si no entra, las filas están mal separadas.</span></span></label></li>
+    <li><label><input type="checkbox" id="s3"><span class="what"><b>Leé con zoom dónde dice 5V, G y 3V3 en tu placa.</b><span class="hint">Están juntos, en la punta del USB-C. Mirá el aviso de abajo.</span></span></label></li>
+  </ul>
+  <div class="callout warn">
+    <strong>En tu placa, 5V, G y 3V3 caen en la línea g</strong>
+    <p>Mirando la placa con el USB-C arriba, esos tres pines están a la derecha. Al girarla con el USB-C a la izquierda quedan en la fila de arriba: <b>g4 es 5V, g5 es G y g6 es 3V3</b>.</p>
+    <p>Para soldar no cambia nada, y la guía de armado ya usa estos agujeros.</p>
+  </div>
+
+  <h3>Soldar</h3>
+  <div class="split">
+    <figure>
+      <div class="fig narrow">
+        <svg viewBox="0 0 560 250" role="img" aria-label="SuperMini vista desde arriba: primero se sueldan dos esquinas en diagonal, se revisa que quede plana y se siguen las otras dos esquinas; los tres pines de alimentación están juntos en la punta del USB-C">
+          <rect x="96" y="56" width="400" height="140" rx="10" fill="var(--pcb)"/>
+          <rect x="60" y="100" width="48" height="52" rx="6" fill="var(--metal)"/>
+          <text class="lbl-s" x="60" y="92">USB-C</text>
+          <rect x="260" y="96" width="70" height="60" rx="4" fill="#0b1824"/>
+          <text class="pcb-t" x="295" y="130" text-anchor="middle">ESP32-C3</text>
+          <g fill="var(--pin)">
+            <circle cx="132" cy="176" r="8"/><circle cx="180" cy="176" r="8"/><circle cx="228" cy="176" r="8"/><circle cx="276" cy="176" r="8"/><circle cx="324" cy="176" r="8"/><circle cx="372" cy="176" r="8"/><circle cx="420" cy="176" r="8"/><circle cx="468" cy="176" r="8"/>
+            <circle cx="132" cy="76" r="8"/><circle cx="180" cy="76" r="8"/><circle cx="228" cy="76" r="8"/><circle cx="276" cy="76" r="8"/><circle cx="324" cy="76" r="8"/><circle cx="372" cy="76" r="8"/><circle cx="420" cy="76" r="8"/><circle cx="468" cy="76" r="8"/>
+          </g>
+          <rect x="116" y="60" width="128" height="32" rx="16" fill="none" stroke="#ff8a80" stroke-width="3"/>
+          <g font-family="var(--font-mono)" font-size="13" font-weight="700" text-anchor="middle" fill="var(--ink)">
+            <circle cx="132" cy="176" r="10" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/><text x="132" y="181">1</text>
+            <circle cx="468" cy="76" r="10" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/><text x="468" y="81">2</text>
+            <circle cx="132" cy="76" r="10" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/><text x="132" y="81">3</text>
+            <circle cx="468" cy="176" r="10" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/><text x="468" y="181">4</text>
+          </g>
+          <text class="lbl-s" x="60" y="40">5V · G · 3V3: tres pines juntos</text>
+          
+          <text class="lbl-s" x="470" y="40" text-anchor="end">primero las esquinas, en este orden</text>
+          <text class="lbl-s" x="470" y="214" text-anchor="end">los otros 12: salteados, alternando filas</text>
+        </svg>
+      </div>
+      <figcaption>Dos esquinas en diagonal fijan la placa. Si quedó torcida, corregirla ahora es fácil. Con 16 puntos hechos ya no.</figcaption>
+    </figure>
+    <ul class="todo" style="margin-top:0">
+      <li><label><input type="checkbox" id="s4"><span class="what"><b>Soldá la esquina 1 y la esquina 2.</b></span></label></li>
+      <li><label><input type="checkbox" id="s5"><span class="what"><b>Mirá de costado que la placa esté plana.</b><span class="hint">Si está torcida, presioná con un lápiz, recalentá ese punto 2 s y soltá. Nunca con el dedo: el calor sube por el pin.</span></span></label></li>
+      <li><label><input type="checkbox" id="s6"><span class="what"><b>Soldá las esquinas 3 y 4.</b></span></label></li>
+      <li><label><input type="checkbox" id="s7"><span class="what"><b>Soldá los otros 12, salteados.</b><span class="hint">Pasá de una fila a la otra para no acumular calor. Limpiá la punta cada 3 o 4 puntos.</span></span></label></li>
+      <li><label><input type="checkbox" id="s8"><span class="what"><b>Esperá 2 minutos y revisá con zoom.</b><span class="hint">Los 16 puntos tienen que parecerse al dibujo “Bien”, sin pelitos de estaño entre pines.</span></span></label></li>
+    </ul>
+  </div>
+  <div class="callout info">
+    <strong>Dónde mirar con más cuidado</strong>
+    <p>5V, G y 3V3 están uno al lado del otro. Un puente en cualquier otro lugar confunde a una señal. Acá es un cortocircuito de la alimentación, y puede quemar el regulador de la placa.</p>
+  </div>
+
+  <h3>Probar</h3>
+  <ul class="todo">
+    <li><label><input type="checkbox" id="s9"><span class="what"><b>Con todo desenchufado, medí continuidad entre 5V y G, y entre G y 3V3.</b><span class="hint">Un pitido cortito al apoyar las puntas es normal: se cargan los capacitores de la placa. Un <b>pitido sostenido</b> es un corto: no enchufes.</span></span></label></li>
+    <li><label><input type="checkbox" id="s10"><span class="what"><b>Medí cada pin contra su vecino, en las dos filas.</b><span class="hint">Son 14 pares. Ninguno tiene que pitar de forma sostenida.</span></span></label></li>
+    <li><label><input type="checkbox" id="s11"><span class="what"><b>Enchufá el USB-C a la PC. Se prende el LED.</b><span class="hint">Si algo calienta o huele raro, desenchufá ya.</span></span></label></li>
+    <li><label><input type="checkbox" id="s12"><span class="what"><b>Medí tensión desde la protoboard.</b><span class="hint">Multímetro en V⎓, punta negra en un agujero libre del número del pin G. Con la roja en el número del pin 5V tenés que leer cerca de 5 V, y en el número del pin 3V3, cerca de 3,3 V. Como medís debajo de la placa, esto también prueba esos puntos.</span></span></label></li>
+    <li><label><input type="checkbox" id="s13"><span class="what"><b>Desenchufá. Dejá la SuperMini clavada en la protoboard.</b></span></label></li>
+  </ul>
+  <p class="muted small prose">Los GPIO no se pueden comprobar así: la revisión visual es tu control. Si después un botón o la pantalla no responden, volvé a ese punto y agregale estaño nuevo.</p>
+  <div class="gate"><b>Terminaste cuando</b> ves 16 volcanes sin puentes, 5V y 3V3 miden bien, y no hay pitido sostenido entre 5V, G y 3V3.</div>
+  <p class="muted small">Para ver que la placa sigue viva, podés cargarle el programa: <code>cd firmware &amp;&amp; cargo run --release</code>. Sin pantalla vas a ver <code>casa del mono: arrancando</code>, y eso es correcto: significa que el programa corre.</p>
+</section>
+
+<section id="pantalla">
+  <div class="head"><h2>Sesión 3 · Pantalla ST7789</h2><span class="progress" data-count="pantalla"></span></div>
+  <div class="prose"><p>Si tu pantalla ya vino con los pines soldados, saltá esta sesión. Es el mismo punto de siempre, pero con vidrio y una cinta flexible cerca, así que acá importa más la puntería.</p></div>
+  <div class="split">
+    <figure>
+      <div class="fig narrow">
+        <svg viewBox="0 0 560 260" role="img" aria-label="Pantalla ST7789: la tira de pines entra por atrás, del lado sin vidrio, y se suelda adelante, en la franja de agujeros sobre el vidrio">
+          <text class="lbl-b" x="40" y="22">Atrás (sin vidrio)</text>
+          <rect x="40" y="34" width="200" height="190" rx="8" fill="var(--pcb-tft)"/>
+          <rect x="66" y="40" width="148" height="16" rx="2" fill="var(--plastic)" stroke="#555"/>
+          <g fill="var(--pin)"><rect x="73" y="30" width="4" height="10"/><rect x="94" y="30" width="4" height="10"/><rect x="115" y="30" width="4" height="10"/><rect x="136" y="30" width="4" height="10"/><rect x="157" y="30" width="4" height="10"/><rect x="178" y="30" width="4" height="10"/><rect x="199" y="30" width="4" height="10"/></g>
+          <rect x="80" y="90" width="120" height="70" rx="4" fill="#2a2e33"/>
+          <text class="pcb-t" x="140" y="122" text-anchor="middle">ST7789</text><text class="pcb-t" x="140" y="136" text-anchor="middle">240×240</text>
+          <text class="lbl-s" x="140" y="244" text-anchor="middle">la tira de plástico queda de este lado</text>
+          <text class="lbl-b" x="320" y="22">Adelante (con vidrio)</text>
+          <rect x="320" y="34" width="200" height="190" rx="8" fill="var(--pcb-tft)"/>
+          <g fill="var(--solder)"><circle cx="355" cy="48" r="5.5"/><circle cx="376" cy="48" r="5.5"/><circle cx="397" cy="48" r="5.5"/><circle cx="418" cy="48" r="5.5"/><circle cx="439" cy="48" r="5.5"/><circle cx="460" cy="48" r="5.5"/><circle cx="481" cy="48" r="5.5"/></g>
+          <g class="pcb-t" text-anchor="middle" style="font-size:7.5px"><text x="355" y="66" class="pcb-t" style="font-size:7.5px">GND</text><text x="376" y="66" class="pcb-t" style="font-size:7.5px">VCC</text><text x="397" y="66" class="pcb-t" style="font-size:7.5px">SCL</text><text x="418" y="66" class="pcb-t" style="font-size:7.5px">SDA</text><text x="439" y="66" class="pcb-t" style="font-size:7.5px">RES</text><text x="460" y="66" class="pcb-t" style="font-size:7.5px">DC</text><text x="481" y="66" class="pcb-t" style="font-size:7.5px">BLK</text></g>
+          <rect x="340" y="76" width="160" height="134" rx="3" fill="#0b0f14" stroke="#3a4048"/>
+          <rect x="400" y="210" width="40" height="14" fill="#c98d2a" opacity="0.85"/>
+          <text class="lbl-s" x="420" y="244" text-anchor="middle">soldás acá arriba · cinta flex abajo: no tocar</text>
+        </svg>
+      </div>
+      <figcaption>Dibujo de un módulo de 7 pines. Si el tuyo tiene 8, el que sobra se llama CS. El orden de los nombres puede cambiar: manda lo impreso en tu pantalla.</figcaption>
+    </figure>
+    <ul class="todo" style="margin-top:0">
+      <li><label><input type="checkbox" id="d1"><span class="what"><b>Dejale puesto el film protector.</b><span class="hint">Si ya lo sacaste no pasa nada, pero no apoyes el vidrio contra la mesa.</span></span></label></li>
+      <li><label><input type="checkbox" id="d2"><span class="what"><b>Clavá la tira en una zona libre de la protoboard.</b><span class="hint">Parte larga abajo, como en la SuperMini.</span></span></label></li>
+      <li><label><input type="checkbox" id="d3"><span class="what"><b>Apoyá la pantalla con el vidrio hacia arriba.</b><span class="hint">Los pines entran por atrás. Como queda sostenida de un solo lado, calzá el otro con una goma de borrar para que quede pareja.</span></span></label></li>
+      <li><label><input type="checkbox" id="d4"><span class="what"><b>Soldá un pin de una punta y mirá que esté derecha.</b><span class="hint">Acercá el soldador desde afuera, lejos del vidrio.</span></span></label></li>
+      <li><label><input type="checkbox" id="d5"><span class="what"><b>Soldá el pin de la otra punta y después el resto.</b><span class="hint">No toques el vidrio ni la cinta flex con el soldador: se derriten.</span></span></label></li>
+      <li><label><input type="checkbox" id="d6"><span class="what"><b>Revisá con zoom y sacá una foto de los nombres de los pines.</b><span class="hint">La vas a necesitar en el paso 2 del armado.</span></span></label></li>
+      <li><label><input type="checkbox" id="d7"><span class="what"><b>Medí cada pin contra su vecino.</b><span class="hint">Entre VCC y GND vale el pitido cortito. Ningún par tiene que pitar de forma sostenida.</span></span></label></li>
+    </ul>
+  </div>
+  <div class="gate"><b>La soldadura está lista cuando</b> todos los puntos quedan bien y ningún par de vecinos pita de forma sostenida. Seguí con la primera prueba.</div>
+  <h3 id="primera-prueba">Primera prueba con la PC</h3>
+  <p class="prose">Para esta prueba alcanza con la SuperMini, la pantalla y 7 cables hembra–macho, u 8 si la pantalla tiene CS. No usás los rieles ni cables macho–macho. La hembra va en el pin de la pantalla. El macho va en un agujero libre <b>del mismo número y del mismo lado del canal</b> que el pin de la SuperMini. La tabla indica el agujero para tu placa, con el USB-C a la izquierda. Antes de enchufar cada cable, confirmá el nombre impreso: si no coincide, manda lo impreso.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Pin de la pantalla</th><th>Pin de la SuperMini</th><th>Agujero</th><th>Otros nombres en la pantalla</th></tr></thead>
+    <tbody>
+      <tr><td><b>GND</b></td><td><b>G</b></td><td><code>j5</code></td><td></td></tr>
+      <tr><td><b>VCC</b></td><td><b>3V3</b>, nunca 5V</td><td><code>j6</code></td><td></td></tr>
+      <tr><td><b>SCL</b></td><td><b>6</b></td><td><code>a5</code></td><td>SCK, CLK</td></tr>
+      <tr><td><b>SDA</b></td><td><b>7</b></td><td><code>a6</code></td><td>MOSI, DIN</td></tr>
+      <tr><td><b>RES</b></td><td><b>20</b></td><td><code>a10</code></td><td>RST</td></tr>
+      <tr><td><b>DC</b></td><td><b>5</b></td><td><code>a4</code></td><td>RS, A0</td></tr>
+      <tr><td><b>BLK</b></td><td><b>21</b></td><td><code>a11</code></td><td>BL, LED</td></tr>
+      <tr><td><b>CS</b>, solo si existe</td><td><b>G</b></td><td><code>i5</code></td><td></td></tr>
+    </tbody>
+  </table></div>
+  <ul class="todo">
+    <li><label><input type="checkbox" id="d8"><span class="what"><b>Con el USB desenchufado, conectá los cables de la tabla.</b><span class="hint">Usá los más cortos que tengas. Conectá primero GND y VCC.</span></span></label></li>
+    <li><label><input type="checkbox" id="d9"><span class="what"><b>Medí continuidad entre los pines G y 3V3 de la SuperMini.</b><span class="hint">Vale el pitido cortito. Si es sostenido, no enchufes.</span></span></label></li>
+    <li><label><input type="checkbox" id="d10"><span class="what"><b>Enchufá el USB-C a la PC y cargá el programa.</b><span class="hint">Desde la carpeta del proyecto: <code>cd firmware &amp;&amp; cargo run --release</code></span></span></label></li>
+    <li><label><input type="checkbox" id="d11"><span class="what"><b>Mirá la pantalla.</b><span class="hint">Se prende la luz y aparece la casa con el mono.</span></span></label></li>
+    <li><label><input type="checkbox" id="d12"><span class="what"><b>Cortá con Ctrl+C y desenchufá antes de tocar un cable.</b></span></label></li>
+  </ul>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Qué pasa</th><th>Qué revisar</th></tr></thead>
+    <tbody>
+      <tr><td><b>La PC no ve la placa</b></td><td>Probá otro cable USB-C: muchos solo cargan. Si sigue igual, mantené BOOT, tocá RST, soltá BOOT y volvé a cargar.</td></tr>
+      <tr><td><b>Pantalla negra, sin luz</b></td><td>VCC, GND y BLK, y sus puntos de soldadura.</td></tr>
+      <tr><td><b>Con luz, pero sin imagen</b></td><td>SCL, SDA, RES y DC. Si tiene CS, confirmá que esté a G. Si la terminal muestra mensajes, el programa corre y el problema está en esos cables o sus puntos.</td></tr>
+      <tr><td><b>Imagen con basura o rayas</b></td><td>Los datos van a 20 MHz. Usá cables más cortos y mandame una foto: se puede bajar la velocidad en el programa.</td></tr>
+      <tr><td><b>Algo calienta o huele raro</b></td><td>Desenchufá ya. Revisá primero que VCC no haya ido a 5V.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="gate"><b>Prueba superada cuando</b> ves al mono en la pantalla. El DY-SV17F y el parlante pueden esperar: las sesiones 4 y 5 no hacen falta para esto.</div>
+</section>
+
+<section id="dy">
+  <div class="head"><h2>Sesión 4 · DY-SV17F</h2><span class="progress" data-count="dy"></span></div>
+  <div class="prose"><p>Si el módulo ya trae pines soldados, saltá esta sesión. Si vino con pines sueltos, la técnica es la misma de la SuperMini. Sacale una foto a cada cara antes de empezar: si ves resistencias chiquitas al lado de CON1–CON3, mandámela antes de cablear.</p></div>
+  <ul class="todo">
+    <li><label><input type="checkbox" id="y1"><span class="what"><b>Buscá los nombres impresos que necesitás.</b><span class="hint">Son <b>V5, GND, RXD, CON1, CON2, CON3, V33, SPK+ y SPK−</b>. En algunos módulos RXD dice RX o IO1.</span></span></label></li>
+    <li><label><input type="checkbox" id="y2"><span class="what"><b>Si la tira sobra, cortala al largo necesario.</b><span class="hint">Se parte en las muescas, con los dedos o con un alicate. Los agujeros que no uses pueden quedar vacíos, pero dejá pines suficientes para que el módulo se apoye parejo.</span></span></label></li>
+    <li><label><input type="checkbox" id="y3"><span class="what"><b>Clavá las tiras en la protoboard y apoyá el módulo encima.</b><span class="hint">Parte larga abajo, componentes hacia arriba. Probá sin soldar.</span></span></label></li>
+    <li><label><input type="checkbox" id="y4"><span class="what"><b>Soldá las puntas, mirá que quede plano y seguí con el resto.</b></span></label></li>
+    <li><label><input type="checkbox" id="y5"><span class="what"><b>Revisá con zoom, sobre todo entre SPK+ y SPK−.</b></span></label></li>
+    <li><label><input type="checkbox" id="y6"><span class="what"><b>Medí V5 contra GND y SPK+ contra SPK−, con el parlante sin conectar.</b><span class="hint">Entre V5 y GND vale el pitido cortito. Entre SPK+ y SPK− no tiene que pitar. Hacé esta prueba antes de conectar el parlante, porque con él sí pita.</span></span></label></li>
+    <li><label><input type="checkbox" id="y7"><span class="what"><b>Medí los pines vecinos.</b></span></label></li>
+  </ul>
+  <div class="gate"><b>Terminaste cuando</b> los 9 pines están firmes y no hay ningún pitido sostenido.</div>
+</section>
+
+<section id="parlante">
+  <div class="head"><h2>Sesión 5 · Parlante</h2><span class="progress" data-count="parlante"></span></div>
+  <div class="prose"><p>Los cables del parlante son muy finitos y no se quedan firmes en un pin. A cada uno le empalmás un pedazo de cable dupont con punta hembra, que después enchufás en SPK+ y SPK−. Es el ejercicio 2 de la práctica. Sin flux, acá lo que más ayuda es tener todo limpio y pelado en el momento.</p></div>
+  <figure>
+    <div class="fig">
+      <svg viewBox="0 0 620 200" role="img" aria-label="Cuatro pasos: cortar un cable dupont, pelar 5 milímetros, pasar el termocontraíble, retorcer con el cable del parlante y soldar, y aislar con termocontraíble">
+        <g>
+          <text class="num" x="10" y="24">1</text><text class="lbl-s" x="28" y="23">cortá un dupont</text><text class="lbl-s" x="28" y="37">hembra por la mitad</text>
+          <rect x="14" y="88" width="22" height="14" rx="2" fill="var(--plastic)"/>
+          <path d="M36 95 H 80" stroke="var(--w-5v)" stroke-width="5" stroke-linecap="round"/><path d="M98 95 H 140" stroke="var(--w-5v)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M84 76 L 94 114 M 94 76 L 84 114" stroke="var(--ink)" stroke-width="2"/>
+          <text class="lbl-s" x="89" y="132" text-anchor="middle">tijera</text>
+        </g>
+        <g transform="translate(155,0)">
+          <text class="num" x="10" y="24">2</text><text class="lbl-s" x="28" y="23">pelá 5 mm</text><text class="lbl-s" x="28" y="37">de cada punta</text>
+          <rect x="14" y="70" width="22" height="14" rx="2" fill="var(--plastic)"/>
+          <path d="M36 77 H 90" stroke="var(--w-5v)" stroke-width="5" stroke-linecap="round"/><path d="M90 77 H 112" stroke="var(--copper)" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M20 118 H 90" stroke="var(--w-5v)" stroke-width="3" stroke-linecap="round"/><path d="M90 118 H 112" stroke="var(--copper)" stroke-width="1.6" stroke-linecap="round"/>
+          <text class="lbl-s" x="20" y="140">cable del parlante</text>
+        </g>
+        <g transform="translate(310,0)">
+          <text class="num" x="10" y="24">3</text><text class="lbl-s" x="28" y="23">termo primero, después</text><text class="lbl-s" x="28" y="37">retorcé y soldá</text>
+          <rect x="14" y="88" width="22" height="14" rx="2" fill="var(--plastic)"/>
+          <path d="M36 95 H 66" stroke="var(--w-5v)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M66 95 Q 74 88, 82 95 T 98 95" fill="none" stroke="var(--copper)" stroke-width="3"/>
+          <ellipse cx="82" cy="95" rx="18" ry="6" fill="var(--solder)" opacity="0.9"/>
+          <path d="M98 95 H 146" stroke="var(--w-5v)" stroke-width="3" stroke-linecap="round"/>
+          <rect x="112" y="87" width="30" height="16" rx="4" fill="var(--w-gnd)" opacity="0.8"/>
+          <text class="lbl-s" x="127" y="122" text-anchor="middle">esperando</text>
+        </g>
+        <g transform="translate(465,0)">
+          <text class="num" x="10" y="24">4</text><text class="lbl-s" x="28" y="23">deslizalo y encogelo</text><text class="lbl-s" x="28" y="37">o usá cinta</text>
+          <rect x="14" y="88" width="22" height="14" rx="2" fill="var(--plastic)"/>
+          <path d="M36 95 H 140" stroke="var(--w-5v)" stroke-width="4" stroke-linecap="round"/>
+          <rect x="58" y="86" width="50" height="18" rx="5" fill="var(--w-gnd)"/>
+          <text class="lbl-s" x="83" y="128" text-anchor="middle">nada de cobre</text><text class="lbl-s" x="83" y="142" text-anchor="middle">a la vista</text>
+        </g>
+        <text class="lbl-s" x="310" y="186" text-anchor="middle">Lo mismo con el negro. Rojo del parlante con un dupont rojo (+), negro con uno negro (−).</text>
+      </svg>
+    </div>
+    <figcaption>Si te pasás de calor, el plástico del cable se encoge un poco. Es normal.</figcaption>
+  </figure>
+  <ul class="todo">
+    <li><label><input type="checkbox" id="k1"><span class="what"><b>Si el parlante trae un conector blanco, cortalo.</b><span class="hint">Cortá pegado al conector para no perder largo.</span></span></label></li>
+    <li><label><input type="checkbox" id="k2"><span class="what"><b>Cortá dos dupont y quedate con las mitades que tienen hembra.</b></span></label></li>
+    <li><label><input type="checkbox" id="k3"><span class="what"><b>Pelá 5 mm de cada punta, con cuidado.</b><span class="hint">El cable del parlante es frágil. Apretá apenas el alicate. Si se cortan hilos, cortá y empezá de nuevo.</span></span></label></li>
+    <li><label><input type="checkbox" id="k4"><span class="what"><b>Pasá 2 cm de termocontraíble por cada cable.</b><span class="hint">Hacelo antes de soldar y dejalo lejos del empalme. Después ya no entra.</span></span></label></li>
+    <li><label><input type="checkbox" id="k5"><span class="what"><b>Estañá las cuatro puntas por separado.</b><span class="hint">Sujetá con la tercera mano o con cinta contra la mesa, nunca con los dedos. Con 1 o 2 segundos alcanza.</span></span></label></li>
+    <li><label><input type="checkbox" id="k6"><span class="what"><b>Uní rojo con rojo y soldá.</b><span class="hint">Retorcé las puntas juntas, calentá 1 segundo y dale un toque de estaño nuevo. No muevas nada hasta que cambie de brillante a sólido.</span></span></label></li>
+    <li><label><input type="checkbox" id="k7"><span class="what"><b>Repetí con negro y negro.</b></span></label></li>
+    <li><label><input type="checkbox" id="k8"><span class="what"><b>Esperá 30 segundos y tapá los empalmes.</b><span class="hint">Deslizá el termocontraíble y encogelo acercando el costado del soldador, sin tocarlo. Con cinta aisladora, dale dos vueltas.</span></span></label></li>
+    <li><label><input type="checkbox" id="k9"><span class="what"><b>Tirá suave de cada empalme.</b><span class="hint">Tiene que aguantar sin moverse.</span></span></label></li>
+    <li><label><input type="checkbox" id="k10"><span class="what"><b>Medí el parlante en Ω entre las dos puntas hembra.</b><span class="hint">Metiendo un pin macho en cada hembra podés apoyar las puntas del multímetro.</span></span></label></li>
+  </ul>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Lectura en Ω</th><th>Qué significa</th></tr></thead>
+    <tbody>
+      <tr><td><b>Cerca de 8 Ω</b></td><td>Los dos empalmes están bien. Listo.</td></tr>
+      <tr><td><b>Cerca de 0 Ω</b></td><td>Los dos empalmes se tocan. Revisá el aislante.</td></tr>
+      <tr><td><b>OL o 1</b></td><td>Un empalme está abierto. Rehacé el que se mueva o se vea opaco.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="gate"><b>Terminaste cuando</b> leés cerca de 8 Ω y no se ve cobre. Con esto se acabaron las soldaduras de esta etapa. Seguí con el <a href="armado.html">armado en la protoboard</a>.</div>
+</section>
+
+<section id="errores">
+  <div class="prose">
+    <h2>Si algo sale mal</h2>
+    <p>Casi todo se arregla. Antes de retocar, limpiá la punta. Si después de dos intentos no sale, frená y mandame una foto con zoom.</p>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Qué ves</th><th>Por qué pasa</th><th>Cómo se arregla sin flux</th></tr></thead>
+    <tbody>
+      <tr><td><b>El estaño hace bola y no se pega</b></td><td>El metal no llegó a temperatura o está sucio.</td><td>Limpiá la punta. Calentá pin y cobre juntos 2 s. Agregá 1–2 mm de estaño nuevo sobre la unión.</td></tr>
+      <tr><td><b>El estaño se queda en la punta</b></td><td>Punta oxidada, o toca solo el pin.</td><td>Limpiala y volvé a estañarla. Apoyá la parte plana contra pin y cobre a la vez.</td></tr>
+      <tr><td><b>Nada funde, o tarda mucho</b></td><td>Punta negra o temperatura baja.</td><td>Limpiá y estañá la punta. Si sigue igual, subí 10–20 °C.</td></tr>
+      <tr><td><b>Punto opaco o granulado</b></td><td>Se movió al enfriar, o faltó calor.</td><td>Calentá 2 s con un toque de estaño nuevo. Sacá el soldador y no muevas nada 3 s.</td></tr>
+      <tr><td><b>Se ve cobre sin cubrir</b></td><td>Faltó estaño.</td><td>Calentá y agregá un poco más.</td></tr>
+      <tr><td><b>Puente entre dos pines</b></td><td>Sobró estaño.</td><td>Con la punta limpia, tocá el puente y arrastrá hacia afuera, entre los pines. Limpiá y repetí. Si el estaño no se mueve, agregale un poquito de estaño nuevo: su flux lo suelta. Con malla o sacaestaño es más fácil.</td></tr>
+      <tr><td><b>Demasiado estaño en un punto</b></td><td>Se fue la mano.</td><td>Calentá y deslizá la punta limpia hacia arriba por el pin: se lleva el sobrante.</td></tr>
+      <tr><td><b>Placa o pantalla torcida</b></td><td>Se movió durante los primeros puntos.</td><td>Con 2 puntos: recalentá uno y acomodá. Si ya soldaste todos y entra en la protoboard, dejala así.</td></tr>
+      <tr><td><b>Pitido sostenido sin puente a la vista</b></td><td>Puede ser un pelito de estaño, o algo en la protoboard.</td><td>Sacá la placa de la protoboard y medí de nuevo. Si dejó de pitar, el problema estaba en la protoboard. Si sigue, revisá entre pines desde abajo.</td></tr>
+      <tr><td><b>Un pad de cobre se despegó</b></td><td>Mucho calor o fuerza.</td><td>No sigas calentando. Mandame una foto: suele tener arreglo con un cablecito.</td></tr>
+      <tr><td><b>El plástico de la protoboard se marcó</b></td><td>Calor en un solo pin durante mucho tiempo.</td><td>Sin problema si los contactos siguen firmes. Seguí salteado.</td></tr>
+      <tr><td><b>Más tarde, un botón o la pantalla no responden</b></td><td>Un punto de GPIO parece bien pero no hace contacto.</td><td>Desenchufá. Calentá ese pin con estaño nuevo, aunque se vea bien.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="etapa2">
+  <div class="prose">
+    <h2>Más adelante: placa final</h2>
+    <p>Esto no hace falta para que el proyecto funcione: todo anda por USB-C en la protoboard. Hacelo recién cuando la protoboard funcione completa, y leé antes la <a href="https://github.com/FedeJure/0xMono#alimentación">sección Alimentación del README</a>. La versión final no lleva batería, así que no hay celda de litio ni pads planos. Para esta etapa comprá flux: la placa perforada es mucho más fácil con él.</p>
+  </div>
+  <div class="two">
+    <div class="card">
+      <h3>Condensador y USB-C</h3>
+      <ul class="buy">
+        <li>Soldá un condensador de 220–470&nbsp;µF y 10&nbsp;V entre 5V y G, junto al módulo de sonido.</li>
+        <li>La franja del condensador va hacia G. Al revés puede reventar.</li>
+        <li>Atornillá la placa a la carcasa, para que los tirones del cable no los aguante el USB-C.</li>
+        <li>Antes de enchufar, medí continuidad entre 5V y G. Vale un pitido cortito; si es sostenido, no enchufes.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Placa perforada final</h3>
+      <ul class="buy">
+        <li>Sacá fotos de la protoboard funcionando antes de desarmar nada.</li>
+        <li>Definí primero las medidas de la carcasa.</li>
+        <li>Soldá de lo más bajo a lo más alto: resistencias, botones, zócalos y cables.</li>
+        <li>Conviene montar la SuperMini en tira hembra para poder sacarla, si la altura te da.</li>
+        <li>Usá cable de silicona de 26–28 AWG. Hacé una conexión por vez y medila con continuidad antes de seguir.</li>
+        <li>También sirven los dupont cortados, cuando ya no los necesites para probar. Primero pelá y estañá uno: si el estaño no agarra o los hilos se cortan solos, usá silicona.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Guía de soldadura del 0xMono. Se complementa con el <a href="armado.html">armado en protoboard</a> y el <a href="https://github.com/FedeJure/0xMono">README del proyecto</a>.
+</footer>
+
+</div>
+
+<script>
+(() => {
+  const KEY = 'soldadura-checks';
+  const boxes = [...document.querySelectorAll('.todo input[type="checkbox"]')];
+  const sessions = ['practica', 'supermini', 'pantalla', 'dy', 'parlante'];
+  let checks = {};
+  try { checks = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { checks = {}; }
+  let progressDoc = null;
+  let pending = null;
+
+  function render() {
+    for (const b of boxes) b.checked = !!checks[b.id];
+    for (const id of sessions) {
+      const inSection = boxes.filter((b) => b.closest('section').id === id);
+      const done = inSection.filter((b) => b.checked).length;
+      const out = document.querySelector(`[data-count="${id}"]`);
+      if (out) out.textContent = `${done} de ${inSection.length}`;
+    }
+    const steps = boxes.filter((b) => sessions.includes(b.closest('section').id));
+    const done = steps.filter((b) => b.checked).length;
+    document.getElementById('total-progress').textContent = `${done} de ${steps.length}`;
+    document.getElementById('meter').style.width = `${steps.length ? (done / steps.length) * 100 : 0}%`;
+  }
+
+  function persist() {
+    try { localStorage.setItem(KEY, JSON.stringify(checks)); } catch (e) {}
+    if (!progressDoc) return;
+    clearTimeout(pending);
+    pending = setTimeout(() => { progressDoc.set({ checks }).catch(() => {}); }, 600);
+  }
+
+  document.addEventListener('change', (ev) => {
+    const b = ev.target;
+    if (!b.matches || !b.matches('.todo input[type="checkbox"]')) return;
+    checks[b.id] = b.checked;
+    render();
+    persist();
+  });
+  render();
+
+  /* Con cuenta, el progreso sigue a la persona entre el celular y la PC. Sin ella queda en este navegador. */
+  (async () => {
+    try {
+      if (!window.claude || !window.claude.use) return;
+      const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+      if (!db || !user) return;
+      const id = await user.id();
+      if (!id) return;
+      const doc = db.collection('data/users/' + id).doc('progreso');
+      const snap = await doc.get();
+      if (snap.exists) {
+        checks = { ...checks, ...(snap.data().checks || {}) };
+        try { localStorage.setItem(KEY, JSON.stringify(checks)); } catch (e) {}
+        render();
+      } else if (Object.keys(checks).length) {
+        await doc.set({ checks });
+      }
+      progressDoc = doc;
+      document.getElementById('store-note').textContent = 'El progreso se guarda en tu cuenta.';
+    } catch (e) { /* sigue funcionando con este navegador */ }
+  })();
+
+  /* Con las manos ocupadas, que el celular no se apague solo. */
+  const wake = document.getElementById('wake');
+  if (!('wakeLock' in navigator)) { wake.hidden = true; }
+  let lock = null;
+  let wanted = false;
+  async function acquire() {
+    try {
+      lock = await navigator.wakeLock.request('screen');
+      lock.addEventListener('release', () => { lock = null; if (!wanted) wake.setAttribute('aria-pressed', 'false'); });
+      wake.setAttribute('aria-pressed', 'true');
+      wake.textContent = 'Pantalla prendida';
+    } catch (e) {
+      wanted = false;
+      wake.setAttribute('aria-pressed', 'false');
+      wake.textContent = 'No disponible en este dispositivo';
+      wake.disabled = true;
+    }
+  }
+  wake.addEventListener('click', async () => {
+    wanted = !wanted;
+    if (wanted) { await acquire(); return; }
+    if (lock) await lock.release();
+    wake.setAttribute('aria-pressed', 'false');
+    wake.textContent = 'Mantener la pantalla prendida';
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (wanted && !lock && document.visibilityState === 'visible') acquire();
+  });
+})();
+</script>

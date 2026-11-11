@@ -1,0 +1,14 @@
+[package]
+name = "habitat"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "La vida del mono en el hábitat 3D: a dónde va, cómo camina, se sienta y se acuesta, qué tiene en la mano y qué se ve (no_std)"
+
+[dependencies]
+assets = { path = "../../assets" }
+companion = { path = "../companion" }
+engine3d = { path = "../engine" }
+embedded-graphics = "0.8"
+fonts = { path = "../fonts" }
+libm = "0.2"

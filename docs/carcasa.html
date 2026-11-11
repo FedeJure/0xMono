@@ -1,0 +1,1006 @@
+<title>Mini arcade del mono</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Pixelify+Sans:wght@500;700&display=swap">
+<style>
+/* Misma identidad que docs/cableado.html: guía de banco de trabajo. Arriba el modelo 3D sobre una plancha de corte; abajo, las piezas para cortar. */
+:root {
+  --bg: #eaeee8;
+  --surface: #f8faf6;
+  --ink: #1a2026;
+  --muted: #56616a;
+  --line: #cfd7cd;
+  --accent: #155fb0;
+  --accent-soft: #d9e6f5;
+  --warn: #9a5b00;
+  --warn-soft: #f8ebcf;
+  --ok: #2c6e31;
+  --ok-soft: #dcefdc;
+  /* objetos físicos: iguales en los dos temas */
+  --mdf: #c99b64;
+  --mdf-edge: #8f6a3f;
+  --mdf-in: #ead8b9;
+  --mdf-ink: #4f3820;
+  --slab: #d9b98c;
+  --mat: #2b5f45;
+  --font-display: "Pixelify Sans", "Courier New", monospace;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --step--1: 0.875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.3rem;
+  --step-2: 1.7rem;
+  --step-3: 2.4rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1215; --surface: #161c20; --ink: #e5eaee; --muted: #9ba7b0; --line: #2a333a;
+    --accent: #6cb4ff; --accent-soft: #16304c; --warn: #f3b44e; --warn-soft: #36270c; --ok: #86d18b; --ok-soft: #14301a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1215; --surface: #161c20; --ink: #e5eaee; --muted: #9ba7b0; --line: #2a333a;
+  --accent: #6cb4ff; --accent-soft: #16304c; --warn: #f3b44e; --warn-soft: #36270c; --ok: #86d18b; --ok-soft: #14301a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--step-0); line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1080px; margin: 0 auto; }
+.prose { max-width: 68ch; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; }
+h1 { font-family: var(--font-display); font-size: var(--step-3); font-weight: 700; margin: 0; letter-spacing: 0.01em; }
+h2 { font-family: var(--font-display); font-size: var(--step-2); font-weight: 500; margin: 0 0 12px; }
+h3 { font-size: var(--step-1); margin: 0 0 8px; }
+p { margin: 0 0 12px; }
+a { color: var(--accent); }
+.eyebrow { font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; }
+.muted { color: var(--muted); }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+section { padding-block: 40px 8px; border-top: 1px solid var(--line); margin-top: 32px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+nav.toc {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 6px; overflow-x: auto; padding-block: 10px;
+  margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))) calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  scrollbar-width: thin;
+}
+nav.toc a { flex: none; text-decoration: none; color: var(--ink); font-size: var(--step--1); border: 1px solid var(--line); background: var(--surface); padding: 4px 10px; border-radius: 999px; }
+nav.toc a:hover { border-color: var(--accent); color: var(--accent); }
+
+.hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: start; padding-block: 32px 16px; }
+.hero .lede { font-size: var(--step-1); color: var(--muted); margin-top: 12px; max-width: 40ch; }
+@media (max-width: 820px) { .hero { grid-template-columns: minmax(0, 1fr); } }
+.tally { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+.tally .big { font-family: var(--font-mono); font-size: var(--step-2); font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.tally .big small { font-size: var(--step--1); color: var(--muted); font-weight: 400; }
+.tally .axes { color: var(--muted); font-size: var(--step--1); margin: 4px 0 12px; }
+.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.checks li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; font-size: var(--step--1); line-height: 1.45; }
+.pill { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 999px; white-space: nowrap; margin-top: 1px; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+
+/* visor 3D */
+.viewer { position: relative; width: 100%; aspect-ratio: 16 / 10; max-height: 72vh; border-radius: 14px; overflow: hidden; background: var(--mat); }
+@media (max-width: 640px) { .viewer { aspect-ratio: 1 / 1; } }
+.viewer canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+.viewer canvas:active { cursor: grabbing; }
+.vbar { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
+.vbar button { pointer-events: auto; }
+.chip { font: 600 0.8125rem var(--font-body); border: 1px solid rgba(255,255,255,0.35); background: rgba(10, 30, 20, 0.55); color: #f3f6f2; padding: 5px 11px; border-radius: 999px; cursor: pointer; }
+.chip:hover { background: rgba(10, 30, 20, 0.8); }
+.chip[aria-pressed="true"] { background: #f3f6f2; color: #173a29; border-color: #f3f6f2; }
+.vhint { position: absolute; bottom: 10px; left: 12px; right: 12px; color: rgba(243, 246, 242, 0.8); font-size: 0.8125rem; pointer-events: none; }
+.vfail { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; color: #f3f6f2; text-align: center; }
+.vcontrols { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: center; margin-top: 14px; font-size: var(--step--1); }
+.vcontrols label { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+.vcontrols input[type="range"] { width: 160px; accent-color: var(--accent); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { font: inherit; background: var(--surface); color: var(--ink); border: 0; padding: 4px 12px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+figcaption { color: var(--muted); font-size: var(--step--1); margin-top: 10px; max-width: 75ch; }
+
+/* medidas */
+.form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 860px) { .form { grid-template-columns: minmax(0, 1fr); } }
+fieldset { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 14px 16px 16px; margin: 0; min-width: 0; }
+legend { font-weight: 700; padding: 0 6px; }
+.field { display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: 10px; align-items: center; padding-block: 6px; border-bottom: 1px dashed var(--line); }
+.field:last-of-type { border-bottom: 0; }
+.field label { font-size: var(--step--1); line-height: 1.35; }
+.field label small { display: block; color: var(--muted); }
+.field .in { display: flex; align-items: center; gap: 4px; }
+.field input { width: 100%; font: 600 0.95rem var(--font-mono); padding: 5px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); text-align: right; }
+.field .u { color: var(--muted); font-size: 0.8rem; width: 1.2em; }
+.formfoot { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 12px; font-size: var(--step--1); }
+.btn { font: 600 var(--step--1) var(--font-body); background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* piezas */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: var(--step--1); }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.sub td { color: var(--muted); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; margin-top: 20px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; min-width: 0; display: grid; grid-template-rows: auto 1fr auto; gap: 8px; }
+.card h3 { font-size: var(--step-0); margin: 0; display: flex; justify-content: space-between; gap: 8px; }
+.card h3 .num { color: var(--accent); font-size: 0.9rem; }
+.card .note { font-size: 0.8125rem; color: var(--muted); line-height: 1.45; margin: 0; }
+.card svg { width: 100%; height: auto; max-height: 280px; }
+svg .piece { fill: var(--mdf-in); stroke: var(--mdf-edge); stroke-width: 0.4; }
+svg .hole { fill: var(--bg); stroke: var(--mdf-edge); stroke-width: 0.35; }
+svg .ghost { fill: none; stroke: var(--mdf-edge); stroke-width: 0.3; stroke-dasharray: 1.2 1; }
+svg .slab { fill: var(--slab); stroke: var(--mdf-edge); stroke-width: 0.2; }
+svg .lbl { fill: var(--mdf-ink); font: 600 2.6px var(--font-body); }
+svg .lbl-s { fill: var(--mdf-ink); font: 2.2px var(--font-body); }
+svg .dim line { stroke: var(--accent); stroke-width: 0.22; }
+svg .dim text { fill: var(--accent); font: 600 2.8px var(--font-mono); }
+svg .pt circle { fill: var(--accent); }
+svg .pt text { fill: var(--ink); font: 700 3.2px var(--font-mono); }
+
+.side { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 820px) { .side { grid-template-columns: minmax(0, 1fr); } }
+.side .figbox { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; overflow-x: auto; }
+.side svg { width: 100%; min-width: 320px; height: auto; display: block; }
+
+ol.steps { list-style: none; counter-reset: s; padding: 0; margin: 0; display: grid; gap: 14px; max-width: 76ch; }
+ol.steps > li { counter-increment: s; display: grid; grid-template-columns: 2.2rem minmax(0, 1fr); gap: 12px; }
+ol.steps > li::before { content: counter(s); font: 700 1.1rem var(--font-display); color: var(--accent); background: var(--accent-soft); border-radius: 8px; height: 2.2rem; display: grid; place-items: center; }
+ol.steps b { display: block; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .two { grid-template-columns: minmax(0, 1fr); } }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+.box ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.callout { border-radius: 10px; padding: 14px 16px; margin-block: 16px; background: var(--warn-soft); }
+.callout strong { display: block; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <div>
+    <div class="eyebrow">Carcasa · MDF de 5 mm · a mano</div>
+    <h1>Mini arcade del mono</h1>
+    <p class="lede">Una caja de madera con forma de máquina de arcade: pantalla inclinada para verla sentado, tres botones adelante y el USB-C atrás. Son todos cortes rectos.</p>
+    <p class="muted" style="font-size:var(--step--1)">Las medidas salen de una pantalla ST7789 de 1,3″ típica. Cargá las de la tuya en <a href="#medidas">Tus medidas</a> y toda la página se recalcula: el 3D, las piezas y los dibujos.</p>
+  </div>
+  <div class="tally" aria-live="polite">
+    <div class="eyebrow">Medida total</div>
+    <div class="big" id="sum-size">–</div>
+    <div class="axes">ancho × fondo × alto, en milímetros</div>
+    <ul class="checks" id="checks"></ul>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Secciones">
+  <a href="#modelo">Modelo 3D</a>
+  <a href="#medidas">Tus medidas</a>
+  <a href="#piezas">Piezas</a>
+  <a href="#laterales">Laterales</a>
+  <a href="#armado">Armado</a>
+  <a href="#comprar">Qué comprar</a>
+</nav>
+
+<section id="modelo" style="border-top:0;margin-top:0;padding-top:24px">
+  <figure style="margin:0">
+    <div class="viewer" id="viewer">
+      <canvas id="c" aria-label="Modelo 3D de la carcasa. Arrastrá para girarlo."></canvas>
+      <div class="vbar" role="group" aria-label="Vistas">
+        <button class="chip" type="button" data-view="tres" aria-pressed="true">3/4</button>
+        <button class="chip" type="button" data-view="frente" aria-pressed="false">De frente</button>
+        <button class="chip" type="button" data-view="silla" aria-pressed="false">Desde la silla</button>
+        <button class="chip" type="button" data-view="costado" aria-pressed="false">Costado</button>
+        <button class="chip" type="button" data-view="atras" aria-pressed="false">Atrás</button>
+      </div>
+      <div class="vhint">Arrastrá para girar · rueda o dos dedos para acercar</div>
+    </div>
+    <div class="vcontrols">
+      <label><input type="checkbox" id="inside"> Ver por dentro</label>
+      <label>Separar piezas <input type="range" id="explode" min="0" max="40" step="1" value="0"></label>
+      <span style="display:inline-flex;gap:8px;align-items:center">Acabado
+        <span class="seg" role="group" aria-label="Acabado">
+          <button type="button" data-fin="natural" aria-pressed="true">MDF</button>
+          <button type="button" data-fin="pintada" aria-pressed="false">Pintada</button>
+        </span>
+      </span>
+    </div>
+    <figcaption>Por dentro se ven la SuperMini sobre su pilar, el puente con los pulsadores y la pantalla apoyada atrás de la ventana. Los cables son ilustrativos: el recorrido real lo decidís al armar.</figcaption>
+  </figure>
+</section>
+
+<section id="medidas">
+  <h2>Tus medidas</h2>
+  <p class="prose">Medí con calibre o regla. Para la pantalla, “la parte que se ve” es el cuadrado que se ilumina, sin el borde negro. La distancia se mide desde el borde de la placa que no tiene los pines.</p>
+  <form class="form" id="form" autocomplete="off">
+    <fieldset>
+      <legend>La caja</legend>
+      <div class="field"><label for="f-W">Ancho total<small>de lateral a lateral</small></label><span class="in"><input id="f-W" name="W" type="number" step="1" inputmode="decimal"><span class="u">mm</span></span></div>
+      <div class="field"><label for="f-D">Fondo<small>de adelante hacia atrás</small></label><span class="in"><input id="f-D" name="D" type="number" step="1" inputmode="decimal"><span class="u">mm</span></span></div>
+      <div class="field"><label for="f-kick">Alto del frente<small>hasta el borde de los botones</small></label><span class="in"><input id="f-kick" name="kick" type="number" step="1" inputmode="decimal"><span class="u">mm</span></span></div>
+      <div class="field"><label for="f-tilt">Inclinación de la pantalla<small>0° es parada</small></label><span class="in"><input id="f-tilt" name="tilt" type="number" step="1" inputmode="decimal"><span class="u">°</span></span></div>
+    </fieldset>
+    <fieldset>
+      <legend>La pantalla</legend>
+      <div class="field"><label for="f-pcbW">Placa, ancho</label><span class="in"><input id="f-pcbW" name="pcbW" type="number" step="0.5" inputmode="decimal"><span class="u">mm</span></span></div>
+      <div class="field"><label for="f-pcbH">Placa, alto<small>con los pines arriba</small></label><span class="in"><input id="f-pcbH" name="pcbH" type="number" step="0.5" inputmode="decimal"><span class="u">mm</span></span></div>
+      <div class="field"><label for="f-winW">Parte que se ve, ancho</label><span class="in"><input id="f-winW" name="winW" type="number" step="0.5" inputmode="decimal"><span class="u">mm</span></span></div>
+      <div class="field"><label for="f-winH">Parte que se ve, alto</label><span class="in"><input id="f-winH" name="winH" type="number" step="0.5" inputmode="decimal"><span class="u">mm</span></span></div>
+      <div class="field"><label for="f-winOff">Del borde de abajo de la placa a la parte que se ve</label><span class="in"><input id="f-winOff" name="winOff" type="number" step="0.5" inputmode="decimal"><span class="u">mm</span></span></div>
+    </fieldset>
+    <fieldset>
+      <legend>Los botones</legend>
+      <div class="field"><label for="f-btnH">Alto del pulsador 6×6<small>de la base a la punta</small></label><span class="in"><input id="f-btnH" name="btnH" type="number" step="0.5" inputmode="decimal"><span class="u">mm</span></span></div>
+      <p class="muted" style="font-size:var(--step--1);margin:10px 0 0">Los pulsadores quedan abajo, en un puente de madera. Arriba asoma un tarugo de 8 mm que los aprieta: así parecen botones de arcade.</p>
+    </fieldset>
+  </form>
+  <div class="formfoot">
+    <button class="btn" type="button" id="reset">Volver a las medidas de ejemplo</button>
+    <span class="muted" id="saved"></span>
+  </div>
+</section>
+
+<section id="piezas">
+  <h2>Piezas para cortar</h2>
+  <p class="prose">Todo sale de MDF de 5 mm: alcanza un pedazo de 30 × 30 cm. Las medidas son finales. Si cortás a mano, dejá 1 mm de más en el largo y lijá hasta que calce.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Pieza</th><th>Cant.</th><th>Medida (mm)</th><th>Qué lleva</th></tr></thead>
+      <tbody id="cutlist"></tbody>
+    </table>
+  </div>
+  <div class="cards" id="cards"></div>
+</section>
+
+<section id="laterales">
+  <h2>Las laterales</h2>
+  <div class="side">
+    <figure class="figbox" style="margin:0">
+      <div id="sidefig"></div>
+      <figcaption>Cara de adentro de la lateral derecha, con el frente a la izquierda. La otra lateral es igual, en espejo. Las franjas marcan dónde se apoya cada panel: copialas a lápiz antes de pegar.</figcaption>
+    </figure>
+    <div>
+      <p>Marcala con regla y escuadra. Todos los puntos se miden desde la esquina de abajo adelante (punto 1): primero hacia atrás y después hacia arriba. Uní los puntos con líneas rectas.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Punto</th><th>Hacia atrás</th><th>Hacia arriba</th></tr></thead>
+          <tbody id="coords"></tbody>
+        </table>
+      </div>
+      <p class="muted" style="font-size:var(--step--1);margin-top:12px">Para que salgan iguales, pegá dos pedazos de MDF con cinta doble faz y cortá los dos juntos.</p>
+    </div>
+  </div>
+</section>
+
+<section id="armado">
+  <h2>Armado</h2>
+  <p class="prose">En este orden. Cola vinílica en todas las uniones, salvo la tapa de atrás, que va con tornillos para poder abrirla.</p>
+  <ol class="steps" id="steps">
+    <li><span><b>Medí tus piezas y cargalas arriba.</b>Revisá que las tres marcas de la medida total estén en “Bien”. Si alguna dice “Ojo”, el texto te dice qué número tocar.</span></li>
+    <li><span><b>Cortá las dos laterales juntas.</b>Con la tabla de puntos. Lijá los cantos con las dos todavía pegadas, así quedan idénticas.</span></li>
+    <li><span><b>Cortá los paneles.</b>Todos tienen el mismo ancho, <span class="num" data-k="win"></span> mm. El largo de cada uno está en la tabla.</span></li>
+    <li><span><b>Hacé los agujeros antes de pegar.</b>Botones: tres agujeros de 9 mm. Ventana: un agujero de 6 mm en cada esquina, calá de agujero a agujero y terminá con lima. USB-C: dos agujeros de 9 mm con los centros a 5 mm, y limá el puente entre los dos. Tornillos de la tapa: mecha de 2 mm.</span></li>
+    <li><span><b>Pegá todo sobre una lateral acostada.</b>Primero en seco, para ver que calce. Después con cola, en este orden: piso, frente, panel de botones, panel de pantalla, marquesina y techo. Arriba va la otra lateral, con un libro de peso. Sujetá con cinta de papel y esperá una hora.</span></li>
+    <li><span><b>Pegá los dos listones de atrás.</b>Apoyá la tapa trasera en su lugar sin cola y pegá cada listón contra la lateral y contra la tapa. Cuando seque, sacá la tapa: los listones quedan justo donde van los tornillos.</span></li>
+    <li><span><b>Lijá al ras y emprolijá.</b>Todo lo que sobresalga de las laterales se lija hasta quedar parejo, incluida la punta de adelante del techo, en bisel. Las uniones en ángulo dejan una ranurita en V: se tapa con masilla para madera. Cada pieza dice cuánto mide la suya y qué bisel la cerraría. Lija 220, sellador y pintura, si querés.</span></li>
+    <li><span><b>Botones.</b>Cortá tres tarugos de <span class="num" data-k="dowel"></span> mm, pintalos y pegá una arandela M8 en la punta de abajo de cada uno. Con la caja boca abajo y sin la tapa, metelos por adentro: tienen que asomar 4 mm. Pegá los separadores debajo del panel, y encima el puente con los tres pulsadores (una gota de silicona cada uno), mirando a los tarugos. Apretá cada botón: si no hace clic, lijá un poco la punta del tarugo.</span></li>
+    <li><span><b>SuperMini.</b>Pegá las dos piezas del pilar entre sí y después al piso, centrado y a 1 mm de la tapa. Encima va la SuperMini con silicona, con el USB-C hacia atrás. Antes de que seque, presentá la tapa trasera: el conector tiene que quedar justo detrás del agujero.</span></li>
+    <li><span><b>Pantalla.</b>Apoyala desde adentro contra la ventana, con los pines arriba. Sostenela con cuatro taquitos pegados al costado de la placa y gotas de silicona en los bordes. Nada de peso sobre el vidrio ni sobre la cinta flex.</span></li>
+    <li><span><b>Cables y prueba.</b>Enchufá todo como en la <a href="cableado.html">guía de cableado</a>, probá con el cargador y cerrá la tapa con los cuatro tornillos. Si querés, pegá cuatro patitas de goma abajo.</span></li>
+  </ol>
+  <div class="callout"><strong>Barbijo para lijar</strong>El polvo de MDF es dañino. Lijá con barbijo FFP2, mejor afuera o con la ventana abierta.</div>
+</section>
+
+<section id="comprar">
+  <h2>Qué comprar</h2>
+  <div class="two">
+    <div class="box">
+      <h3>Ferretería</h3>
+      <ul>
+        <li>MDF de 5 mm, un pedazo de 30 × 30 cm.</li>
+        <li>Tarugo de madera de 8 mm, un pedazo de 10 cm.</li>
+        <li>3 arandelas M8 (agujero de 8,4 mm).</li>
+        <li>Listón de pino de 10 × 10 mm, unos 25 cm.</li>
+        <li>4 tornillos para madera de 3 × 12 mm.</li>
+        <li>4 patitas de goma autoadhesivas (opcional).</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Para trabajar</h3>
+      <ul>
+        <li>Mechas de 2, 6 y 9 mm. Si no conseguís de 9, la de 10 sirve: el tarugo queda con juego pero la arandela lo frena.</li>
+        <li>Caladora o arco de calar, lima y escuadra.</li>
+        <li>Cola vinílica, masilla para madera y silicona (o pistola de silicona caliente).</li>
+        <li>Lija 120 y 220, y barbijo FFP2.</li>
+        <li>Pintura acrílica y sellador, si la pintás.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script id="geo">
+/* Geometría pura: sin DOM ni THREE, para poder probarla aparte. Medidas en mm.
+   Perfil de la lateral en (x, y): x hacia atrás desde el frente, y hacia arriba desde el piso. */
+var T = 5;
+var FIX = { cpRun: 32, cpAng: 12, mqH: 20, mqLean: 7, pilarH: 30, smL: 22.5, smW: 18, spacer: 10, protr: 4, need: 34, pcb0: 4 };
+var DEF = { W: 80, D: 95, kick: 28, tilt: 28, pcbW: 28, pcbH: 39, winW: 24, winH: 24, winOff: 6, btnH: 5 };
+var LIM = { W: [66, 130], D: [70, 150], kick: [26, 50], tilt: [15, 40], pcbW: [15, 60], pcbH: [20, 70], winW: [10, 55], winH: [10, 55], winOff: [0, 40], btnH: [3.5, 14] };
+var RAD = Math.PI / 180;
+var ORDER_ALL = ['piso', 'frente', 'botones', 'pantalla', 'marquesina', 'techo', 'trasera'];
+function vadd(a, b) { return [a[0] + b[0], a[1] + b[1]]; }
+function vsub(a, b) { return [a[0] - b[0], a[1] - b[1]]; }
+function vmul(a, k) { return [a[0] * k, a[1] * k]; }
+function vdot(a, b) { return a[0] * b[0] + a[1] * b[1]; }
+function vlen(a) { return Math.hypot(a[0], a[1]); }
+function vunit(a) { return vmul(a, 1 / vlen(a)); }
+
+/* Recorta un polígono (en coordenadas s, w de un panel) a la franja 0 <= w <= T. */
+function clipHalf(poly, c, sign) {
+  var out = [], n = poly.length;
+  for (var i = 0; i < n; i++) {
+    var cur = poly[i], prev = poly[(i + n - 1) % n];
+    var ci = sign * (cur[1] - c) >= -1e-9, pi = sign * (prev[1] - c) >= -1e-9;
+    if (ci !== pi) { var t = (c - prev[1]) / (cur[1] - prev[1]); out.push([prev[0] + t * (cur[0] - prev[0]), c]); }
+    if (ci) out.push(cur);
+  }
+  return out;
+}
+function slab(q) { return [q.at(q.s0, 0), q.at(q.s1, 0), q.at(q.s1, T), q.at(q.s0, T)]; }
+
+function geometry(p) {
+  var Win = p.W - 2 * T;
+  var Lp = p.pcbH + 5;
+  var ca = FIX.cpAng * RAD, ta = p.tilt * RAD;
+  var P0 = [0, 0], P1 = [0, p.kick];
+  var P2 = [FIX.cpRun, p.kick + FIX.cpRun * Math.tan(ca)];
+  var P3 = vadd(P2, [Lp * Math.sin(ta), Lp * Math.cos(ta)]);
+  var P4 = vadd(P3, [-FIX.mqLean, FIX.mqH]);
+  var P5 = [p.D, P4[1]], P6 = [p.D, 0];
+  var prof = [P0, P1, P2, P3, P4, P5, P6];
+  /* El perfil va en sentido horario: el interior queda a la derecha de cada lado. */
+  var N = prof.length, eD = [], eN = [];
+  for (var i = 0; i < N; i++) { var dd = vunit(vsub(prof[(i + 1) % N], prof[i])); eD.push(dd); eN.push([dd[1], -dd[0]]); }
+  var concave = prof.map(function (V, k) { var a = eD[(k + N - 1) % N], b = eD[k]; return a[0] * b[1] - a[1] * b[0] > 1e-9; });
+
+  /* Cada panel apoya su cara de afuera sobre un lado del perfil. En cada punta, "null" quiere decir que
+     el panel pasa de largo hasta la esquina (o por debajo del otro, si la esquina es hacia adentro);
+     con nombre, se corta recto donde choca con ese otro panel. */
+  var defs = [
+    ['piso', 6, 0, 6, null, null],
+    ['botones', 1, 1, 2, null, null],
+    ['techo', 4, 4, 5, null, null],
+    ['pantalla', 2, 2, 3, 'botones', null],
+    ['marquesina', 3, 3, 4, 'pantalla', 'techo'],
+    ['trasera', 5, 5, 6, 'techo', 'piso'],
+    ['frente', 0, 0, 1, 'piso', 'botones']
+  ];
+  var pn = {};
+  defs.forEach(function (df) {
+    var id = df[0], edge = df[1], ia = df[2], ib = df[3], A = prof[ia], B = prof[ib];
+    var d = vunit(vsub(B, A)), n = eN[edge];
+    var loc = function (X) { var q = vsub(X, A); return [vdot(q, d), vdot(q, n)]; };
+    var strip = function (poly) { return clipHalf(clipHalf(poly, 0, 1), T, -1); };
+    var at = function (s, w) { return vadd(vadd(A, vmul(d, s)), vmul(n, w)); };
+    var ends = [{ k: ia, stop: df[4], s: 0 }, { k: ib, stop: df[5], s: vlen(vsub(B, A)) }];
+    ends.forEach(function (e, j) {
+      var V = prof[e.k], other = edge === e.k ? (e.k + N - 1) % N : e.k, nO = eN[other];
+      e.poke = 0; e.dev = 0;
+      if (e.stop) {
+        var c = strip(slab(pn[e.stop]).map(loc));
+        if (c.length) e.s = (j === 0 ? Math.max : Math.min).apply(null, c.map(function (q) { return q[0]; }));
+        e.dev = Math.acos(Math.min(1, Math.abs(vdot(d, pn[e.stop].n)))) / RAD;
+      } else if (concave[e.k]) {
+        e.s = (T - vdot(vsub(A, V), nO)) / vdot(d, nO);
+      } else {
+        e.poke = Math.max(0, -vdot(vsub(at(e.s, T), V), nO));
+      }
+    });
+    pn[id] = { id: id, A: A, B: B, d: d, n: n, s0: ends[0].s, s1: ends[1].s, L: ends[1].s - ends[0].s, at: at, ends: ends };
+  });
+
+  var H = P4[1];
+  var Bt = pn.botones, S = pn.pantalla, Tr = pn.trasera;
+  /* botones: centro de los agujeros a lo largo del panel, separación entre agujeros */
+  var uh = Math.max(14, (vlen(vsub(P2, P1)) - 1) / 2);
+  var sp = Math.min(20, (Win - 18) / 2);
+  var dowel = T + FIX.spacer - p.btnH + FIX.protr;
+  /* pantalla: la placa arranca a pcb0 del borde de abajo del panel */
+  var win = { u0: FIX.pcb0 + p.winOff, u1: FIX.pcb0 + p.winOff + p.winH, w: p.winW };
+  /* USB-C: altura de su centro desde el piso de afuera */
+  var yUsb = T + FIX.pilarH + 1.6 + 1.6;
+  var usb = { u: (P5[1] - yUsb) - Tr.s0, w: 14, h: 9 };
+  var screws = [];
+  [8, Tr.L - 8].forEach(function (u) { [-(Win / 2 - 5), Win / 2 - 5].forEach(function (v) { screws.push({ u: u, v: v }); }); });
+  /* lugar detrás de los pines de la pantalla, medido perpendicular al panel */
+  var pinU = S.s0 + FIX.pcb0 + p.pcbH - 2;
+  var Q = S.at(pinU, T);
+  var dx = S.n[0] > 1e-6 ? (p.D - T - Q[0]) / S.n[0] : Infinity;
+  var dy = S.n[1] < -1e-6 ? (Q[1] - T) / -S.n[1] : Infinity;
+  var behind = Math.min(dx, dy);
+  /* puente de los botones: su cara de abajo, para ver que no toque el piso */
+  var bridgeLow = Math.min(Bt.at(uh - 10, T + FIX.spacer + T)[1], Bt.at(uh + 10, T + FIX.spacer + T)[1]);
+  /* SuperMini */
+  var smX1 = p.D - T - 1, smX0 = smX1 - FIX.smL;
+  var bridgeBack = Math.max(Bt.at(uh + 10, T + FIX.spacer + T)[0], Bt.at(uh + 10, T)[0]);
+
+  var checks = [];
+  checks.push(behind >= FIX.need
+    ? { ok: true, t: 'Detrás de los pines de la pantalla quedan ' + fmt(behind) + ' mm. Hacen falta unos ' + FIX.need + ' para las hembras y la curva del cable.' }
+    : { ok: false, t: 'Detrás de los pines de la pantalla quedan ' + fmt(behind) + ' mm y hacen falta unos ' + FIX.need + '. Subí el fondo a ' + Math.ceil(p.D + FIX.need - behind + 1) + ' mm o bajá la inclinación.' });
+  var winOk = p.winW <= p.pcbW && p.winOff + p.winH <= p.pcbH - 4 && p.pcbW <= Win - 6;
+  checks.push(winOk
+    ? { ok: true, t: 'La placa de la pantalla (' + fmt(p.pcbW) + ' × ' + fmt(p.pcbH) + ') entra en el interior de ' + fmt(Win) + ' mm de ancho.' }
+    : { ok: false, t: p.pcbW > Win - 6 ? 'La placa de la pantalla es más ancha que el interior. Subí el ancho total.' : 'La parte que se ve no entra en la placa: revisá las medidas de la pantalla.' });
+  var btnOk = sp >= 17 && bridgeLow >= T + 2 && bridgeBack < smX0 - 2;
+  checks.push(btnOk
+    ? { ok: true, t: 'Los tres botones quedan a ' + fmt(sp) + ' mm entre centros y el puente no toca el piso.' }
+    : { ok: false, t: sp < 17 ? 'Los botones quedan muy juntos y las arandelas se tocan. Subí el ancho total.' : (bridgeLow < T + 2 ? 'El puente de los botones toca el piso. Subí el alto del frente.' : 'El puente de los botones choca con la SuperMini. Subí el fondo.') });
+
+  var shortest = ORDER_ALL.reduce(function (m, id) { return pn[id].L < pn[m].L ? id : m; }, 'piso');
+  if (pn[shortest].L < 6) checks.push({ ok: false, t: 'La pieza “' + shortest + '” queda de ' + fmt(pn[shortest].L) + ' mm: muy chica para cortar. Volvé a una inclinación entre 15° y 35°.' });
+
+  return { p: p, Win: Win, H: H, Lp: Lp, prof: prof, pn: pn, uh: uh, sp: sp, dowel: dowel, win: win, yUsb: yUsb, usb: usb,
+    screws: screws, behind: behind, smX0: smX0, smX1: smX1, checks: checks };
+}
+function fmt(x) { var r = Math.round(x * 2) / 2; return String(r).replace('.', ','); }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+(function () {
+  "use strict";
+  var MONO = 'data:image/png;base64,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';
+  var $ = function (s) { return document.querySelector(s); };
+  var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+  /* ---------- estado ---------- */
+  var P = Object.assign({}, DEF);
+  try {
+    var saved = JSON.parse(localStorage.getItem('arcade-mono-medidas') || 'null');
+    if (saved) Object.keys(DEF).forEach(function (k) { if (typeof saved[k] === 'number' && isFinite(saved[k])) P[k] = saved[k]; });
+  } catch (e) { /* sin almacenamiento: usamos las de ejemplo */ }
+  var G = geometry(P);
+
+  /* ---------- formulario ---------- */
+  function fillForm() { Object.keys(DEF).forEach(function (k) { var el = $('#f-' + k); if (el) el.value = String(P[k]); }); }
+  fillForm();
+  var timer = null;
+  $('#form').addEventListener('input', function (ev) {
+    var el = ev.target; if (!el.name) return;
+    var v = parseFloat(String(el.value).replace(',', '.'));
+    if (!isFinite(v)) return;
+    var lim = LIM[el.name];
+    v = Math.min(lim[1], Math.max(lim[0], v));
+    P[el.name] = v;
+    clearTimeout(timer);
+    timer = setTimeout(update, 120);
+  });
+  $('#form').addEventListener('submit', function (e) { e.preventDefault(); });
+  $('#form').addEventListener('change', fillForm);
+  $('#reset').addEventListener('click', function () { P = Object.assign({}, DEF); fillForm(); update(); });
+
+  function update() {
+    G = geometry(P);
+    try { localStorage.setItem('arcade-mono-medidas', JSON.stringify(P)); $('#saved').textContent = 'Tus medidas quedan guardadas en este navegador.'; } catch (e) { $('#saved').textContent = ''; }
+    renderText();
+    if (V) V.rebuild();
+  }
+
+  /* ---------- textos, tabla y dibujos ---------- */
+  var NAMES = { piso: 'Piso', frente: 'Frente', botones: 'Panel de botones', pantalla: 'Panel de pantalla', marquesina: 'Marquesina', techo: 'Techo', trasera: 'Tapa trasera' };
+  var ORDER = ['piso', 'frente', 'botones', 'pantalla', 'marquesina', 'techo', 'trasera'];
+
+  function renderText() {
+    var p = G.p;
+    $('#sum-size').innerHTML = fmt(p.W) + ' × ' + fmt(p.D) + ' × ' + fmt(G.H);
+    $('#checks').innerHTML = G.checks.map(function (c) {
+      return '<li><span class="pill ' + (c.ok ? 'ok' : 'warn') + '">' + (c.ok ? 'Bien' : 'Ojo') + '</span><span>' + c.t + '</span></li>';
+    }).join('');
+    $$('[data-k="win"]').forEach(function (e) { e.textContent = fmt(G.Win); });
+    $$('[data-k="dowel"]').forEach(function (e) { e.textContent = fmt(G.dowel); });
+
+    var notes = {
+      piso: 'Liso. Marcá dónde va el pilar de la SuperMini.',
+      frente: 'Liso. Va entre el piso y el panel de botones.',
+      botones: '3 agujeros de 9 mm.',
+      pantalla: 'Ventana de ' + fmt(p.winW) + ' × ' + fmt(p.winH) + '.',
+      marquesina: 'Lisa. Acá va el nombre o un dibujo.',
+      techo: 'Liso.',
+      trasera: 'Agujero del USB-C y 4 tornillos. No se pega.'
+    };
+    var rows = ORDER.map(function (id) {
+      var q = G.pn[id];
+      return '<tr><td>' + NAMES[id] + '</td><td class="n">1</td><td class="n">' + fmt(G.Win) + ' × ' + fmt(q.L) + '</td><td>' + notes[id] + '</td></tr>';
+    });
+    rows.unshift('<tr><td>Lateral</td><td class="n">2</td><td class="n">' + fmt(p.D) + ' × ' + fmt(G.H) + '</td><td>Con forma: ver <a href="#laterales">Las laterales</a>.</td></tr>');
+    rows.push('<tr class="sub"><td>Puente de botones</td><td class="n">1</td><td class="n">' + fmt(G.Win) + ' × 20</td><td>Sostiene los pulsadores debajo del panel.</td></tr>');
+    rows.push('<tr class="sub"><td>Separador</td><td class="n">4</td><td class="n">8 × 20</td><td>Van de a dos, uno encima del otro: 10 mm entre el panel y el puente.</td></tr>');
+    rows.push('<tr class="sub"><td>Pilar de la SuperMini</td><td class="n">2</td><td class="n">18 × 30</td><td>Pegadas cara contra cara: un taco de 10 mm que entra entre las dos filas de hembras.</td></tr>');
+    rows.push('<tr class="sub"><td>Listón de pino 10 × 10</td><td class="n">2</td><td class="n">' + fmt(G.H - 2 * T) + ' de largo</td><td>Atrás, contra las laterales. Ahí entran los tornillos de la tapa.</td></tr>');
+    rows.push('<tr class="sub"><td>Tarugo de 8 mm</td><td class="n">3</td><td class="n">' + fmt(G.dowel) + ' de largo</td><td>Los botones. Con una arandela M8 pegada abajo.</td></tr>');
+    $('#cutlist').innerHTML = rows.join('');
+
+    $('#cards').innerHTML = ORDER.map(function (id) {
+      var q = G.pn[id];
+      return '<article class="card"><h3><span>' + NAMES[id] + '</span><span class="num">' + fmt(G.Win) + ' × ' + fmt(q.L) + '</span></h3>' + drawPanel(id) + '<p class="note">' + cardNote(id) + ' ' + jointNote(id) + '</p></article>';
+    }).join('');
+    $('#sidefig').innerHTML = drawSide();
+    $('#coords').innerHTML = G.prof.map(function (pt, i) {
+      return '<tr><td class="n">' + (i + 1) + '</td><td class="n">' + fmt(pt[0]) + ' mm</td><td class="n">' + fmt(pt[1]) + ' mm</td></tr>';
+    }).join('');
+  }
+
+  var ENDS = { piso: ['de adelante', 'de atrás'], frente: ['de abajo', 'de arriba'], botones: ['de adelante', 'de atrás'],
+    pantalla: ['de abajo', 'de arriba'], marquesina: ['de abajo', 'de arriba'], techo: ['de adelante', 'de atrás'], trasera: ['de arriba', 'de abajo'] };
+  function jointNote(id) {
+    var q = G.pn[id], out = [];
+    q.ends.forEach(function (e, j) {
+      var nm = 'la punta ' + ENDS[id][j];
+      var past = j === 1 ? q.s1 - vlen(vsub(q.B, q.A)) : -q.s0;
+      if (!e.stop && past > 0.5) out.push('Ojo: ' + nm + ' sigue ' + fmt(past) + ' mm de largo, por detrás del panel de al lado, que apoya encima.');
+      if (e.poke > 0.3) out.push('Después de pegar, lijá al ras ' + nm + ': sobresale ' + fmt(e.poke) + ' mm.');
+      if (e.dev > 4) out.push(nm.charAt(0).toUpperCase() + nm.slice(1) + ' apoya en ángulo y deja una ranura de ' + fmt(T * Math.tan(e.dev * RAD)) + ' mm: masilla, o lijala antes en bisel de ' + Math.round(e.dev) + '°.');
+    });
+    return out.join(' ');
+  }
+
+  function cardNote(id) {
+    var p = G.p;
+    switch (id) {
+      case 'piso': return 'Visto desde arriba, el frente abajo. La línea punteada es el pilar.';
+      case 'frente': return 'Visto de frente.';
+      case 'botones': return 'Visto desde arriba, el frente abajo. A, B y C de izquierda a derecha.';
+      case 'pantalla': return 'Visto de frente. La línea punteada es la placa, que queda atrás. Si tu ventana no está centrada en la placa, corré el agujero igual que en tu pantalla.';
+      case 'marquesina': return 'La franja de arriba, inclinada hacia adelante. Da sombra a la pantalla.';
+      case 'techo': return 'Visto desde arriba, el frente abajo.';
+      case 'trasera': return 'Vista desde atrás. El centro del USB-C queda a ' + fmt(G.yUsb) + ' mm del suelo. Probá que entre la ficha de tu cable antes de pegar la SuperMini.';
+    }
+    return '';
+  }
+
+  function dimH(x1, x2, y, label) {
+    return '<g class="dim"><line x1="' + x1 + '" y1="' + y + '" x2="' + x2 + '" y2="' + y + '"/>' +
+      '<line x1="' + x1 + '" y1="' + (y - 1.3) + '" x2="' + x1 + '" y2="' + (y + 1.3) + '"/>' +
+      '<line x1="' + x2 + '" y1="' + (y - 1.3) + '" x2="' + x2 + '" y2="' + (y + 1.3) + '"/>' +
+      '<text x="' + ((x1 + x2) / 2) + '" y="' + (y - 1.1) + '" text-anchor="middle">' + label + '</text></g>';
+  }
+  function dimV(y1, y2, x, label) {
+    var ym = (y1 + y2) / 2, tx = x - 1.1;
+    return '<g class="dim"><line x1="' + x + '" y1="' + y1 + '" x2="' + x + '" y2="' + y2 + '"/>' +
+      '<line x1="' + (x - 1.3) + '" y1="' + y1 + '" x2="' + (x + 1.3) + '" y2="' + y1 + '"/>' +
+      '<line x1="' + (x - 1.3) + '" y1="' + y2 + '" x2="' + (x + 1.3) + '" y2="' + y2 + '"/>' +
+      '<text x="' + tx + '" y="' + ym + '" text-anchor="middle" transform="rotate(-90 ' + tx + ' ' + ym + ')">' + label + '</text></g>';
+  }
+
+  /* Dibujo de un panel rectangular. X: de izquierda a derecha como lo ves de afuera. Y: hacia abajo. */
+  function drawPanel(id) {
+    var q = G.pn[id], Wd = G.Win, L = q.L, p = G.p;
+    var mx = 12, my = 9, vbW = Wd + mx + 6, vbH = L + my + 5;
+    var up = id !== 'trasera';
+    var X = function (v) { return mx + Wd / 2 + v; };
+    var Y = function (u) { return my + (up ? L - u : u); };
+    var s = '<svg viewBox="0 0 ' + vbW.toFixed(1) + ' ' + vbH.toFixed(1) + '" role="img" aria-label="' + NAMES[id] + '">';
+    s += '<rect class="piece" x="' + mx + '" y="' + my + '" width="' + Wd + '" height="' + L + '"/>';
+    s += dimH(mx, mx + Wd, my - 3, fmt(Wd));
+    s += dimV(my, my + L, mx - 4, fmt(L));
+    if (id === 'botones') {
+      ['A', 'B', 'C'].forEach(function (lt, i) {
+        var v = (i - 1) * G.sp;
+        s += '<circle class="hole" cx="' + X(v) + '" cy="' + Y(G.uh) + '" r="4.5"/>';
+        s += '<text class="lbl" x="' + X(v) + '" y="' + (Y(G.uh) - 6) + '" text-anchor="middle">' + lt + '</text>';
+      });
+      s += '<g class="dim"><line x1="' + (mx + Wd + 2) + '" y1="' + Y(G.uh) + '" x2="' + (mx + Wd + 2) + '" y2="' + Y(0) + '"/></g>';
+      s += '<text class="lbl-s" x="' + X(-G.sp) + '" y="' + (Y(G.uh) + 9) + '" text-anchor="middle">Ø 9</text>';
+      s += '<text class="lbl-s" x="' + X(0) + '" y="' + (Y(0) - 2) + '" text-anchor="middle">centros a ' + fmt(G.uh) + ' del frente · ' + fmt(G.sp) + ' entre sí</text>';
+      s += '<text class="lbl-s" x="' + X(0) + '" y="' + (my + 3) + '" text-anchor="middle">atrás</text>';
+    } else if (id === 'pantalla') {
+      var pc0 = FIX.pcb0, pc1 = FIX.pcb0 + p.pcbH;
+      s += '<rect class="ghost" x="' + X(-p.pcbW / 2) + '" y="' + Y(pc1) + '" width="' + p.pcbW + '" height="' + p.pcbH + '"/>';
+      s += '<rect class="hole" x="' + X(-G.win.w / 2) + '" y="' + Y(G.win.u1) + '" width="' + G.win.w + '" height="' + (G.win.u1 - G.win.u0) + '"/>';
+      s += dimV(Y(G.win.u0), Y(0), X(-G.win.w / 2) - 2.5, fmt(G.win.u0));
+      s += '<text class="lbl-s" x="' + X(0) + '" y="' + (Y(G.win.u1) + (G.win.u1 - G.win.u0) / 2 + 1) + '" text-anchor="middle">ventana</text>';
+      s += '<text class="lbl-s" x="' + X(0) + '" y="' + (Y(pc1) + 3) + '" text-anchor="middle">pines</text>';
+    } else if (id === 'trasera') {
+      var u = G.usb.u, hw = G.usb.w / 2, hh = G.usb.h / 2;
+      s += '<rect class="hole" x="' + X(-hw) + '" y="' + (Y(u) - hh) + '" width="' + G.usb.w + '" height="' + G.usb.h + '" rx="' + hh + '"/>';
+      s += '<text class="lbl-s" x="' + X(0) + '" y="' + (Y(u) - hh - 1.5) + '" text-anchor="middle">USB-C ' + G.usb.w + ' × ' + G.usb.h + '</text>';
+      s += dimV(Y(u), Y(L), X(-hw) - 3, fmt(L - u));
+      G.screws.forEach(function (sc) { s += '<circle class="hole" cx="' + X(sc.v) + '" cy="' + Y(sc.u) + '" r="1"/>'; });
+      s += '<text class="lbl-s" x="' + X(0) + '" y="' + (Y(8) + 0.8) + '" text-anchor="middle">tornillos a 5 del costado, 8 del borde</text>';
+    } else if (id === 'piso') {
+      var a0 = G.smX0 + 2, a1 = G.smX1 - 2;
+      s += '<rect class="ghost" x="' + X(-5) + '" y="' + Y(a1) + '" width="10" height="' + (a1 - a0) + '"/>';
+      s += '<text class="lbl-s" x="' + X(0) + '" y="' + (Y(a1) - 2) + '" text-anchor="middle">pilar</text>';
+      s += dimV(Y(G.pn.piso.L), Y(a1), X(5) + 4, fmt(G.pn.piso.L - a1));
+      s += '<text class="lbl-s" x="' + X(0) + '" y="' + (Y(0) - 2) + '" text-anchor="middle">frente</text>';
+    } else if (id === 'marquesina') {
+      s += '<text x="' + X(0) + '" y="' + (Y(L / 2) + 2.2) + '" text-anchor="middle" style="font: 700 6px var(--font-display); fill: var(--mdf-edge)">MONO</text>';
+    } else if (id === 'techo') {
+      s += '<text class="lbl-s" x="' + X(0) + '" y="' + (Y(0) - 2) + '" text-anchor="middle">frente</text>';
+    }
+    return s + '</svg>';
+  }
+
+  /* Lateral: frente a la izquierda, piso abajo. */
+  function drawSide() {
+    var p = G.p, H = G.H, D = p.D, mx = 14, my = 10;
+    var X = function (x) { return mx + x; }, Y = function (y) { return my + H - y; };
+    var pts = function (arr) { return arr.map(function (q) { return X(q[0]).toFixed(2) + ',' + Y(q[1]).toFixed(2); }).join(' '); };
+    var s = '<svg viewBox="0 0 ' + (D + mx + 8) + ' ' + (H + my + 12) + '" role="img" aria-label="Lateral con los puntos numerados y las franjas de cada panel">';
+    s += '<polygon class="piece" points="' + pts(G.prof) + '"/>';
+    ORDER.forEach(function (id) { s += '<polygon class="slab" points="' + pts(slab(G.pn[id])) + '"/>'; });
+    /* listón y pilar */
+    s += '<rect class="ghost" x="' + X(D - T - 10) + '" y="' + Y(H - T) + '" width="10" height="' + (H - 2 * T) + '"/>';
+    s += '<rect class="ghost" x="' + X(G.smX0 + 2) + '" y="' + Y(T + FIX.pilarH) + '" width="' + (FIX.smL - 4) + '" height="' + FIX.pilarH + '"/>';
+    s += '<text class="lbl-s" x="' + X((G.smX0 + G.smX1) / 2) + '" y="' + Y(T + FIX.pilarH / 2) + '" text-anchor="middle">pilar</text>';
+    s += '<text class="lbl-s" x="' + X(D - T - 5) + '" y="' + Y(H / 2) + '" text-anchor="middle" transform="rotate(-90 ' + X(D - T - 5) + ' ' + Y(H / 2) + ')">listón</text>';
+    /* nombres de las franjas */
+    var lab = function (id, txt, off) {
+      var q = G.pn[id], m = q.at(q.s0 + q.L / 2, T / 2 + (off || 0));
+      return '<text class="lbl-s" x="' + X(m[0]) + '" y="' + (Y(m[1]) + 0.8) + '" text-anchor="middle">' + txt + '</text>';
+    };
+    s += lab('piso', 'piso') + lab('techo', 'techo');
+    var Sq = G.pn.pantalla, mid = Sq.at(Sq.s0 + Sq.L / 2, T + 6);
+    s += '<text class="lbl-s" x="' + X(mid[0]) + '" y="' + Y(mid[1]) + '">pantalla</text>';
+    var Bq = G.pn.botones, mb = Bq.at(Bq.L / 2, T + 5);
+    s += '<text class="lbl-s" x="' + X(mb[0]) + '" y="' + Y(mb[1]) + '" text-anchor="middle">botones</text>';
+    var fq = G.pn.frente.at(G.pn.frente.s0 + G.pn.frente.L / 2, T + 2);
+    s += '<text class="lbl-s" x="' + X(fq[0]) + '" y="' + Y(fq[1]) + '">frente</text>';
+    var mq = G.pn.marquesina.at(G.pn.marquesina.s0 + G.pn.marquesina.L / 2, T + 2);
+    s += '<text class="lbl-s" x="' + X(mq[0]) + '" y="' + Y(mq[1]) + '">marquesina</text>';
+    s += '<text class="lbl-s" x="' + X(D - T - 2) + '" y="' + Y(T + FIX.pilarH + 18) + '" text-anchor="end">tapa →</text>';
+    /* puntos */
+    G.prof.forEach(function (pt, i) {
+      var dx = pt[0] < D / 2 ? -3.2 : 3.2, dy = pt[1] < H / 2 ? 3.6 : -1.6;
+      s += '<g class="pt"><circle cx="' + X(pt[0]) + '" cy="' + Y(pt[1]) + '" r="0.9"/><text x="' + (X(pt[0]) + dx) + '" y="' + (Y(pt[1]) + dy) + '" text-anchor="middle">' + (i + 1) + '</text></g>';
+    });
+    s += dimH(X(0), X(D), Y(0) + 8, fmt(D));
+    s += dimV(Y(H), Y(0), X(0) - 7, fmt(H));
+    return s + '</svg>';
+  }
+
+  renderText();
+
+  /* ---------- 3D ---------- */
+  var V = null;
+  try { if (window.THREE && THREE.OrbitControls) V = makeViewer(); else throw new Error('sin three'); }
+  catch (e) {
+    $('#viewer').insertAdjacentHTML('beforeend', '<div class="vfail">No se pudo cargar el modelo 3D. Las medidas y los dibujos de abajo valen igual.</div>');
+    $$('.vbar, .vhint').forEach(function (el) { el.hidden = true; });
+  }
+
+  function makeViewer() {
+    var V3 = THREE.Vector3;
+    var canvas = $('#c');
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    var scene = new THREE.Scene();
+    scene.background = new THREE.Color('#2b5f45');
+    var camera = new THREE.PerspectiveCamera(30, 1.6, 1, 5000);
+    var controls = new THREE.OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.12;
+    controls.maxPolarAngle = Math.PI / 2 - 0.04;
+    controls.minDistance = 90;
+    controls.maxDistance = 900;
+
+    scene.add(new THREE.HemisphereLight(0xf4f1ff, 0x3b4a3a, 0.75));
+    var sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(120, 260, 180); scene.add(sun);
+    var fill = new THREE.DirectionalLight(0xffffff, 0.25); fill.position.set(-200, 80, -120); scene.add(fill);
+
+    /* texturas */
+    function canvasTex(w, h, draw) {
+      var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      draw(cv.getContext('2d'), w, h);
+      var t = new THREE.CanvasTexture(cv); t.anisotropy = 4; return t;
+    }
+    var mdfTex = canvasTex(256, 256, function (c, w, h) {
+      c.fillStyle = '#c99b64'; c.fillRect(0, 0, w, h);
+      for (var i = 0; i < 2600; i++) {
+        var x = Math.random() * w, y = Math.random() * h, a = Math.random() * 0.12;
+        c.fillStyle = Math.random() < 0.5 ? 'rgba(90,55,20,' + a + ')' : 'rgba(255,235,200,' + a + ')';
+        c.fillRect(x, y, 1 + Math.random() * 3, 1);
+      }
+    });
+    mdfTex.wrapS = mdfTex.wrapT = THREE.RepeatWrapping; mdfTex.repeat.set(1 / 40, 1 / 40);
+    var matTex = canvasTex(512, 512, function (c, w, h) {
+      c.fillStyle = '#2b5f45'; c.fillRect(0, 0, w, h);
+      for (var i = 0; i <= 10; i++) {
+        var z = i * w / 10;
+        c.strokeStyle = i % 5 === 0 ? 'rgba(235,245,238,0.42)' : 'rgba(235,245,238,0.16)';
+        c.lineWidth = i % 5 === 0 ? 2.2 : 1.2;
+        c.beginPath(); c.moveTo(z, 0); c.lineTo(z, h); c.stroke();
+        c.beginPath(); c.moveTo(0, z); c.lineTo(w, z); c.stroke();
+      }
+    });
+    matTex.wrapS = matTex.wrapT = THREE.RepeatWrapping; matTex.repeat.set(12, 12);
+    var desk = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), new THREE.MeshStandardMaterial({ map: matTex, roughness: 0.95 }));
+    desk.rotation.x = -Math.PI / 2; scene.add(desk);
+    var shadowTex = canvasTex(128, 128, function (c, w, h) {
+      var gr = c.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w / 2);
+      gr.addColorStop(0, 'rgba(0,0,0,0.5)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = gr; c.fillRect(0, 0, w, h);
+    });
+    var shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }));
+    shadow.rotation.x = -Math.PI / 2; scene.add(shadow);
+
+    var monoTex = new THREE.TextureLoader().load(MONO, function () { needs = true; });
+    monoTex.magFilter = THREE.NearestFilter;
+    function marqueeTex(fg) {
+      return canvasTex(512, 128, function (c, w, h) {
+        c.clearRect(0, 0, w, h);
+        c.fillStyle = fg; c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.font = '700 92px "Pixelify Sans", "Courier New", monospace';
+        c.fillText('MONO', w / 2, h / 2 + 6);
+      });
+    }
+
+    var FIN = {
+      natural: { side: null, panel: null, marq: null, text: '#4f3820' },
+      pintada: { side: '#27406b', panel: '#efe6d2', marq: '#f2c230', text: '#1a2026' }
+    };
+    var finish = 'natural';
+    function woodMat(col) {
+      return col ? new THREE.MeshStandardMaterial({ color: col, roughness: 0.6 })
+        : new THREE.MeshStandardMaterial({ color: 0xffffff, map: mdfTex, roughness: 0.9 });
+    }
+    var M = {};
+    function makeMats() {
+      var f = FIN[finish];
+      M.side = woodMat(f.side); M.panel = woodMat(f.panel); M.marq = woodMat(f.marq);
+      M.raw = woodMat(null);
+      M.pine = new THREE.MeshStandardMaterial({ color: '#e6c995', roughness: 0.8 });
+      M.marqText = new THREE.MeshBasicMaterial({ map: marqueeTex(f.text), transparent: true, depthWrite: false });
+      M.pcb = new THREE.MeshStandardMaterial({ color: '#183a57', roughness: 0.5 });
+      M.black = new THREE.MeshStandardMaterial({ color: '#1d2023', roughness: 0.5 });
+      M.metal = new THREE.MeshStandardMaterial({ color: '#c3cad0', roughness: 0.3, metalness: 0.7 });
+      M.plug = new THREE.MeshStandardMaterial({ color: '#30363b', roughness: 0.6 });
+      M.screen = new THREE.MeshBasicMaterial({ map: monoTex });
+      M.btn = ['#d0312d', '#e8b100', '#1f7ae0'].map(function (c) { return new THREE.MeshStandardMaterial({ color: c, roughness: 0.45 }); });
+      M.wire = {};
+      setInside(insideOn);
+    }
+    var insideOn = false;
+    function setInside(on) {
+      insideOn = on;
+      [M.side].forEach(function (m) { m.transparent = on; m.opacity = on ? 0.14 : 1; m.depthWrite = !on; m.needsUpdate = true; });
+      needs = true;
+    }
+    function wireMat(c) { if (!M.wire[c]) M.wire[c] = new THREE.MeshStandardMaterial({ color: c, roughness: 0.6 }); return M.wire[c]; }
+
+    var root = new THREE.Group(); scene.add(root);
+    var parts = [], cables = [];
+    var explode = 0, needs = true;
+
+    function rebuild() {
+      root.traverse(function (o) { if (o.geometry) o.geometry.dispose(); });
+      root.clear();
+      parts = []; cables = [];
+      makeMats();
+      var p = G.p, H = G.H, D = p.D, W = p.W, Win = G.Win;
+      var W3 = function (px, py, z) { return new V3(z, py, D / 2 - px); };
+      var dir3 = function (d) { return new V3(0, d[1], -d[0]); };
+      var box = function (sx, sy, sz, mat) { return new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat); };
+      var addPart = function (obj, dirv) { root.add(obj); parts.push({ obj: obj, base: obj.position.clone(), dir: dirv || null }); };
+
+      shadow.scale.set(W * 2.4, D * 1.9, 1); shadow.position.set(0, 0.2, 0);
+
+      /* laterales */
+      var shape = new THREE.Shape(G.prof.map(function (q) { return new THREE.Vector2(D / 2 - q[0], q[1]); }));
+      var sideGeo = new THREE.ExtrudeGeometry(shape, { depth: T, bevelEnabled: false });
+      [1, -1].forEach(function (sg) {
+        var m = new THREE.Mesh(sideGeo, M.side);
+        var mx = new THREE.Matrix4().makeBasis(new V3(0, 0, 1), new V3(0, 1, 0), new V3(-1, 0, 0));
+        mx.setPosition(sg > 0 ? W / 2 : -W / 2 + T, 0, 0);
+        m.applyMatrix4(mx);
+        addPart(m, new V3(sg, 0, 0));
+      });
+
+      /* paneles: un grupo por panel, con ejes locales u (largo), v (ancho), w (hacia adentro) */
+      function frame(q) {
+        var ex = dir3(q.d), ez = dir3(q.n), ey = new V3(1, 0, 0);
+        if (ex.clone().cross(ey).dot(ez) < 0) ey = new V3(-1, 0, 0);
+        var mx = new THREE.Matrix4().makeBasis(ex, ey, ez);
+        var o = q.at(q.s0, 0); mx.setPosition(W3(o[0], o[1], 0));
+        var g = new THREE.Group(); g.applyMatrix4(mx);
+        g.userData.vs = ey.x; g.userData.out = ez.clone().negate();
+        return g;
+      }
+      function slabMesh(q, holes, mat) {
+        var s = new THREE.Shape();
+        s.moveTo(0, -Win / 2); s.lineTo(q.L, -Win / 2); s.lineTo(q.L, Win / 2); s.lineTo(0, Win / 2); s.lineTo(0, -Win / 2);
+        (holes || []).forEach(function (h) { s.holes.push(h); });
+        return new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: T, bevelEnabled: false, curveSegments: 28 }), mat);
+      }
+      function circ(u, v, r) { var h = new THREE.Path(); h.absarc(u, v, r, 0, Math.PI * 2, true); return h; }
+      function rect(u0, u1, v0, v1) { var h = new THREE.Path(); h.moveTo(u0, v0); h.lineTo(u0, v1); h.lineTo(u1, v1); h.lineTo(u1, v0); h.lineTo(u0, v0); return h; }
+      function slot(uc, vc, lu, lv) {
+        var r = lu / 2, h = new THREE.Path();
+        h.absarc(uc, vc - lv / 2 + r, r, Math.PI, Math.PI * 2, false);
+        h.absarc(uc, vc + lv / 2 - r, r, 0, Math.PI, false);
+        return h;
+      }
+
+      var groups = {};
+      ORDER.forEach(function (id) {
+        var q = G.pn[id], g = frame(q), holes = [], mat = M.panel;
+        if (id === 'botones') [-1, 0, 1].forEach(function (i) { holes.push(circ(G.uh, i * G.sp, 4.5)); });
+        if (id === 'pantalla') holes.push(rect(G.win.u0, G.win.u1, -G.win.w / 2, G.win.w / 2));
+        if (id === 'trasera') {
+          holes.push(slot(G.usb.u, 0, G.usb.h, G.usb.w));
+          G.screws.forEach(function (sc) { holes.push(circ(sc.u, sc.v, 1.4)); });
+        }
+        if (id === 'marquesina') mat = M.marq;
+        g.add(slabMesh(q, holes, mat));
+        groups[id] = g;
+        addPart(g, g.userData.out);
+      });
+
+      /* letrero de la marquesina */
+      (function () {
+        var q = G.pn.marquesina, hh = Math.min((Win - 8) / 4, q.L - 3);
+        var pl = new THREE.Mesh(new THREE.PlaneGeometry(hh * 4, hh), M.marqText);
+        var rot = new THREE.Matrix4().makeBasis(new V3(0, 1, 0), new V3(1, 0, 0), new V3(0, 0, -1));
+        pl.quaternion.setFromRotationMatrix(rot);
+        pl.position.set(q.L / 2, 0, -0.15);
+        groups.marquesina.add(pl);
+      })();
+
+      /* pantalla: vidrio, imagen, placa, tira de pines y hembras */
+      var gs = groups.pantalla, uc = (G.win.u0 + G.win.u1) / 2;
+      var scr = new THREE.Mesh(new THREE.PlaneGeometry(G.win.w, G.win.u1 - G.win.u0), M.screen);
+      scr.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(new V3(0, 1, 0), new V3(1, 0, 0), new V3(0, 0, -1)));
+      scr.position.set(uc, 0, T - 0.05); gs.add(scr);
+      var glass = box(p.winH + 5, p.winW + 3, 2, M.black); glass.position.set(uc - 1, 0, T + 1); gs.add(glass);
+      var pcb = box(p.pcbH, p.pcbW, 1.6, M.pcb); pcb.position.set(FIX.pcb0 + p.pcbH / 2, 0, T + 2.8); gs.add(pcb);
+      var hdrU = FIX.pcb0 + p.pcbH - 2;
+      var hdr = box(2.5, 17.8, 2.5, M.black); hdr.position.set(hdrU, 0, T + 4.85); gs.add(hdr);
+      var hem = box(2.5, 17.8, 14, M.black); hem.position.set(hdrU, 0, T + 13.1); gs.add(hem);
+
+      /* botones: tarugos, arandelas, pulsadores, separadores y puente */
+      var gb = groups.botones, vs = gb.userData.vs, sp = FIX.spacer, wBtnTop = T + sp - p.btnH;
+      [-1, 0, 1].forEach(function (i) {
+        var v = i * G.sp * vs; /* A a la izquierda vista de frente */
+        var dw = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, G.dowel, 28), M.btn[i + 1]);
+        dw.rotation.x = Math.PI / 2; dw.position.set(G.uh, v, -FIX.protr + G.dowel / 2); gb.add(dw);
+        var ws = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 1.4, 28), M.metal);
+        ws.rotation.x = Math.PI / 2; ws.position.set(G.uh, v, wBtnTop - 0.7); gb.add(ws);
+        var act = new THREE.Mesh(new THREE.CylinderGeometry(1.75, 1.75, 1.5, 16), M.black);
+        act.rotation.x = Math.PI / 2; act.position.set(G.uh, v, wBtnTop + 0.75); gb.add(act);
+        var bd = box(6, 6, p.btnH - 1.5, M.black); bd.position.set(G.uh, v, T + sp - (p.btnH - 1.5) / 2); gb.add(bd);
+      });
+      [-1, 1].forEach(function (sg) { var spc = box(20, 8, sp, M.raw); spc.position.set(G.uh, sg * (Win / 2 - 4), T + sp / 2); gb.add(spc); });
+      var br = box(20, Win, T, M.raw); br.position.set(G.uh, 0, T + sp + T / 2); gb.add(br);
+
+      /* SuperMini sobre su pilar */
+      var smC = (G.smX0 + G.smX1) / 2, yB = T + FIX.pilarH;
+      var pil = box(10, FIX.pilarH, FIX.smL - 4, M.raw); pil.position.copy(W3(smC, T + FIX.pilarH / 2, 0)); addPart(pil);
+      var sm = box(FIX.smW, 1.6, FIX.smL, M.pcb); sm.position.copy(W3(smC, yB + 0.8, 0)); addPart(sm);
+      var chip = box(5, 0.9, 5, M.black); chip.position.copy(W3(smC - 2, yB + 2, 0)); addPart(chip);
+      var uc3 = box(9, 3.2, 7.5, M.metal); uc3.position.copy(W3(G.smX1 - 3.25, yB + 1.6 + 1.6, 0)); addPart(uc3);
+      [-1, 1].forEach(function (sg) {
+        var h1 = box(2.5, 2.5, 20.3, M.black); h1.position.copy(W3(smC, yB - 1.25, sg * 7.62)); addPart(h1);
+        var h2 = box(2.5, 14, 20.3, M.black); h2.position.copy(W3(smC, yB - 2.5 - 7, sg * 7.62)); addPart(h2);
+      });
+      /* listones de la tapa */
+      [-1, 1].forEach(function (sg) {
+        var l = box(10, H - 2 * T, 10, M.pine); l.position.copy(W3(D - T - 5, H / 2, sg * (Win / 2 - 5))); addPart(l);
+      });
+      /* ficha y cable USB-C, afuera */
+      var plug = box(12, 6.5, 16, M.plug); plug.position.copy(W3(D + 8, G.yUsb, 0)); addPart(plug, new V3(0, 0, -1));
+      var usbCurve = new THREE.CatmullRomCurve3([W3(D + 15, G.yUsb, 0), W3(D + 30, G.yUsb - 4, 0), W3(D + 44, 6, 6), W3(D + 70, 1.6, 14), W3(D + 130, 1.6, 22)]);
+      var ucab = new THREE.Mesh(new THREE.TubeGeometry(usbCurve, 48, 1.7, 8), M.plug); addPart(ucab, new V3(0, 0, -1));
+
+      /* cables (se esconden al separar piezas) */
+      gs.updateMatrixWorld(true); gb.updateMatrixWorld(true);
+      var hemBottomY = yB - 2.5 - 14;
+      var pinX = function (i) { return G.smX0 + 1.6 + i * 2.54; };
+      var scrCols = ['#2b3238', '#e8710a', '#d9a100', '#1f7ae0', '#c2185b', '#2a9d5c', '#8d99a4'];
+      scrCols.forEach(function (c, i) {
+        var a = gs.localToWorld(new V3(hdrU, -7.62 + i * 2.54, T + 20.2));
+        var b = W3(pinX(i), hemBottomY, 7.62);
+        var mid = new V3((a.x + b.x) / 2 + 4, Math.max(T + 6, b.y - 8), Math.max(a.z, b.z) - 4);
+        var curve = new THREE.CatmullRomCurve3([a, a.clone().add(gs.userData.out.clone().multiplyScalar(-8)), mid, new V3(b.x + 2, b.y - 6, b.z), b]);
+        var t = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 0.55, 6), wireMat(c)); root.add(t); cables.push(t);
+      });
+      [-1, 0, 1].forEach(function (i, k) {
+        var a = gb.localToWorld(new V3(G.uh + 4.5, i * G.sp * vs, T + sp - 2));
+        var b = W3(pinX(2 + k * 2), hemBottomY, -7.62);
+        var curve = new THREE.CatmullRomCurve3([a, new V3(a.x, a.y - 6, a.z - 6), new V3((a.x + b.x) / 2, T + 6, (a.z + b.z) / 2), new V3(b.x - 2, b.y - 6, b.z), b]);
+        var t = new THREE.Mesh(new THREE.TubeGeometry(curve, 40, 0.55, 6), wireMat('#8a3fc0')); root.add(t); cables.push(t);
+      });
+
+      root.position.set(0, 0, 0);
+      applyExplode();
+      if (!camInit) { setView('tres', true); camInit = true; }
+      needs = true;
+    }
+
+    function applyExplode() {
+      parts.forEach(function (pt) {
+        pt.obj.position.copy(pt.base);
+        if (pt.dir) pt.obj.position.addScaledVector(pt.dir, explode);
+      });
+      cables.forEach(function (c) { c.visible = explode === 0; });
+      needs = true;
+    }
+
+    /* cámara */
+    var camInit = false, tween = null;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function setView(name, instant) {
+      var p = G.p, R = Math.max(p.W, p.D, G.H), d = R * 3.6, cy = G.H * 0.45;
+      var pos;
+      if (name === 'frente') pos = new V3(0, cy + d * 0.12, d);
+      else if (name === 'silla') pos = new V3(0, cy + d * Math.sin(38 * RAD), d * Math.cos(38 * RAD));
+      else if (name === 'costado') pos = new V3(d, cy + d * 0.08, 0);
+      else if (name === 'atras') pos = new V3(-d * 0.55, cy + d * 0.45, -d * 0.75);
+      else pos = new V3(d * 0.62, cy + d * 0.42, d * 0.72);
+      var target = new V3(0, cy, 0);
+      $$('[data-view]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-view') === name)); });
+      if (instant || reduce) { camera.position.copy(pos); controls.target.copy(target); controls.update(); needs = true; return; }
+      tween = { from: camera.position.clone(), to: pos, tf: controls.target.clone(), tt: target, t0: performance.now() };
+    }
+
+    function resize() {
+      var r = canvas.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      renderer.setSize(r.width, r.height, false);
+      camera.aspect = r.width / r.height; camera.updateProjectionMatrix(); needs = true;
+    }
+    if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas); else window.addEventListener('resize', resize);
+    controls.addEventListener('change', function () { needs = true; });
+    canvas.addEventListener('pointerdown', function () { $$('[data-view]').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); }); tween = null; });
+
+    function loop(now) {
+      if (tween) {
+        var k = Math.min(1, (now - tween.t0) / 650), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        camera.position.lerpVectors(tween.from, tween.to, e);
+        controls.target.lerpVectors(tween.tf, tween.tt, e);
+        if (k >= 1) tween = null;
+        needs = true;
+      }
+      controls.update();
+      if (needs) { renderer.render(scene, camera); needs = false; }
+      requestAnimationFrame(loop);
+    }
+
+    $$('[data-view]').forEach(function (b) { b.addEventListener('click', function () { setView(b.getAttribute('data-view')); }); });
+    $('#inside').addEventListener('change', function (e) { setInside(e.target.checked); });
+    $('#explode').addEventListener('input', function (e) { explode = Number(e.target.value); applyExplode(); });
+    $$('[data-fin]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        finish = b.getAttribute('data-fin');
+        $$('[data-fin]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        rebuild();
+      });
+    });
+    if (document.fonts && document.fonts.load) document.fonts.load('700 92px "Pixelify Sans"').then(function () { rebuild(); }, function () {});
+
+    resize();
+    rebuild();
+    requestAnimationFrame(loop);
+    return { rebuild: rebuild };
+  }
+})();
+</script>

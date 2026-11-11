@@ -1,0 +1,263 @@
+/* Manual de 0xMono: cuadernillo A5 para imprimir (WeasyPrint). */
+
+@font-face { font-family: "Space Grotesk"; src: url(fonts/SpaceGrotesk-VF.ttf); font-weight: 300 700; }
+@font-face { font-family: "Inter"; src: url(fonts/Inter-VF.ttf); font-weight: 100 900; }
+@font-face { font-family: "JetBrains Mono"; src: url(fonts/JetBrainsMono-VF.ttf); font-weight: 100 800; }
+
+@counter-style hex2 {
+  system: numeric;
+  symbols: "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F";
+  pad: 2 "0";
+}
+
+:root {
+  --ink: #1E1B18;
+  --ink-2: #3A342D;
+  --muted: #6E665C;
+  --faint: #9A9184;
+  --line: #D8D1C4;
+  --paper: #F4F1EA;
+  --paper-2: #EAE5DA;
+  --accent: #F2C230;
+  --accent-soft: #FBF0C9;
+  --sans: "Inter", sans-serif;
+  --display: "Space Grotesk", "Inter", sans-serif;
+  --mono: "JetBrains Mono", monospace;
+}
+
+/* ---------- Páginas ---------- */
+@page {
+  size: A5;
+  margin: 14mm 12mm 16mm 12mm;
+}
+@page :right {
+  margin-left: 16mm;   /* lado del doblez */
+  @bottom-right { content: "0x" counter(page, hex2); font: 500 7.5pt "JetBrains Mono"; color: #6E665C; vertical-align: top; padding-top: 6mm; }
+  @bottom-left { content: "0xMono · Manual de uso"; font: 400 7pt "JetBrains Mono"; color: #9A9184; vertical-align: top; padding-top: 6mm; }
+}
+@page :left {
+  margin-right: 16mm;
+  @bottom-left { content: "0x" counter(page, hex2); font: 500 7.5pt "JetBrains Mono"; color: #6E665C; vertical-align: top; padding-top: 6mm; }
+  @bottom-right { content: "rev. 1.0"; font: 400 7pt "JetBrains Mono"; color: #9A9184; vertical-align: top; padding-top: 6mm; }
+}
+@page cover { margin: 0; @bottom-right { content: none; } @bottom-left { content: none; } }
+
+html { font-family: var(--sans); font-size: 9pt; line-height: 1.45; color: var(--ink); font-feature-settings: "ss01", "cv11"; }
+body { margin: 0; }
+* { box-sizing: border-box; }
+
+.page { break-after: page; position: relative; }
+.page:last-child { break-after: auto; }
+.cover-page { page: cover; height: 210mm; padding: 7mm; }
+
+img.px { image-rendering: pixelated; }
+
+/* ---------- Tipografía ---------- */
+h1, h2, h3 { font-family: var(--display); color: var(--ink); }
+h1 { font-size: 22pt; line-height: 1.02; font-weight: 600; letter-spacing: -.02em; margin: 0 0 3mm; }
+h2 { font-size: 11.5pt; line-height: 1.2; font-weight: 600; letter-spacing: -.01em; margin: 0 0 1.6mm; break-after: avoid; }
+h3 { font-size: 9.8pt; line-height: 1.25; font-weight: 600; margin: 0 0 .8mm; break-after: avoid; }
+p { margin: 0 0 2.2mm; }
+.lede { font-size: 10.2pt; line-height: 1.42; color: var(--ink-2); margin-bottom: 5mm; }
+.eyebrow {
+  font: 500 7.2pt/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+  border-top: .6mm solid var(--ink); padding-top: 2mm; margin-bottom: 3.5mm; display: flex; justify-content: space-between;
+}
+.eyebrow b { color: var(--ink); font-weight: 600; }
+.small { font-size: 8.2pt; line-height: 1.4; }
+.muted { color: var(--muted); }
+b, strong { font-weight: 650; color: var(--ink); }
+a { color: inherit; text-decoration: none; }
+code, .mono { font-family: var(--mono); font-size: .92em; font-weight: 500; background: var(--paper); border-radius: .6mm; padding: 0 .8mm; white-space: nowrap; }
+.x { font-family: var(--mono); font-weight: 500; }
+a.pnum::after { content: target-counter(attr(href), page); font-weight: 650; }
+
+/* Botones: teclas */
+.k {
+  display: inline-block; font: 600 7.2pt/3.7mm var(--mono); color: var(--ink);
+  width: 4.4mm; height: 4.4mm; text-align: center; background: var(--accent);
+  border-radius: .9mm; border: .3mm solid var(--ink); vertical-align: -.7mm;
+}
+.k.big { font-size: 11pt; width: 8mm; height: 8mm; line-height: 7.2mm; border-radius: 1.4mm; border-width: .4mm; }
+
+/* ---------- Cajas ---------- */
+.box { background: var(--paper); border-radius: 1.2mm; padding: 3mm 3.5mm; margin: 0 0 3mm; break-inside: avoid; }
+.box > :last-child { margin-bottom: 0; }
+.box.accent { background: var(--accent-soft); }
+.box.line { background: none; border: .3mm solid var(--line); }
+.note { border-left: .9mm solid var(--accent); padding: .6mm 0 .6mm 3mm; margin: 0 0 3mm; break-inside: avoid; }
+.note > :last-child { margin-bottom: 0; }
+.tag { display: block; font: 600 6.8pt/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.4mm; }
+
+.shot { display: block; width: 100%; border: .3mm solid var(--ink); border-radius: 1mm; }
+
+/* ---------- Tapa ---------- */
+.cover-card {
+  position: relative; height: 196mm; background: var(--paper); border-radius: 2mm;
+  padding: 11mm 11mm 0;
+}
+.cover-head { display: flex; justify-content: space-between; font: 500 7pt var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: .3mm solid var(--ink); padding-bottom: 2mm; }
+.logo { font-family: var(--display); font-weight: 700; font-size: 50pt; line-height: 1; letter-spacing: -.035em; margin: 9mm 0 3mm; color: var(--ink); }
+.logo .x { font-family: var(--mono); font-weight: 400; letter-spacing: -.04em; color: var(--muted); }
+.cover-sub { font: 400 12pt/1.35 var(--display); color: var(--ink-2); width: 80mm; margin: 0; }
+.cover-sub b { font-weight: 600; }
+.device { position: relative; }
+.device > .body { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.device .lbl { position: absolute; width: 10%; text-align: center; font: 700 1em/1 var(--mono); color: var(--ink); margin-top: -.5em; }
+/* device-line.svg: 200 x 290 */
+.dl > .screen { position: absolute; left: 19%; top: 24.14%; width: 62%; height: 42.76%; }
+.dl > .marquee { position: absolute; left: 8%; top: 4.14%; width: 84%; height: 13.8%; text-align: center; font: 700 1em/1 var(--display); letter-spacing: -.02em; }
+.dl > .marquee .x { font-weight: 400; color: var(--muted); }
+/* device-tech.svg y device-back.svg: 250 x 290 */
+.dt > .screen { position: absolute; left: 15.2%; top: 24.14%; width: 49.6%; height: 42.76%; }
+.dt > .marquee { position: absolute; left: 6.4%; top: 4.14%; width: 67.2%; height: 13.8%; text-align: center; font: 700 1em/1 var(--display); letter-spacing: -.02em; }
+.dt > .marquee .x { font-weight: 400; color: var(--muted); }
+.cover-device { position: absolute; right: 13mm; top: 76mm; width: 70mm; height: 101.5mm; font-size: 16pt; }
+.cover-device .marquee { padding-top: 2.2mm; }
+.cover-device .lbl { font-size: 7.5pt; }
+.cover-specs { position: absolute; left: 11mm; bottom: 11mm; width: 37mm; font: 400 7pt/1.7 var(--mono); color: var(--muted); }
+.cover-specs b { display: block; color: var(--ink); font-weight: 600; border-bottom: .3mm solid var(--ink); margin-bottom: 1.5mm; padding-bottom: 1mm; letter-spacing: .06em; }
+.cover-foot { position: absolute; left: 11mm; right: 11mm; bottom: 6mm; display: none; }
+
+/* ---------- Hola ---------- */
+.hola-head { display: flex; gap: 5mm; align-items: flex-end; margin-bottom: 5mm; }
+.hola-head .pic { width: 28mm; flex: none; }
+.hola-head h1 { margin: 0; flex: 1; }
+.letter { font-size: 9.6pt; line-height: 1.5; color: var(--ink-2); }
+.letter .sign { font: 500 8pt var(--mono); color: var(--muted); margin-top: 1mm; }
+.toc { list-style: none; padding: 0; margin: 0; border-top: .3mm solid var(--line); columns: 2; column-gap: 6mm; }
+.toc li { display: flex; font-size: 8.6pt; line-height: 1.4; border-bottom: .3mm solid var(--line); padding: .45mm 0; }
+.toc li a { flex: 1; }
+.toc li a::after { content: leader(" ") target-counter(attr(href), page, decimal-leading-zero); font: 500 8pt var(--mono); color: var(--muted); }
+.gift { display: flex; gap: 6mm; margin-top: 5mm; }
+.gift > div { flex: 1; border-bottom: .3mm solid var(--ink); font: 500 7pt var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-bottom: 6mm; }
+
+/* ---------- Conocé ---------- */
+.parts { display: flex; gap: 2mm; align-items: flex-start; }
+.parts .devfront { width: 62mm; height: 71.9mm; font-size: 9.5pt; flex: none; }
+.parts .devfront .marquee { padding-top: 1.2mm; }
+.parts .devfront .lbl { font-size: 6pt; }
+.devback { width: 34mm; height: 39.4mm; flex: none; }
+.badge {
+  position: absolute; width: 4.6mm; height: 4.6mm; border-radius: 2.3mm; background: var(--ink); color: #fff;
+  font: 600 6.6pt/4.6mm var(--mono); text-align: center; margin: -2.3mm 0 0 -2.3mm;
+}
+.legend { list-style: none; padding: 0; margin: 0; flex: 1; }
+.legend li { display: flex; gap: 2.2mm; margin-bottom: 2.6mm; }
+.legend li .n { flex: none; width: 4.6mm; height: 4.6mm; border-radius: 2.3mm; background: var(--ink); color: #fff; font: 600 6.6pt/4.6mm var(--mono); text-align: center; margin-top: .3mm; }
+.legend li div { flex: 1; font-size: 8.4pt; line-height: 1.38; color: var(--ink-2); }
+.legend li b { display: block; font-family: var(--display); font-weight: 600; font-size: 9.4pt; }
+.back-row { display: flex; gap: 2mm; align-items: center; margin-top: 3mm; padding-top: 3mm; border-top: .3mm dashed var(--line); }
+.caption-mono { font: 500 6.8pt var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- Pasos ---------- */
+.steps { list-style: none; padding: 0; margin: 0; counter-reset: st; }
+.steps > li { position: relative; padding-left: 10mm; margin-bottom: 3.6mm; counter-increment: st; break-inside: avoid; }
+.steps > li::before {
+  content: counter(st, decimal-leading-zero); position: absolute; left: 0; top: .2mm;
+  font: 600 9pt/1 var(--mono); color: var(--ink); border-top: .6mm solid var(--accent); padding-top: 1mm; width: 6.5mm;
+}
+.steps > li h3 { margin-bottom: .6mm; }
+.steps.start-3 { counter-reset: st 2; }
+.steps.start-4 { counter-reset: st 3; }
+.steps.start-5 { counter-reset: st 4; }
+
+/* ---------- Día ---------- */
+.day { display: grid; grid-template-columns: 32mm 32mm 32mm; justify-content: space-between; gap: 2mm 0; padding: 0 3mm; }
+.card { break-inside: avoid; }
+.card img { display: block; width: 100%; border: .3mm solid var(--ink); border-radius: .8mm; }
+.card .t { display: inline-block; font: 600 6.8pt/1 var(--mono); color: var(--ink); background: var(--accent); padding: .6mm 1.1mm; margin-right: 1.6mm; vertical-align: .3mm; }
+.card h3 { font-size: 9pt; margin: 1.2mm 0 .3mm; line-height: 1.15; }
+.card p { font-size: 7.4pt; line-height: 1.28; margin: 0; color: var(--muted); }
+
+/* ---------- Forma de ser ---------- */
+.two { display: flex; gap: 4mm; }
+.two > * { flex: 1; min-width: 0; }
+.strip { display: flex; gap: 2mm; }
+.strip figure { flex: 1; margin: 0; }
+.strip figure img { width: 100%; display: block; border: .3mm solid var(--ink); border-radius: .8mm; }
+.strip figcaption { font: 500 7pt/1.3 var(--mono); color: var(--ink); margin-top: 1.2mm; }
+.strip figcaption span { display: block; color: var(--muted); }
+.strip.mini { margin-top: 2.5mm; gap: 3mm; }
+.issues { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm 4mm; }
+.issue { display: flex; gap: 2.6mm; align-items: flex-start; break-inside: avoid; }
+.issue img { width: 18mm; flex: none; border: .3mm solid var(--ink); border-radius: .8mm; }
+.issue div { font-size: 7.9pt; line-height: 1.35; color: var(--ink-2); }
+.issue b { display: block; font: 600 6.8pt/1.2 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: .3mm; }
+.issue b span { color: var(--ink); }
+.issue h3 { font-size: 9.2pt; margin-bottom: .4mm; }
+
+/* ---------- Tablas ---------- */
+table { border-collapse: collapse; width: 100%; }
+.gestures td, .specs td, .score td { padding: 1.6mm 1.5mm; vertical-align: top; border-bottom: .3mm solid var(--line); font-size: 8.6pt; }
+.gestures { border-top: .3mm solid var(--ink); }
+.gestures td:first-child { white-space: nowrap; width: 34mm; font-family: var(--mono); font-size: 7.6pt; color: var(--muted); padding-top: 1.9mm; }
+.specs { border-top: .3mm solid var(--ink); }
+.specs td:first-child { font: 500 7.4pt var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); width: 24mm; padding-top: 1.9mm; }
+.score { border-top: .3mm solid var(--ink); }
+.score td { font-size: 8pt; padding: 1.2mm 1mm; }
+.score td:last-child { text-align: right; font: 600 7.6pt var(--mono); white-space: nowrap; }
+
+/* ---------- Pantallas ---------- */
+.screen-frame { background: var(--ink); border-radius: 1.6mm; padding: 1.8mm; }
+.screen-frame img { display: block; width: 100%; }
+.subscreens { display: flex; gap: 4mm; }
+.subscreens figure { flex: 1; margin: 0; }
+.subscreens figcaption, figure.scr figcaption { font: 500 7pt/1.3 var(--mono); color: var(--muted); margin-top: 1.4mm; }
+figure.scr { flex: 0 0 44mm; margin: 0; }
+.btn-legend { display: flex; gap: 0; margin: 4mm 0; border-top: .3mm solid var(--ink); border-bottom: .3mm solid var(--line); }
+.btn-legend > div { flex: 1; display: flex; gap: 2.5mm; align-items: center; padding: 2.4mm 0; }
+.btn-legend b { display: block; font: 600 9.4pt var(--display); }
+.btn-legend span.d { font-size: 7.6pt; color: var(--muted); }
+.tree { list-style: none; margin: 0; padding: 0; font-size: 8.4pt; }
+.tree > li { margin-bottom: 1.8mm; break-inside: avoid; }
+.tree .item { font: 500 8pt var(--mono); color: var(--ink); }
+.tree > li > .item::before { content: "▸ "; color: var(--muted); }
+.tree .sub { margin: .8mm 0 0 1.2mm; padding-left: 4mm; border-left: .3mm solid var(--line); }
+.tree .sub > div { margin-bottom: .9mm; }
+.tree .desc { color: var(--muted); margin-left: 1.5mm; }
+
+/* ---------- Celular ---------- */
+.phone { background: var(--ink); border-radius: 4.5mm; padding: 3mm 1.5mm 3.5mm; position: relative; width: 29mm; flex: none; }
+.phone::before { content: ""; position: absolute; top: 1mm; left: 50%; width: 7mm; height: 1mm; margin-left: -3.5mm; border-radius: .5mm; background: #4A443C; }
+.phone img { display: block; width: 100%; border-radius: 1.2mm; }
+.portal { display: flex; gap: 5mm; align-items: flex-start; }
+
+/* ---------- Juego ---------- */
+.controls > div { display: flex; align-items: center; gap: 2mm; font-size: 8.4pt; margin-bottom: 1.2mm; }
+.controls > div > .keys { flex: none; width: 5mm; }
+
+/* ---------- Cuidados / FAQ ---------- */
+.care { display: grid; grid-template-columns: 1fr 1fr; gap: 0 6mm; border-top: .3mm solid var(--ink); }
+.care > div { padding: 2.4mm 0 2.6mm; border-bottom: .3mm solid var(--line); break-inside: avoid; }
+.care h3 { font-size: 9.4pt; margin-bottom: .6mm; }
+.care h3 .mono { background: none; padding: 0; color: var(--muted); font-size: 7pt; margin-right: 1.2mm; }
+.care p { font-size: 8.2pt; line-height: 1.38; margin: 0; color: var(--ink-2); }
+.faq { margin: 0; border-top: .3mm solid var(--ink); }
+.faq dt { font: 600 9pt/1.25 var(--display); margin: 1.7mm 0 .4mm; break-after: avoid; }
+.faq dd { margin: 0 0 1.4mm; padding-bottom: 1.5mm; border-bottom: .3mm solid var(--line); font-size: 8.2pt; line-height: 1.38; color: var(--ink-2); break-inside: avoid; }
+
+/* ---------- Garantía ---------- */
+.legal { border: .3mm solid var(--ink); padding: 3.5mm 4mm 3mm; position: relative; }
+.legal h2 { font: 600 7.4pt var(--mono); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2mm; }
+.legal p { font-size: 7.6pt; line-height: 1.42; color: var(--ink-2); margin-bottom: 1.6mm; text-align: justify; }
+.stamp { position: absolute; right: 5mm; top: -4mm; font: 700 7pt/1 var(--mono); letter-spacing: .08em; color: var(--ink); background: var(--accent); border: .4mm solid var(--ink); padding: 1.4mm 2mm; transform: rotate(-4deg); }
+.sign-line { display: flex; gap: 6mm; margin-top: 5mm; font: 500 6.6pt var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.sign-line > div { flex: 1; border-top: .3mm solid var(--ink); padding-top: 1mm; }
+.oss { display: flex; gap: 4mm; align-items: center; }
+.oss img { width: 21mm; height: 21mm; flex: none; }
+
+/* ---------- Contratapa ---------- */
+.back-card { position: relative; height: 196mm; background: var(--ink); color: #EDE8DD; border-radius: 2mm; padding: 22mm 11mm 0; }
+.back-card .logo { color: #F4F1EA; font-size: 30pt; margin: 0 0 2mm; }
+.back-card .logo .x { color: #9A9184; }
+.back-card .quote { font: 400 11.5pt/1.35 var(--display); color: #CFC7B8; margin: 0 0 9mm; width: 82mm; }
+.back-strip { display: flex; gap: 2.5mm; }
+.back-strip img { width: 35.6mm; height: 35.6mm; border-radius: .8mm; }
+.back-feats { margin-top: 8mm; display: grid; grid-template-columns: 1fr 1fr; gap: 0 6mm; font: 400 7.4pt/1 var(--mono); color: #CFC7B8; }
+.back-feats div { border-top: .3mm solid #4A443C; padding: 2mm 0; display: flex; justify-content: space-between; }
+.back-feats div span:last-child { color: #F4F1EA; }
+.back-foot { position: absolute; left: 11mm; right: 11mm; bottom: 10mm; font: 400 6.8pt/1.7 var(--mono); color: #9A9184; border-top: .3mm solid #4A443C; padding-top: 2.5mm; display: flex; justify-content: space-between; align-items: flex-end; }
+.back-foot img { width: 9mm; }
+.nowrap { white-space: nowrap; }
+.back-note { margin-top: 10mm; font: 400 7pt/1.6 var(--mono); color: #9A9184; }

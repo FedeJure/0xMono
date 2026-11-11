@@ -1,0 +1,17 @@
+[package]
+name = "engine3d"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Motor 3D por software, en punto fijo y sin FPU, para el ESP32-C3 + ST7789 240x240"
+
+[features]
+# Coloca las funciones críticas (rasterizado) en IRAM del ESP32 (sección `.rwtext`).
+# El C3 ejecuta desde flash a través de una caché de 16 KB: fuera de ella, cada
+# fallo de caché cuesta decenas de ciclos. Solo tiene sentido en el firmware.
+iram = []
+# Cuenta ciclos de CPU por etapa del rasterizado con el contador de rendimiento
+# del ESP32-C3 (CSR 0x7E2). Solo para el benchmark: añade unas instrucciones.
+profile = []
+
+[dependencies]

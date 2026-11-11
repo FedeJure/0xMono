@@ -1,0 +1,11 @@
+/target/
+firmware/target/
+companion.bin
+*.blend1
+__pycache__/
+miner.bin
+
+# Animaciones de Mixamo: no se pueden redistribuir. Queda el resultado ya
+# convertido (assets/mono_anims*.json y assets/src/mono_anims.rs); para
+# volver a procesarlas, bajarlas de Mixamo (ver README).
+assets/anims/*.fbx
